@@ -1,4 +1,4 @@
-﻿// <copyright file="TranslationUnits.cs" company="Allied Bits Ltd.">
+// <copyright file="TranslationUnits.cs" company="Allied Bits Ltd.">
 //
 // Copyright 2025 Allied Bits Ltd.
 //
@@ -25,28 +25,29 @@ namespace Tlumach;
 
 public class BaseTranslationUnit
 {
-    private readonly TranslationConfiguration _config;
+    private readonly TranslationConfiguration _translationConfiguration;
 
-    private readonly TranslationManager _translationManager;
-    protected TranslationManager TranslationManager { get { return _translationManager; } }
+    protected TranslationManager TranslationManager { get; }
 
     public string Key { get; internal set; }
 
+    protected TranslationConfiguration TranslationConfiguration => _translationConfiguration;
+
     public BaseTranslationUnit(TranslationManager translationManager, TranslationConfiguration translationConfiguration, string key)
     {
-        _translationManager = translationManager;
-        _config = translationConfiguration;
+        TranslationManager = translationManager;
+        _translationConfiguration = translationConfiguration;
         Key = key;
     }
 
     protected TranslationEntry? InternalGetValue(CultureInfo cultureInfo)
     {
-        return _translationManager.GetValue(_config, cultureInfo, Key);
+        return TranslationManager.GetValue(TranslationConfiguration, cultureInfo, Key);
     }
 
     protected string InternalGetValueAsText(CultureInfo cultureInfo)
     {
-        return _translationManager.GetValue(_config, cultureInfo, Key)?.Text ?? string.Empty;
+        return TranslationManager.GetValue(TranslationConfiguration, cultureInfo, Key)?.Text ?? string.Empty;
     }
 }
 
@@ -59,29 +60,57 @@ public class TranslationUnit : BaseTranslationUnit
     {
     }
 
+    /// <summary>
+    /// Returns the value of the translation text for the specified culture/locale.
+    /// </summary>
+    /// <param name="cultureInfo">the culture/locale for which the text is needed.</param>
+    /// <returns>the requested text or an empty string.</returns>
     public string GetValue(CultureInfo cultureInfo)
     {
         return InternalGetValueAsText(cultureInfo);
     }
 }
 
+/// <summary>
+/// <para>Represents a unit of translation - a unit of text (a word, a phrase, a sentence, etc.) in a translation accessible using a unique key - that contains parameters ('format items' in .NET terms).</para>
+/// <para>This class enables an application to relay processing of templates on the library.</para>
+/// </summary>
 public class TemplatedTranslationUnit : BaseTranslationUnit
 {
+
     public TemplatedTranslationUnit(TranslationManager translationManager, TranslationConfiguration translationConfiguration, string key)
         : base(translationManager, translationConfiguration, key)
     {
     }
 
+    /// <summary>
+    /// Returns the text of the template translation entry without processing the template. This may be useful when template processing is handled by the caller (e.g., when strings use .NET template format which is handled using the <see cref="string.Format"/> method).
+    /// </summary>
+    /// <param name="cultureInfo">the culture/locale for which the text is needed.</param>
+    /// <returns>the requested text or an empty string.</returns>
     public string GetValueAsTemplate(CultureInfo cultureInfo)
     {
         return InternalGetValueAsText(cultureInfo);
     }
 
+    /// <summary>
+    /// Processes the template translation entry by substituting the parameters with actual values and returns the final text.
+    /// </summary>
+    /// <param name="parameters">a dictionary that contains parameter names as keys and actual values to substitute as values.</param>
+    /// <returns>the requested text or an empty string.</returns>
+    /// <exception cref="TemplateProcessingException">thrown if processing of the template fails.</exception>
     public string GetValue(IDictionary<string, object> parameters)
     {
         return GetValue(TranslationManager.CurrentCulture, parameters);
     }
 
+    /// <summary>
+    /// Processes the template translation entry by substituting the parameters with actual values and returns the final text.
+    /// </summary>
+    /// <param name="cultureInfo">the culture/locale for which the text is needed.</param>
+    /// <param name="parameters">a dictionary that contains parameter names as keys and actual values to substitute as values.</param>
+    /// <returns>the requested text or an empty string.</returns>
+    /// <exception cref="TemplateProcessingException">thrown if processing of the template fails.</exception>
     public string GetValue(CultureInfo cultureInfo, IDictionary<string, object> parameters)
     {
         TranslationEntry? result = InternalGetValue(cultureInfo);
@@ -89,21 +118,36 @@ public class TemplatedTranslationUnit : BaseTranslationUnit
         // If a value was obtained, it contains a template that we need to fill with values
         if (result is not null)
         {
-            return ProcessTemplatedValue(result, (key) =>
-            {
-                string keyUpper = key.ToUpperInvariant();
-                return parameters.FirstOrDefault(e => e.Key.Equals(keyUpper, StringComparison.OrdinalIgnoreCase));
-            });
+            return result.ProcessTemplatedValue(
+                (key) =>
+                {
+                    string keyUpper = key.ToUpperInvariant();
+                    return parameters.FirstOrDefault(e => e.Key.Equals(keyUpper, StringComparison.OrdinalIgnoreCase));
+                },
+                TranslationConfiguration.TemplateEscapeMode);
         }
 
         return string.Empty;
     }
 
+    /// <summary>
+    /// Processes the template translation entry by substituting the parameters with actual values and returns the final text.
+    /// </summary>
+    /// <param name="parameters">an object, whose properties are used to provide values for parameters in the template. The names of the template's parameters are matched with the object property names in a case-insensitive manner.</param>
+    /// <returns>the requested text or an empty string.</returns>
+    /// <exception cref="TemplateProcessingException">is thrown if processing of the template fails.</exception>
     public string GetValue(object parameters)
     {
         return GetValue(TranslationManager.CurrentCulture, parameters);
     }
 
+    /// <summary>
+    /// Processes the template translation entry by substituting the parameters with actual values and returns the final text.
+    /// </summary>
+    /// <param name="cultureInfo">the culture/locale for which the text is needed.</param>
+    /// <param name="parameters">an object, whose properties are used to provide values for parameters in the template. The names of the template's parameters are matched with the object property names in a case-insensitive manner.</param>
+    /// <returns>the requested text or an empty string.</returns>
+    /// <exception cref="TemplateProcessingException">is thrown if processing of the template fails.</exception>
     public string GetValue(CultureInfo cultureInfo, object parameters)
     {
         TranslationEntry? result = InternalGetValue(cultureInfo);
@@ -111,22 +155,17 @@ public class TemplatedTranslationUnit : BaseTranslationUnit
         // If a value was obtained, it contains a template that we need to fill with values
         if (result is not null)
         {
-            return ProcessTemplatedValue(result, (key) =>
-            {
-                if (ReflectionUtils.TryGetPropertyValue(parameters, key, out object? value))
-                    return value;
-                else
-                    return null;
-            });
+            return result.ProcessTemplatedValue(
+                (key) =>
+                {
+                    if (ReflectionUtils.TryGetPropertyValue(parameters, key, out object? value))
+                        return value;
+                    else
+                        return null;
+                },
+                TranslationConfiguration.TemplateEscapeMode);
         }
 
         return string.Empty;
     }
-
-    private string ProcessTemplatedValue(TranslationEntry entry, Func<string, object?> getParamValueFunc)
-    {
-        // todo: implement
-        return string.Empty;
-    }
-
 }

@@ -1,11 +1,32 @@
-﻿namespace Tlumach.Base
+namespace Tlumach.Base
 {
+
+    public class TranslationTreeLeaf
+    {
+        public string Key { get; }
+
+        public bool IsTemplated { get;  }
+
+        public TranslationTreeLeaf(string key, bool isTemplated)
+        {
+            Key = key;
+            IsTemplated = isTemplated;
+        }
+    }
+
     public class TranslationTreeNode
     {
         public Dictionary<string, TranslationTreeNode> ChildNodes { get; } = new(StringComparer.OrdinalIgnoreCase);
 
-        public List<string> Keys { get; } = [];
+        /// <summary>
+        /// Contains the list of keys in the node.
+        /// Each key is a string without parent node names in it.
+        /// </summary>
+        public Dictionary<string, TranslationTreeLeaf> Keys { get; } = [];
 
+        /// <summary>
+        /// Contains the own name of the node (without parent names).
+        /// </summary>
         public string Name { get; }
 
         public TranslationTreeNode(string name)
@@ -36,6 +57,9 @@
         public TranslationTreeNode? MakeNode(string name)
         {
             TranslationTreeNode? result = null;
+            if (name.Length == 0)
+                return null;
+
             int idx = name.IndexOf('.');
             if (idx == -1)
             {

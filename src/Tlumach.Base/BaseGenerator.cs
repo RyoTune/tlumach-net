@@ -1,4 +1,4 @@
-﻿// <copyright file="BaseGenerator.cs" company="Allied Bits Ltd.">
+// <copyright file="BaseGenerator.cs" company="Allied Bits Ltd.">
 //
 // Copyright 2025 Allied Bits Ltd.
 //
@@ -64,6 +64,13 @@ namespace Tlumach.Base
 
             StringBuilder builder = new();
 
+            EmitMainBody(builder, usingNamespace, configuration, translationTree);
+
+            return builder.ToString();
+        }
+
+        private void EmitMainBody(StringBuilder builder, string? usingNamespace, TranslationConfiguration configuration, TranslationTree translationTree)
+        {
             builder.AppendLine("using System;\nusing System.Reflection;\n\n");
             builder.AppendLine("using Tlumach.Base;");
             if (!string.IsNullOrEmpty(usingNamespace))
@@ -76,42 +83,54 @@ namespace Tlumach.Base
             builder.Append("public static class ").Append(configuration.ClassName).AppendLine();
             builder.AppendLine("{");
             if (!string.IsNullOrEmpty(configuration.DefaultFileLocale))
-                builder.Append("    private static string _defaultFileLocale = \"").Append(configuration.DefaultFileLocale).AppendLine("\";");
+                builder.Append("    private static string? _defaultFileLocale = \"").Append(configuration.DefaultFileLocale).AppendLine("\";");
             else
-                builder.AppendLine("    private static string _defaultFileLocale = null;");
+                builder.AppendLine("    private static string? _defaultFileLocale = null;");
             builder.AppendLine();
-            builder.Append("    private static TranslationConfiguration _translationConfiguration = new TranslationConfiguration(typeof(").Append(configuration.ClassName).Append(").Assembly, \"").Append(configuration.DefaultFile).AppendLine("\", _defaultFileLocale);\n");
-            builder.AppendLine("{").Append("    public static TranslationManager TranslationManager {get; } = new TranslationManager();");
+            builder.Append("    private static TranslationConfiguration _translationConfiguration = new TranslationConfiguration(typeof(").Append(configuration.ClassName).Append(").Assembly, \"").Append(configuration.DefaultFile).Append("\", _defaultFileLocale, ").Append(configuration.GetTemplateEscapeModeFullValue()).AppendLine (");\n");
+            builder.AppendLine("{");
+            builder.AppendLine("    ///<summary>");
+            builder.AppendLine("    ///Use this instance to change the default culture or to access translations without using TranslationUnit instances");
+            builder.AppendLine("    ///</summary>");
+            builder.AppendLine("    public static TranslationManager TranslationManager {get; } = new TranslationManager(_translationConfiguration);");
 
-            EmitGroupUnits(builder, translationTree, translationTree.RootNode, 1);
+            EmitGroupUnits(builder, translationTree, translationTree.RootNode, 1, string.Empty);
 
             builder.AppendLine("}");
-
-            return builder.ToString();
         }
 
-        protected void EmitGroupUnits(StringBuilder builder, TranslationTree translationTree, TranslationTreeNode node, int offset)
+        private void EmitGroupUnits(StringBuilder builder, TranslationTree translationTree, TranslationTreeNode node, int level, string namePrefix)
         {
             if (builder is null)
                 throw new ArgumentNullException(nameof(builder));
             if (node is null)
                 throw new ArgumentNullException(nameof(node));
 
-            var offsetString = new string(' ', offset << 2);
+            var indent = new string(' ', level << 2);
 
-            foreach (var key in node.Keys)
+            TranslationTreeLeaf value;
+            string unitClassName;
+
+            // The key here is a KeyValuePair, in which the key (and Value.Key) is the own name within the group.
+            foreach (var key in node.Keys.OrderBy(x => x.Key, StringComparer.OrdinalIgnoreCase))
             {
+                value = key.Value;
+                unitClassName = value.IsTemplated ? "TemplatedTranslationUnit" : "TranslationUnit";
                 builder.AppendLine();
-                builder.Append(offsetString).Append("public static TranslationUnit ").Append(OwnName(key)).Append(" = new TranslationUnit(TranslationManager, _translationConfiguration, \"").Append(key).AppendLine("\");");
+                builder.Append(indent)
+                    .Append("public static ").Append(unitClassName).Append(" ").Append(OwnName(value.Key))
+                    .Append(" = new ").Append(unitClassName).Append("(TranslationManager, _translationConfiguration, \"").Append(namePrefix + value.Key).AppendLine("\");");
             }
 
+            string subKey;
             foreach (var child in node.ChildNodes.Keys.OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
             {
+                subKey = node.ChildNodes[child].Name;
                 builder.AppendLine();
-                builder.Append(offsetString).Append("public static class ").Append(node.ChildNodes[child].Name).AppendLine();
-                builder.Append(offsetString).AppendLine("{");
-                EmitGroupUnits(builder, translationTree, node.ChildNodes[child], offset + 1);
-                builder.Append(offsetString).AppendLine("}");
+                builder.Append(indent).Append("public static class ").Append(subKey).AppendLine();
+                builder.Append(indent).AppendLine("{");
+                EmitGroupUnits(builder, translationTree, node.ChildNodes[child], level + 1, namePrefix + subKey + '.');
+                builder.Append(indent).AppendLine("}");
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿// <copyright file="Translation.cs" company="Allied Bits Ltd.">
+// <copyright file="Translation.cs" company="Allied Bits Ltd.">
 //
 // Copyright 2025 Allied Bits Ltd.
 //
@@ -22,6 +22,8 @@ namespace Tlumach.Base
 {
     /// <summary>
     /// Contains translation entries that belong to one locale.
+    /// Each entry is identified by the unique key, which is composed of the key name and the names of all its parent group names joined by dot ".", e.g., "group.subgroup.key".
+    /// Key names are stored without case conversion but are searched for in a case-insensitive manner.
     /// </summary>
     public class Translation : Dictionary<string, TranslationEntry>
     {
@@ -39,13 +41,30 @@ namespace Tlumach.Base
         /// Contains the locale of the file, from which the translation was loaded, if this locale was specified in the file.
         /// </summary>
         public string? Locale { get; internal set; }
+
         /// <summary>
         /// Contains the context of the file, from which the translation was loaded, if this context was specified in the file.
-        /// Contexts are specified in ARB files and are supported and preservved by Tlumach converters.
+        /// Contexts are specified in ARB files and are supported and preserved by Tlumach converters.
         /// </summary>
         public string? Context { get; internal set; }
 
-        public Translation(string? locale, string? context)
+        /// <summary>
+        /// May contain the value of the `@@last_modified` key of an ARB file.
+        /// </summary>
+        public DateTime? LastModified { get; set; }
+
+        /// <summary>
+        /// May contain the value of the `@@author` key of an ARB file.
+        /// </summary>
+        public string? Author { get; set; }
+
+        /// <summary>
+        /// May contain custom properties of an ARB file.
+        /// </summary>
+        public Dictionary<string, string> CustomProperties = [];
+
+        public Translation(string? locale, string? context = null)
+            : base(StringComparer.OrdinalIgnoreCase)
         {
             Locale = locale;
             Context = context;

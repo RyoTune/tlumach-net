@@ -1,4 +1,4 @@
-﻿// <copyright file="TranslationConfiguration.cs" company="Allied Bits Ltd.">
+// <copyright file="TranslationConfiguration.cs" company="Allied Bits Ltd.">
 //
 // Copyright 2025 Allied Bits Ltd.
 //
@@ -40,24 +40,30 @@ namespace Tlumach.Base
         /// The name of the namespace that the generator puts to the generated source code.
         /// </summary>
         public const string KEY_GENERATED_NAMESPACE = "generated_namespace";
+
         /// <summary>
         /// The name of the class that the generator puts to the generated source code.
         /// </summary>
         public const string KEY_GENERATED_CLASS = "generated_class";
+
+        public const string KEY_TRANSLATION_ASTERISK = "*";
+
+        public const string KEY_TRANSLATION_DEFAULT = "default";
 
         /// <summary>
         /// The name of the translations section in the configuration file.
         /// </summary>
         public const string KEY_SECTION_TRANSLATIONS = "translations";
 
-        public const string KEY_TRANSLATION_ASTERISK = "*";
-
-        public const string KEY_TRANSLATION_DEFAULT = "default";
+        /// <summary>
+        /// The name of the translations section in the configuration file suffixed with a dot.
+        /// </summary>
+        public static readonly string KEY_SECTION_TRANSLATIONS_DOT = KEY_SECTION_TRANSLATIONS + ".";
 
         public static TranslationConfiguration Empty { get; }
 
         /// <summary>
-        /// A reference to the assembly, in which the generated file resides.
+        /// Gets a reference to the assembly, in which the generated file resides.
         /// </summary>
         public Assembly? Assembly { get; }
 
@@ -72,38 +78,61 @@ namespace Tlumach.Base
 
         public string? DefaultFileLocale { get; }
 
+        public TemplateStringEscaping TemplateEscapeMode { get; }
+
         /// <summary>
         /// Contains the list of individual translation items covered by the configuration.
         /// This list may be empty or incomplete, in which case, the library will use heuristics to determine the filename to load the translation from.
         /// </summary>
-        public Dictionary<string, string> Translations { get; }
+        public Dictionary<string, string> Translations { get; } = [];
 
         static TranslationConfiguration()
         {
             Empty = new();
         }
 
-        private TranslationConfiguration()
-        {}
-
-        public TranslationConfiguration(Assembly assembly, string defaultFile, string? defaultFileLocale)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TranslationConfiguration"/> class.
+        /// <para>Usable by the code that does not use TranslationUnits.</para>
+        /// </summary>
+        /// <param name="assembly">The assembly that contains translations. May be empty if files are to be loaded from the disk.</param>
+        /// <param name="defaultFile">a reference to the default file for the translation.</param>
+        /// <param name="defaultFileLocale">the locale specified in the file (when supported by the file format).</param>
+        /// <param name="templateEscapeMode">specifies how the translation entries should be parsed to determine whether they contain placeholders and to replace these placeholders with real values. See <seealso cref="TemplateStringEscaping"/> for details.</param>
+        public TranslationConfiguration(Assembly? assembly, string defaultFile, string? defaultFileLocale, TemplateStringEscaping templateEscapeMode)
         {
             Assembly = assembly;
             DefaultFile = defaultFile;
             DefaultFileLocale = defaultFileLocale;
-            Translations = [];
+            TemplateEscapeMode = templateEscapeMode;
         }
 
         /// <summary>
-        /// Used by configuration parsers.
+        /// Initializes a new instance of the <see cref="TranslationConfiguration"/> class.
+        /// <para>Used by configuration parsers.</para>
         /// </summary>
-        public TranslationConfiguration(string? defaultFile, string? @namespace, string? className, string? defaultFileLocale)
+        /// <param name="defaultFile">a reference to the default file for the translation.</param>
+        /// <param name="namespace">the namespace to which the class with generated translation units belongs.</param>
+        /// <param name="className">the name of the class with generated translation units.</param>
+        /// <param name="defaultFileLocale">the locale specified in the file (when supported by the file format).</param>
+        /// <param name="templateEscapeMode">specifies how the translation entries should be parsed to determine whether they contain placeholders and to replace these placeholders with real values. See <seealso cref="TemplateStringEscaping"/> for details.</param>
+        public TranslationConfiguration(string defaultFile, string? @namespace, string? className, string? defaultFileLocale, TemplateStringEscaping templateEscapeMode)
         {
             DefaultFile = defaultFile;
             DefaultFileLocale = defaultFileLocale;
             Namespace = @namespace;
             ClassName = className;
-            Translations = [];
+            TemplateEscapeMode = templateEscapeMode;
+        }
+
+        private TranslationConfiguration()
+        {
+            DefaultFile = string.Empty;
+        }
+
+        public string GetTemplateEscapeModeFullValue()
+        {
+            return typeof(TemplateStringEscaping).Name + "." + TemplateEscapeMode.ToString();
         }
     }
 }

@@ -29,6 +29,9 @@ dotnet_diagnostic.RCS1194.severity = none
 # Disable the "Use string interpolation instead of 'string.Concat'" suggestion as Concat should be generally faster.
 dotnet_diagnostic.RCS1267.severity = none
 
+# Disable the "Use StringBuilder" suggestion - StringBuilder is generally slow than a couple of concatenations (in modern .NET, the + operation for strings is implemented via a call to string.Concat)
+dotnet_diagnostic.S1643.severity = none
+
 dotnet_diagnostic.SA0001.severity = warning
 
 dotnet_diagnostic.SA0002.severity = warning

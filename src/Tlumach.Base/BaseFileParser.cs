@@ -1,4 +1,4 @@
-﻿// <copyright file="BaseFileParser.cs" company="Allied Bits Ltd.">
+// <copyright file="BaseFileParser.cs" company="Allied Bits Ltd.">
 //
 // Copyright 2025 Allied Bits Ltd.
 //
@@ -20,8 +20,114 @@ using System.Text;
 
 namespace Tlumach.Base
 {
-    public abstract class BaseFileParser
+
+    public abstract partial class BaseFileParser
     {
+
+        public static bool RecognizeFileRefs { get; set; }
+
+        public static bool StringHasParameters(string inputText, TemplateStringEscaping templateEscapeMode)
+        {
+            if (string.IsNullOrEmpty(inputText))
+                return false;
+
+            bool inQuotes = false;
+            int openBraceCount = 0;
+
+            int i = 0;
+            while (i < inputText.Length)
+            {
+                char currentChar = inputText[i];
+
+                // Look ahead one character to check for duplicates
+                char? nextChar = (i + 1 < inputText.Length) ? inputText[i + 1] : (char?)null;
+
+                if (templateEscapeMode == TemplateStringEscaping.Arb)
+                {
+                    // --- 1. Handle Duplicated Quote Characters ---
+                    // If we see '' (two single quotes), it's an escaped quote.
+                    // We skip both characters and stay in the same quote state.
+                    if (currentChar == '\'' && nextChar == '\'')
+                    {
+                        i += 2; // Skip the next character as well
+                        continue;
+                    }
+                }
+
+                if (templateEscapeMode == TemplateStringEscaping.DotNet)
+                {
+                    // --- 2. Handle Duplicated Braces ---
+                    // If we see {{, we skip both characters.
+                    // These do not affect the matching logic.
+                    if (currentChar == '{' && nextChar == '{')
+                    {
+                        i += 2; // Skip the next character as well
+                        continue;
+                    }
+
+                    // If we see }}, we skip both characters unless there was an open brace found earlier.
+                    // In the latter case, the brace in currentChar must close the opened brace, and the brace in nextChar will be considered on the next round.
+                    if ((currentChar == '}' && nextChar == '}') && (openBraceCount == 0))
+                    {
+                        i += 2; // Skip the next character as well
+                        continue;
+                    }
+                }
+
+                if (templateEscapeMode == TemplateStringEscaping.Arb)
+                {
+                    // --- 3. Handle Quote State Toggle ---
+                    // If we see a non-duplicated quote, toggle the inQuotes flag.
+                    if (currentChar == '\'')
+                    {
+                        inQuotes = !inQuotes;
+                        i++;
+                        continue;
+                    }
+                }
+
+                // --- 4. Handle Braces (if not in quotes) ---
+                if (!inQuotes)
+                {
+                    // We found a non-duplicated, non-quoted opening brace.
+                    // Mark that we are now looking for a closing brace.
+                    if ((currentChar == '{') && ((templateEscapeMode == TemplateStringEscaping.Arb) || (templateEscapeMode == TemplateStringEscaping.DotNet)))
+                    {
+                        openBraceCount++;
+                    }
+                    else
+                    // We found a non-duplicated, non-quoted closing brace.
+                    if ((currentChar == '}') && ((templateEscapeMode == TemplateStringEscaping.Arb) || (templateEscapeMode == TemplateStringEscaping.DotNet)))
+                    {
+                        // If we were looking for a closing brace, we found a match!
+                        if (openBraceCount > 0)
+                        {
+                            return true;
+                        }
+
+                        // If we found a '}' without a '{' first,
+                        // this is an error
+                        throw new GenericParserException($"Unmatched closing curly bracket detected in the text '{inputText}'");
+                    }
+                }
+
+                // else: We are in quotes. All other characters,
+                // including single { and }, are ignored.
+                i++;
+            }
+
+            if (openBraceCount > 0)
+                throw new GenericParserException($"Unclosed opening curly bracket detected in the text '{inputText}'");
+
+            // If we finished the loop without finding a match, return false.
+            return false;
+        }
+
+        protected virtual TemplateStringEscaping GetTemplateEscapeMode()
+        {
+            return TemplateStringEscaping.Backslash;
+        }
+
         /// <summary>
         /// Loads the keys from the default translation file and builds a tree of keys.
         /// </summary>
@@ -33,7 +139,7 @@ namespace Tlumach.Base
         public TranslationTree? LoadTranslationStructure(string fileName, out TranslationConfiguration? configuration)
         {
             // First, load the configuration
-            string? configContent = null;
+            string? configContent;
             try
             {
                 configContent = File.ReadAllText(fileName, Encoding.UTF8);
@@ -77,10 +183,10 @@ namespace Tlumach.Base
                 throw new ParserLoadException(fileName, $"No parser found for the {fileExt} file extension that the default translation file '{defaultFile}' has");
 
             // Read the default translation file
-            string? defaultContent = null;
+            string? defaultContent;
             try
             {
-                defaultContent = File.ReadAllText(defaultFile);
+                defaultContent = File.ReadAllText(defaultFile, Encoding.UTF8);
             }
             catch (Exception ex)
             {
@@ -103,6 +209,7 @@ namespace Tlumach.Base
 
         /// <summary>
         /// Checks whether this parser can handle a translation file with the given extension.
+        /// <para>This method is not used for configuration files</para>
         /// </summary>
         /// <param name="fileExtension">the extension to check.</param>
         /// <returns><see langword="true"/> if the extension is supported and <see langword="false"/> otherwise</returns>
@@ -133,5 +240,39 @@ namespace Tlumach.Base
         /// <returns>The constructed <seealso cref="TranslationTree"/> upon success or <see langword="null"/> otherwise. </returns>
         /// <exception cref="TextParseException">Gets thrown when parsing of a default translation file fails.</exception>
         protected abstract TranslationTree? InternalLoadTranslationStructure(string content);
+
+        /// <summary>
+        /// Checks whether the text is templated, i.e. contains placeholders.
+        /// </summary>
+        /// <param name="text">the text to check.</param>
+        /// <returns><see langword="true"/> if the text contains placeholders and <see langword="false"/> otherwise.</returns>
+        internal virtual bool IsTemplatedText(string text) => false;
+
+        /// <summary>
+        /// Checks whether the text is a reference.
+        /// </summary>
+        /// <param name="text">the text to check.</param>
+        /// <returns><see langword="true"/> if the text is a reference and <see langword="false"/> otherwise.</returns>
+        internal virtual bool IsReference(string text) => RecognizeFileRefs && text.Length > 0 && text[0] == '@';
+
+        protected static int GetAbsolutePosition(string text, int lineNumber, int linePosition)
+        {
+            // LineNumber and LinePosition are 1-based
+            int currentLine = 1;
+            int index = 0;
+
+            while (currentLine < lineNumber && index < text.Length)
+            {
+                if (text[index] == '\n')
+                {
+                    currentLine++;
+                }
+
+                index++;
+            }
+
+            // Add position within the target line (minus 1 because LinePosition is 1-based)
+            return index + (linePosition - 1);
+        }
     }
 }

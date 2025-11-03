@@ -1,4 +1,4 @@
-﻿// <copyright file="Exceptions.cs" company="Allied Bits Ltd.">
+// <copyright file="Exceptions.cs" company="Allied Bits Ltd.">
 //
 // Copyright 2025 Allied Bits Ltd.
 //
@@ -33,6 +33,26 @@ namespace Tlumach.Base
         }
 
         public TlumachException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+    }
+
+    /// <summary>
+    /// This exception gets thrown when an error occurs when processing a translation unit that is a template and inserting values into this template.
+    /// </summary>
+    public class TemplateProcessingException : TlumachException
+    {
+        public TemplateProcessingException()
+        {
+        }
+
+        public TemplateProcessingException(string message)
+            : base(message)
+        {
+        }
+
+        public TemplateProcessingException(string message, Exception innerException)
             : base(message, innerException)
         {
         }

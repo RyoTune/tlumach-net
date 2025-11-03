@@ -1,4 +1,4 @@
-﻿// <copyright file="TranslationManager.cs" company="Allied Bits Ltd.">
+// <copyright file="TranslationManager.cs" company="Allied Bits Ltd.">
 //
 // Copyright 2025 Allied Bits Ltd.
 //
@@ -41,6 +41,8 @@ namespace Tlumach
 
         private CultureInfo _culture = CultureInfo.InvariantCulture;
 
+        private TranslationConfiguration? _defaultConfig;
+
         public bool LoadFromDisk { get; set; }
 
         public string FilesLocation { get; set; } = string.Empty;
@@ -59,16 +61,40 @@ namespace Tlumach
         public event EventHandler<TranslationValueEventArgs>? OnTranslationValueNeeded;
 
         /// <summary>
-        /// The event is fired after a translation of a certain key has been found in a file or an empty one was allocated.
+        /// The event is fired after a translation of a certain key has been found in a file.
         /// Should a handler need to provide a different value, it may change the text in the <seealso cref="TranslationValueEventArgs.Text"/> property or replace the reference in the <seealso cref="TranslationValueEventArgs.Entry"/> property of the arguments.
         /// </summary>
         public event EventHandler<TranslationValueEventArgs>? OnTranslationValueFound;
+
+        /// <summary>
+        /// The event is fired after a translation of a certain key has not been found in a file.
+        /// Should a handler decide to provide some value, it may set the text in the <seealso cref="TranslationValueEventArgs.Text"/> property or place a reference in the <seealso cref="TranslationValueEventArgs.Entry"/> property of the arguments.
+        /// </summary>
+        public event EventHandler<TranslationValueEventArgs>? OnTranslationValueNotFound;
 
         /// <summary>
         /// The event is fired when the CurrentCulture property is changed by the application.
         /// It is used primarily by the reactive TranslationUnit classes.
         /// </summary>
         public event EventHandler<CultureChangedEventArgs>? OnCultureChanged;
+
+        public TranslationManager()
+        {
+            _defaultConfig = null;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TranslationManager"/> class.
+        /// <para>
+        /// This constructor creates a translation manager based on the specified configuration.
+        /// Such translation manager can be used to simplify access to translations when translation units are not used - an application simply calls the GetValue method and species the key and, optionally, the culture.
+        /// </para>
+        /// </summary>
+        /// <param name="translationConfiguration">the configuration that specifies where to load translations from.</param>
+        public TranslationManager(TranslationConfiguration translationConfiguration)
+        {
+            _defaultConfig = translationConfiguration;
+        }
 
         /// <summary>
         /// Updates current culture of the manager.
@@ -108,9 +134,47 @@ namespace Tlumach
             _defaultTranslation = null;
         }
 
+        /// <summary>
+        /// Retrieves the value based on the default configuration and culture.
+        /// </summary>
+        /// <param name="key">the key of the translation entry to retrieve.</param>
+        /// <returns>the translation entry or an empty entry if nothing was found.</returns>
+        public TranslationEntry GetValue(string key)
+        {
+            if (_defaultConfig is null)
+                return TranslationEntry.Empty;
+
+            return GetValue(_defaultConfig, _culture, key);
+        }
+
+        /// <summary>
+        /// Retrieves the value based on the default configuration and culture.
+        /// </summary>
+        /// <param name="culture">the culture, for which the entry is needed.</param>
+        /// <param name="key">the key of the translation entry to retrieve.</param>
+        /// <returns>the translation entry or an empty entry if nothing was found.</returns>
+        public TranslationEntry GetValue(CultureInfo culture, string key)
+        {
+            if (_defaultConfig is null)
+                return TranslationEntry.Empty;
+
+            return GetValue(_defaultConfig, culture, key);
+        }
+
+#pragma warning disable MA0051 // Method is too long
+        /// <summary>
+        /// Retrieves the value based on the default configuration and culture.
+        /// </summary>
+        /// <param name="config">the configuration that specifies where to load translations from.</param>
+        /// <param name="culture">the culture, for which the entry is needed.</param>
+        /// <param name="key">the key of the translation entry to retrieve.</param>
+        /// <returns>the translation entry or an empty entry if nothing was found.</returns>
         public TranslationEntry GetValue(TranslationConfiguration config, CultureInfo culture, string key)
+#pragma warning restore MA0051 // Method is too long
         {
             ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNullOrEmpty(config.DefaultFile);
+
             ArgumentNullException.ThrowIfNull(culture);
             ArgumentNullException.ThrowIfNull(key);
 
@@ -136,19 +200,24 @@ namespace Tlumach
             if (culture != _culture)
             {
                 string cultureNameUpper = culture.Name.ToUpperInvariant();
+
                 // Locate the translation set for the specified locale
                 if (!_translations.TryGetValue(cultureNameUpper, out translation) || translation is null)
                 {
                     translation = InternalLoadTranslation(config, culture);
-                    translation ??= new(null);
+                    translation ??= new Translation(culture.Name); // we use an empty translation here, but we cannot use a static instance because this particular instance will be filled with entries from the default translations one by one once they are accessed.
                     _translations.TryAdd(cultureNameUpper, translation);
                 }
 
                 cultureLocalTranslation = translation;
 
                 // If the translation exists, try using it
-                if (translation.TryGetValue(keyUpper, out result) && result is not null && TranslationEntryAcceptable(result, translation.OriginalAssembly, translation.OriginalFile))
+                if (translation.TryGetValue(keyUpper, out result)
+                    && result is not null
+                    && TranslationEntryAcceptable(result, translation.OriginalAssembly, translation.OriginalFile))
+                {
                     return FireTranslationValueFound(culture, key, result, translation.OriginalAssembly, translation.OriginalFile);
+                }
             }
 
             // At this point, we need a default translation
@@ -174,14 +243,17 @@ namespace Tlumach
             }
 
             // Try loading from the default translation
-            if (_defaultTranslation is not null && _defaultTranslation.TryGetValue(keyUpper, out result) && result is not null && TranslationEntryAcceptable(result, _defaultTranslation.OriginalAssembly, _defaultTranslation.OriginalFile))
+            if (_defaultTranslation is not null
+                && _defaultTranslation.TryGetValue(keyUpper, out result)
+                && result is not null
+                && TranslationEntryAcceptable(result, _defaultTranslation.OriginalAssembly, _defaultTranslation.OriginalFile))
             {
                 // if a locale-specific translation exists, cache the value from the default translation in the culture-local one so that in the future, no attempt to load or go to the default translation is needed
                 cultureLocalTranslation?.Add(keyUpper, result);
                 return FireTranslationValueFound(culture, key, result, _defaultTranslation.OriginalAssembly, _defaultTranslation.OriginalFile);
             }
 
-            return FireTranslationValueFound(culture, key, new(string.Empty), null, null);
+            return FireTranslationValueNotFound( culture, key);
         }
 
         private static string? ReadFileFromResource(Assembly assembly, string resourceName)
@@ -194,21 +266,6 @@ namespace Tlumach
                     return null;
 
                 using var reader = new StreamReader(stream, Encoding.UTF8);
-                return reader.ReadToEnd();
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        private static string? ReadFileFromDisk(string fileName)
-        {
-            try
-            {
-                using var reader = File.OpenText(fileName);
-                if (reader is null)
-                    return null;
                 return reader.ReadToEnd();
             }
             catch
@@ -296,12 +353,38 @@ namespace Tlumach
 
             List<string> fileNames = [];
 
-#pragma warning disable CA1307 // Specify StringComparison for clarity
-            string resourceName = fileName.Replace("/", ".").Replace(@"\", ".");
-#pragma warning restore CA1307 // Specify StringComparison for clarity
+            if (LoadFromDisk)
+            {
+                string? filePath;
+                if (string.IsNullOrEmpty(FilesLocation))
+                    filePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                else
+                    filePath = FilesLocation;
+
+                if (!string.IsNullOrEmpty(filePath))
+                {
+                    // Enumerate all supported files, strip the extension, check if the file's base name matches "fileName", and add all matching filenames to the list
+                    string fileNameMatch = fileName + "_";
+                    string name;
+                    foreach (var extension in FileFormats.GetSupportedExtensions())
+                    {
+                        var diskFiles = Directory.EnumerateFiles(filePath, "*" + extension, new EnumerationOptions() { RecurseSubdirectories = false, IgnoreInaccessible = true, MatchType = MatchType.Simple });
+                        foreach (var diskFile in diskFiles)
+                        {
+                            name = Path.GetFileName(diskFile);
+                            if (name.StartsWith(fileNameMatch, StringComparison.OrdinalIgnoreCase))
+                                fileNames.Add(name);
+                        }
+                    }
+                }
+            }
 
             if (assembly is not null)
             {
+#pragma warning disable CA1307 // Specify StringComparison for clarity
+                string resourceName = fileName.Replace("/", ".").Replace(@"\", ".");
+#pragma warning restore CA1307 // Specify StringComparison for clarity
+
                 string baseName;
                 int idx;
 
@@ -326,32 +409,6 @@ namespace Tlumach
                             idx = baseName.LastIndexOf(fileNameMatch, StringComparison.OrdinalIgnoreCase);
                             if (idx < resourcePath.Length - 1)
                                 fileNames.Add(resourcePath[(idx + 1)..]);
-                        }
-                    }
-                }
-            }
-
-            if (LoadFromDisk)
-            {
-                string? filePath;
-                if (string.IsNullOrEmpty(FilesLocation))
-                    filePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                else
-                    filePath = FilesLocation;
-
-                if (!string.IsNullOrEmpty(filePath))
-                {
-                    // Enumerate all supported files, strip the extension, check if the file's base name matches "fileName", and add all matching filenames to the list
-                    string fileNameMatch = fileName + "_";
-                    string name;
-                    foreach (var extension in FileFormats.GetSupportedExtensions())
-                    {
-                        var diskFiles = Directory.EnumerateFiles(filePath, "*" + extension, new EnumerationOptions() { RecurseSubdirectories = false, IgnoreInaccessible = true, MatchType = MatchType.Simple });
-                        foreach (var diskFile in diskFiles)
-                        {
-                            name = Path.GetFileName(diskFile);
-                            if (name.StartsWith(fileNameMatch, StringComparison.OrdinalIgnoreCase))
-                                fileNames.Add(name);
                         }
                     }
                 }
@@ -409,7 +466,7 @@ namespace Tlumach
                 }
             }
 
-            string fileExtension = Path.GetExtension(config.DefaultFile);
+            string? fileExtension = Path.GetExtension(config.DefaultFile);
 
             // If the content has not been loaded, try some heuristics
             if (string.IsNullOrEmpty(translationContent))
@@ -439,7 +496,6 @@ namespace Tlumach
                 }
             }
 
-            // If there was no content located, we still return an empty translation so that the manager does not attempt to locate a translation the next time it needs one.
             if (string.IsNullOrEmpty(translationContent))
                 return null;
 
@@ -458,46 +514,71 @@ namespace Tlumach
         private string? InternalLoadFileContent(Assembly? assembly, string filename, ref string? usedFileName, string? originalFile = null)
         {
             string? fileContent = null;
+
+            // Try to load the file from the disk.
+            // The disk is checked first so that a translation provided on the disk can override the translation from resources (useful for translators to test their work).
+            if (LoadFromDisk)
+            {
+                // If the path is absolute, we only try this file and return
+                if (Path.IsPathRooted(filename))
+                {
+                    return Utils.ReadFileFromDisk(filename);
+                }
+
+                string tryFileName;
+
+                // Try the file in the FilesLocation directory if one is specified
+                if (!string.IsNullOrEmpty(FilesLocation))
+                {
+                    tryFileName = Path.Combine(FilesLocation, filename);
+
+                    fileContent = Utils.ReadFileFromDisk(tryFileName);
+                    if (fileContent is not null)
+                        return fileContent;
+                }
+                else
+                {
+                    string? baseDir;
+
+                    // Try the directory of the original file, if it was specified.
+                    if (!string.IsNullOrEmpty(originalFile))
+                    {
+                        baseDir = Path.GetDirectoryName(originalFile);
+                        if (!string.IsNullOrEmpty(baseDir))
+                        {
+                            tryFileName = Path.Combine(baseDir, filename);
+
+                            fileContent = Utils.ReadFileFromDisk(tryFileName);
+                            if (fileContent is not null)
+                                return fileContent;
+                        }
+                    }
+
+                    // Try the directory of the main EXE file
+                    baseDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                    if (!string.IsNullOrEmpty(baseDir))
+                    {
+                        tryFileName = Path.Combine(baseDir, filename);
+
+                        fileContent = Utils.ReadFileFromDisk(tryFileName);
+                        if (fileContent is not null)
+                            return fileContent;
+                    }
+
+                    // The last resort - try to load "as is" (from the current directory)
+                    fileContent = Utils.ReadFileFromDisk(filename);
+                    if (fileContent is not null)
+                        return fileContent;
+                }
+            }
+
+            // Try to load the file from the assembly
             if (assembly is not null)
             {
                 string asmFileName = filename.Replace('/', '.').Replace('\\', '.');
 
                 fileContent = ReadFileFromResource(assembly, asmFileName);
 
-                if (fileContent is not null)
-                    return fileContent;
-            }
-
-            if (LoadFromDisk)
-            {
-                // If the path is absolute, we only try this file and return.
-                if (Path.IsPathRooted(filename))
-                {
-                    return ReadFileFromDisk(filename);
-                }
-
-                string tryFileName;
-
-                if (!string.IsNullOrEmpty(this.FilesLocation))
-                {
-                    tryFileName = Path.Combine(FilesLocation, filename);
-
-                    fileContent = ReadFileFromDisk(tryFileName);
-                    if (fileContent is not null)
-                        return fileContent;
-                }
-
-                string? baseDir = Path.GetDirectoryName(originalFile);
-                if (!string.IsNullOrEmpty(baseDir))
-                {
-                    tryFileName = Path.Combine(baseDir, filename);
-
-                    fileContent = ReadFileFromDisk(tryFileName);
-                    if (fileContent is not null)
-                        return fileContent;
-                }
-
-                fileContent = ReadFileFromDisk(filename);
                 if (fileContent is not null)
                     return fileContent;
             }
@@ -536,18 +617,50 @@ namespace Tlumach
             if (OnTranslationValueFound is not null)
             {
                 TranslationValueEventArgs args = new(culture, key);
-                OnTranslationValueFound.Invoke(this, args);
-                if (args.Entry == entry && string.Equals(args.Text, entry.Text, StringComparison.Ordinal))
+
+                try
+                {
+                    entry.Lock();
+                    OnTranslationValueFound.Invoke(this, args);
+                }
+                finally
+                {
+                    entry.Unlock();
+                }
+                // If the handler has provided the entry, validate and return it.
+                if (args.Entry == entry)
                     return entry;
 
                 if (args.Entry is not null && TranslationEntryAcceptable(args.Entry, originalAssembly, originalFile))
                     return args.Entry;
 
+                // If just a text was provided - great, we create an entry based on this text.
                 if (args.Text is not null)
                     return new TranslationEntry(args.Text);
             }
 
             return entry;
+        }
+
+        private TranslationEntry FireTranslationValueNotFound(CultureInfo culture, string key)
+        {
+            if (OnTranslationValueNotFound is not null)
+            {
+                TranslationValueEventArgs args = new(culture, key);
+                OnTranslationValueNotFound.Invoke(this, args);
+
+                // If the handler has provided the entry, validate and return it.
+                // When a new entry is provided, we accept entries only with the text but not with a reference (a handler should resolve references itself).
+                if (args.Entry is not null && (args.Entry.Text is not null) && args.Entry.Reference is null)
+                    return args.Entry;
+
+                // If just a text was provided - great, we create an entry based on this text.
+                if (args.Text is not null)
+                    return new TranslationEntry(args.Text);
+            }
+
+            // Nothing was found, return an empty entry.
+            return TranslationEntry.Empty;
         }
     }
 }

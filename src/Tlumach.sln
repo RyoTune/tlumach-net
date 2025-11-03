@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Reactive", "Tlumach
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Avalonia", "Tlumach.Avalonia\Tlumach.Avalonia.csproj", "{B84AD767-A2BB-4B14-95B4-A8DD6559830A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Tests", "Tlumach.Tests\Tlumach.Tests.csproj", "{F88396A1-6E68-4BE3-8018-FFBC0EB5562B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Tests", "..\test\Tlumach.Tests\Tlumach.Tests.csproj", "{F88396A1-6E68-4BE3-8018-FFBC0EB5562B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
