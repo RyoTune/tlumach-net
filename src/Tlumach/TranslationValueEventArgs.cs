@@ -1,4 +1,4 @@
-﻿// <copyright file="TranslationValueEventArgs.cs" company="Allied Bits Ltd.">
+// <copyright file="TranslationValueEventArgs.cs" company="Allied Bits Ltd.">
 //
 // Copyright 2025 Allied Bits Ltd.
 //
@@ -28,19 +28,25 @@ namespace Tlumach
     public class TranslationValueEventArgs : EventArgs
     {
         /// <summary>
-        /// A reference to the culture, for which the text is needed.
+        /// Gets a reference to the culture, for which the text is needed.
         /// </summary>
         public CultureInfo Culture { get; }
 
         /// <summary>
-        /// The key of the requested translation entry.
+        /// Gets the key of the requested translation entry.
         /// </summary>
         public string Key { get; }
 
         /// <summary>
-        /// Should be set to the text value that corresponds to the specified Key and Culture; alternatively, Entry may be set.
+        /// Should be set to the text value that corresponds to the specified Key and Culture; alternatively, <seealso cref="EscapedText"/> or <seealso cref="Entry"/> may be set.
         /// </summary>
         public string? Text { get; set; }
+
+        /// <summary>
+        /// May be set to the escaped text value that corresponds to the specified Key and Culture; alternatively, Entry may be set.
+        /// This parameter may be set instead of <seealso cref="Text"/>, in which case, it will be un-escaped and also will be used during template processing (if required).
+        /// </summary>
+        public string? EscapedText { get; set; }
 
         /// <summary>
         /// May be set to the instance of the TranslationEntry class that corresponds to the specified Key and Culture and contains the requested text; alternatively, Text may be set.

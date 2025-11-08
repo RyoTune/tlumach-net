@@ -16,6 +16,10 @@
 //
 // </copyright>
 
+using System.Globalization;
+using System.Text;
+using System.Xml.XPath;
+
 namespace Tlumach.Base
 {
     /// <summary>
@@ -33,12 +37,13 @@ namespace Tlumach.Base
     {
         private bool _locked = false;
         private string? _text = null;
+        private string? _escapedText = null;
         private string? _reference = null;
 
         public static TranslationEntry Empty { get; }
 
         /// <summary>
-        /// Gets or sets a localized text.
+        /// Gets or sets a localized text. This text has been un-escaped (if needed) during loading from the translation file.
         /// </summary>
         public string? Text
         {
@@ -47,6 +52,19 @@ namespace Tlumach.Base
             {
                 CheckNotLocked();
                 _text = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a localized text that has not been un-escaped. This text is used when evaluating if the localized text contains templates and when processing those templates.
+        /// </summary>
+        public string? EscapedText
+        {
+            get => _escapedText;
+            set
+            {
+                CheckNotLocked();
+                _escapedText = value;
             }
         }
 
@@ -106,9 +124,9 @@ namespace Tlumach.Base
         public string? Video { get; set; }
 
         /// <summary>
-        /// Gets or sets an optional collection of placeholder descriptions.
+        /// Gets an optional collection of placeholder descriptions.
         /// </summary>
-        public List<Placeholder>? Placeholders { get; set; }
+        public List<Placeholder>? Placeholders { get; private set; }
 
         static TranslationEntry()
         {
@@ -126,11 +144,13 @@ namespace Tlumach.Base
         /// <summary>
         /// Initializes a new instance of the <see cref="TranslationEntry"/> class.
         /// </summary>
-        /// <param name="text">an optional localized text of the translation entry.</param>
+        /// <param name="text">an optional localized text of the translation entry that has been un-escaped if necessary.</param>
+        /// <param name="escapedText">an optional localized text of the translation entry that has not been un-escaped.</param>
         /// <param name="reference">an optional reference to an external file with the text.</param>
-        public TranslationEntry(string? text, string? reference = null)
+        public TranslationEntry(string? text, string? escapedText = null, string? reference = null)
         {
             Text = text;
+            EscapedText = escapedText;
             Reference = reference;
         }
 
@@ -140,14 +160,501 @@ namespace Tlumach.Base
             Placeholders.Add(placeholder);
         }
 
-        public string ProcessTemplatedValue(Func<string, object?> getParamValueFunc, TemplateStringEscaping templateEscapeMode = TemplateStringEscaping.None)
+        public string ProcessTemplatedValue(CultureInfo culture, TemplateStringEscaping templateEscapeMode, params object?[] parameters)
         {
-            string inputText = Text ?? string.Empty;
+            if (templateEscapeMode != TemplateStringEscaping.DotNet && templateEscapeMode != TemplateStringEscaping.Arb && templateEscapeMode != TemplateStringEscaping.ArbNoEscaping)
+                return Text ?? string.Empty;
+            else
+            if (templateEscapeMode == TemplateStringEscaping.DotNet) // with .NET, we simply use the .NET formatter
+                return string.Format(Text, parameters);
+            else
+            {
+                // In the case of Arb format, we need to pick parameters by index
+                return InternalProcessTemplatedValue(
+                    (key, position) =>
+                    {
+                        if (position >= 0 && position < parameters.Length)
+                        {
+                            object? value = parameters[position];
+                            if (value is null)
+                                return "null";
+                            return value;
+                        }
+                        else
+                            return null;
+                    },
+                    culture,
+                    templateEscapeMode);
+            }
+        }
+
+        public string ProcessTemplatedValue(CultureInfo culture, TemplateStringEscaping templateEscapeMode, IDictionary<string, object?> parameters)
+        {
+            return InternalProcessTemplatedValue(
+                (key, _) =>
+                {
+                    // This will cover the case of named parameters, and if the parameters are requested by index, the caller can provide numbers as string keys.
+                    if (parameters.Keys.Contains(key, StringComparer.OrdinalIgnoreCase))
+                    {
+                        object? value = parameters[key];
+                        if (value is null)
+                            return "null";
+                        return value;
+                    }
+
+                    if (templateEscapeMode == TemplateStringEscaping.DotNet)
+                    {
+                        // Probably, the key starts with a number that is the index of a parameter (like this works in .NET format strings).
+                        // Try this assumption, and if there is an index in the key, use the index as a key in the 'parameters' parameter.
+                        Utils.GetLeadingNonNegativeNumber(key, out int charsUsed);
+                        if (charsUsed > 0 && parameters.TryGetValue(key.Substring(0, charsUsed), out object? result))
+                        {
+                            object? value = result;
+                            if (value is null)
+                                return "null";
+                            return value;
+                        }
+                    }
+
+                    return null;
+                },
+                culture,
+                templateEscapeMode);
+        }
+
+        public string ProcessTemplatedValue(CultureInfo culture, TemplateStringEscaping templateEscapeMode, object parameters)
+        {
+            return InternalProcessTemplatedValue(
+                (key, _) =>
+                {
+                    if (Utils.TryGetPropertyValue(parameters, key, out object? value))
+                    {
+                        if (value is null)
+                            return "null";
+                        return value;
+                    }
+                    else
+                        return null;
+                },
+                culture,
+                templateEscapeMode);
+        }
+
+        public string InternalProcessTemplatedValue(Func<string, int, object?> getParamValueFunc, CultureInfo culture, TemplateStringEscaping templateEscapeMode = TemplateStringEscaping.None)
+        {
+            // No text to process. Return the empty string.
+            if (string.IsNullOrEmpty(EscapedText) && string.IsNullOrEmpty(Text))
+                return string.Empty;
+
+            // No escaping, no placeholders. Just return the text.
             if (templateEscapeMode == TemplateStringEscaping.None)
-                return inputText;
+                return EscapedText ?? Text ?? string.Empty;
 
+            // No placeholders. Just return the text, possibly un-escaping it.
+            if (templateEscapeMode == TemplateStringEscaping.Backslash)
+            {
+                if (EscapedText is not null)
+                    return Utils.UnescapeString(EscapedText);
+                else
+                    return Text ?? string.Empty;
+            }
 
-            // todo: implement
+            // validate some parameters (better late than never)
+            if (getParamValueFunc == null)
+                throw new ArgumentNullException(nameof(getParamValueFunc));
+
+            culture ??= CultureInfo.CurrentCulture;
+
+            bool shouldUnescape;
+            string inputText;
+
+            if (!string.IsNullOrEmpty(EscapedText))
+            {
+                // no un-escaping is done in ArbNoEscaping mode
+                shouldUnescape = templateEscapeMode != TemplateStringEscaping.ArbNoEscaping;
+                inputText = EscapedText!;
+            }
+            else
+            {
+                shouldUnescape = false;
+                inputText = Text!;
+            }
+
+            StringBuilder builder = new(inputText.Length);
+            int charCode;
+            char nextChar;
+            int pointer = 0;
+            bool inQuotes = false;
+            int openBraceCount = 0;
+            int placeholderIndex = -1;
+
+            while (pointer < inputText.Length)
+            {
+                char c = inputText[pointer];
+                if (shouldUnescape && (templateEscapeMode == TemplateStringEscaping.DotNet))
+                {
+                    if (c == '\\')
+                    {
+                        pointer++;
+                        if (pointer < inputText.Length)
+                        {
+                            nextChar = inputText[pointer];
+                            switch (nextChar)
+                            {
+                                case '"':
+                                    builder.Append('"');
+                                    pointer++;
+                                    continue;
+                                case '\\':
+                                    builder.Append('\\');
+                                    pointer++;
+                                    continue;
+                                case '/':
+                                    builder.Append('/');
+                                    pointer++;
+                                    continue;
+                                case 'b':
+                                    builder.Append('\b');
+                                    pointer++;
+                                    continue;
+                                case 'f':
+                                    builder.Append('\f');
+                                    pointer++;
+                                    continue;
+                                case 'n':
+                                    builder.Append('\n');
+                                    pointer++;
+                                    continue;
+                                case 'r':
+                                    builder.Append('\r');
+                                    pointer++;
+                                    continue;
+                                case 't':
+                                    builder.Append('\t');
+                                    pointer++;
+                                    continue;
+                                case 'u':
+                                    if (pointer + 4 < inputText.Length)
+                                    {
+                                        string hex = inputText.Substring(pointer + 1, 4);
+                                        try
+                                        {
+                                            charCode = int.Parse(hex, System.Globalization.NumberStyles.HexNumber);
+                                            builder.Append((char) charCode);
+                                        }
+                                        catch (FormatException)
+                                        {
+                                            // Invalid sequence
+                                            builder.Append('\\').Append('u').Append(hex);
+                                        }
+
+                                        pointer += 4;
+                                        continue;
+                                    }
+                                    else
+                                    {
+                                        // Incomplete sequence
+                                        builder.Append('\\').Append('u');
+                                        pointer++;
+                                        continue;
+                                    }
+
+                                default:
+                                    builder.Append('\\').Append(nextChar);
+                                    pointer++;
+                                    continue;
+                            }
+                        }
+                        else
+                            throw new TemplateParserException("Incomplete escape sequence (hanging backslash '\\' detected) in the following text:\n" + inputText);
+                    }
+                }
+
+                if (shouldUnescape && (templateEscapeMode == TemplateStringEscaping.Arb))
+                {
+                    if (c == Utils.C_SINGLE_QUOTE)
+                    {
+                        pointer++;
+                        if (pointer < inputText.Length)
+                            nextChar = inputText[pointer];
+                        else
+                            nextChar = '\0';
+
+                        if (nextChar == Utils.C_SINGLE_QUOTE)
+                        {
+                            builder.Append(Utils.C_SINGLE_QUOTE);
+                            pointer++;
+                            continue;
+                        }
+                        else
+                            inQuotes = !inQuotes;
+                    }
+                }
+
+                // Finally, get to placeholders
+                if (c == '{')
+                {
+                    pointer++;
+                    if (pointer < inputText.Length)
+                    {
+                        nextChar = inputText[pointer];
+                        if (templateEscapeMode == TemplateStringEscaping.DotNet && nextChar == '{')
+                        {
+                            builder.Append(c);
+                            pointer++;
+                            continue;
+                        }
+
+                        int startOfParam = pointer;
+
+                        openBraceCount = 1;
+
+                        // grab everything until all braces are closed
+                        while (pointer < inputText.Length || openBraceCount > 0)
+                        {
+                            if (inputText[pointer] == '}')
+                            {
+                                openBraceCount--;
+                            }
+                            else
+                            if (inputText[pointer] == '{')
+                            {
+                                openBraceCount++;
+                                if (templateEscapeMode == TemplateStringEscaping.DotNet)
+                                    throw new TemplateParserException("An inlaid open curly brace ('{') detected in the following text:\n" + inputText);
+                            }
+
+                            pointer++;
+                        }
+
+                        // We have captured all of the placeholder
+                        if (openBraceCount == 0)
+                        {
+                            placeholderIndex++; // we started with -1 in order to make index == 0 for the first encountered placeholder
+
+                            // take the placeholder itself
+                            string placeholderContent = inputText.Substring(startOfParam, pointer - startOfParam);
+
+                            try
+                            {
+                                // obtain the value to place instead of the placeholder
+                                string placeholderValue = GetPlaceholderValue(placeholderContent, placeholderIndex, getParamValueFunc, templateEscapeMode, culture);
+
+                                // add the value to the string builder
+                                builder.Append(placeholderValue);
+                            }
+                            catch (TemplateParserException ex)
+                            {
+                                throw new TemplateParserException(ex.Message + " in the following text:\n" + inputText, ex.InnerException is not null ? ex.InnerException : ex);
+                            }
+
+                            // at this point, pointer points beyond the last curly brace, so we can continue looking for the next ones
+                            continue;
+                        }
+
+                        // have we reached the end of the text?
+                        if (pointer == inputText.Length)
+                            break;
+                    }
+                    else
+                    if (inQuotes) // Quotes are currently used only in Arb
+                        throw new TemplateParserException("A hanging open quote (') detected in the following text:\n" + inputText);
+                    else
+                        throw new TemplateParserException("Incomplete placeholder (hanging opening curly brace ('{') detected) in the following text:\n" + inputText);
+                }
+
+                builder.Append(c);
+                pointer++;
+            }
+
+            if (inQuotes)
+                throw new TemplateParserException("A hanging open quote (') detected in the following text:\n" + inputText);
+
+            if (openBraceCount > 0)
+                throw new GenericParserException("Unclosed opening curly brace ('{') in the following text:\n" + inputText);
+
+            return builder.ToString();
+        }
+
+        private string GetPlaceholderValue(string placeholderContent, int placeholderIndex, Func<string, int, object?> getParamValueFunc, TemplateStringEscaping templateEscapeMode, CultureInfo culture)
+        {
+            string placeholderName;
+            string tail;
+            int placeholderPositional = -1; // a numeric representation of a positional placeholder in Arb
+
+            int pointer = 0;
+            char c;
+
+            object? value;
+
+            // if the placeholder is empty, we request the value by index. Since we have no formatting specifiers, we use default conversion to string.
+            if (placeholderContent.Length == 0)
+            {
+                value = getParamValueFunc(string.Empty, placeholderIndex);
+                if (value is null)
+                    return string.Empty;
+
+                return string.Format(culture, "{0}", value);
+            }
+
+            // Arb requires that the placeholder name is a valid Dart identifier, and identifiers may start with a letter or an underscore
+            if (templateEscapeMode == TemplateStringEscaping.Arb || templateEscapeMode == TemplateStringEscaping.ArbNoEscaping)
+            {
+                c = placeholderContent[0];
+
+                // arb uses '@' as the first character after '{' to indicate a non-translatable value, which emitted as is (without '@', of course)
+                if (c == '@')
+                    return placeholderContent.Substring(1);
+
+                if (c != '_' && !char.IsLetter(c))
+                    throw new TemplateParserException($"Invalid placeholder name in placeholder '{placeholderContent}'");
+            }
+
+            bool isPositional = true;
+
+            // find the name of the placeholder
+            while (pointer < placeholderContent.Length)
+            {
+                c = placeholderContent[pointer];
+                if (!char.IsLetterOrDigit(c) && c != '_')
+                    break;
+                if (isPositional && !char.IsDigit(c))
+                    isPositional = false;
+                pointer++;
+            }
+
+            // if we reached the end of the content, then the whole content is a name of the placeholder
+            if (pointer == placeholderContent.Length)
+            {
+                placeholderName = placeholderContent;
+                tail = string.Empty;
+            }
+            else
+            {
+                placeholderName = placeholderContent.Substring(0, pointer);
+                tail = placeholderContent.Substring(pointer + 1);
+            }
+
+            // if the placeholder is positional, i.e., is a number, we obtain the position
+            if (isPositional)
+            {
+                if (!int.TryParse(placeholderName, out placeholderPositional))
+                {
+                    placeholderPositional = -1;
+                    isPositional = false;
+                }
+            }
+
+            // process a placeholder according to .NET rules, if requested
+            if (templateEscapeMode == TemplateStringEscaping.DotNet)
+            {
+                // obtain the value for the placeholder
+                value = getParamValueFunc(placeholderName, placeholderPositional >= 0 ? placeholderPositional : placeholderIndex);
+
+                // a null value indicates that a placeholder value was not found. In this case, return an empty string. If one needs to return "null", they should include a placeholder value that is a string "null".
+                if (value is null)
+                    return string.Empty;
+
+                if (tail.Length > 0)
+                    return string.Format(culture, "{0:" + tail + '}', value);
+                else
+                    return string.Format(culture, "{0}", value);
+            }
+
+            // process a placeholder according to Arb rules, if requested
+            if (templateEscapeMode == TemplateStringEscaping.Arb || templateEscapeMode == TemplateStringEscaping.ArbNoEscaping)
+            {
+                Placeholder? placeholder = null;
+
+                string placeholderType = "String";
+
+                // Here, there's some quite confusing logic happening.
+                // A placeholder is replaced when it is declared in a placeholder attribute (see Arb description for details), or when a replacement value is provided in the parameters of the formatting function.
+
+                if (isPositional)
+                {
+                    // obtain the value for the placeholder
+                    value = getParamValueFunc(placeholderName, placeholderPositional);
+
+                    // a null value indicates that a placeholder value was not found. In this case, return an empty string. If one needs to return "null", they should include a placeholder value that is a string "null".
+                    if (value is null)
+                        return placeholderContent;
+                }
+                else
+                if (Placeholders is not null)
+                {
+                    // According to Arb rules, if placeholders are specified, then each placeholder used in the text must have an entry in the placeholder list.
+                    // If it does not, the literal value of the placeholder is returned (i.e., the placeholder is considered to not be a placeholder).
+                    placeholder = Placeholders.FirstOrDefault(p => p.Name.Equals(placeholderName, StringComparison.OrdinalIgnoreCase));
+                    if (placeholder is null)
+                        return placeholderContent;
+
+                    value = getParamValueFunc(placeholderName, placeholderIndex);
+                    if (value is null)
+                        return placeholderContent;
+
+                    if (placeholder.Type is not null)
+                    {
+                        placeholderType = placeholder.Type;
+
+                        if (placeholderType.Equals("num", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (!Utils.IsBoxedNumber(value))
+                                // throw new TemplateParserException($"The placeholder '{placeholderName}' was declared as numeric, but a value of type {value.GetType().Name} was provided for use by the formatter");
+                                placeholderType = "String";
+                        }
+                        else
+                        if (placeholderType.Equals("int", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (!Utils.IsBoxedIntegerNumber(value))
+                                //throw new TemplateParserException($"The placeholder '{placeholderName}' was declared as integer, but a value of type {value.GetType().Name} was provided for use by the formatter");
+                                placeholderType = "String";
+                        }
+                        else
+                        if (placeholderType.Equals("DateTime", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (value is not DateTime
+#if NET9_0_OR_GREATER
+                                && (value is not DateOnly) && (value is not TimeOnly)
+#endif
+                                )
+                                //throw new TemplateParserException($"The placeholder '{placeholderName}' was declared as DateTime, but a value of type {value.GetType().Name} was provided for use by the formatter");
+                                placeholderType = "String";
+                        }
+                    }
+                }
+                else
+                {
+                    value = getParamValueFunc(placeholderName, placeholderIndex);
+                    if (value is null)
+                        return placeholderContent;
+                }
+
+                try
+                {
+                    if (placeholderType.Equals("num", StringComparison.OrdinalIgnoreCase) || placeholderType.Equals("int", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // format a number
+                        if (!string.IsNullOrEmpty(placeholder!.Format))
+                            return Utils.FormatArbNumber(value, getParamValueFunc, placeholder, tail, culture);
+                    }
+                    else
+                    if (placeholderType.Equals("DateTime", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // format a number
+                        if (!string.IsNullOrEmpty(placeholder!.Format))
+                            return Utils.FormatArbDateTime(value, placeholder, culture);
+                    }
+
+                    // catch-all
+                    return Utils.FormatArbString(value, getParamValueFunc, tail, culture);
+                }
+                catch (TemplateParserException ex)
+                {
+                    throw new TemplateParserException($"{ex.Message} in placeholder '{placeholderName}'", ex);
+                }
+            }
+
             return string.Empty;
         }
 
@@ -173,7 +680,7 @@ namespace Tlumach.Base
         {
             if (_locked)
             {
-                throw new InvalidOperationException("A translation entry should not be modified by event handlers. When handling an event, create a new entry instead.");
+                throw new InvalidOperationException("A translation entry should not be modified by event handlers. When handling an event, create a new entry or set Text or EscapedText.");
             }
         }
         #endregion

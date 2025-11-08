@@ -63,6 +63,8 @@ namespace Tlumach.Base
         /// </summary>
         public Dictionary<string, string> CustomProperties = [];
 
+        public bool IsBasicCulture { get; set; } = false;
+
         public Translation(string? locale, string? context = null)
             : base(StringComparer.OrdinalIgnoreCase)
         {

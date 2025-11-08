@@ -20,10 +20,8 @@ using System.Text;
 
 namespace Tlumach.Base
 {
-
     public abstract partial class BaseFileParser
     {
-
         public static bool RecognizeFileRefs { get; set; }
 
         public static bool StringHasParameters(string inputText, TemplateStringEscaping templateEscapeMode)
@@ -47,7 +45,7 @@ namespace Tlumach.Base
                     // --- 1. Handle Duplicated Quote Characters ---
                     // If we see '' (two single quotes), it's an escaped quote.
                     // We skip both characters and stay in the same quote state.
-                    if (currentChar == '\'' && nextChar == '\'')
+                    if (currentChar == Utils.C_SINGLE_QUOTE && nextChar == Utils.C_SINGLE_QUOTE)
                     {
                         i += 2; // Skip the next character as well
                         continue;
@@ -78,7 +76,7 @@ namespace Tlumach.Base
                 {
                     // --- 3. Handle Quote State Toggle ---
                     // If we see a non-duplicated quote, toggle the inQuotes flag.
-                    if (currentChar == '\'')
+                    if (currentChar == Utils.C_SINGLE_QUOTE)
                     {
                         inQuotes = !inQuotes;
                         i++;
@@ -91,13 +89,13 @@ namespace Tlumach.Base
                 {
                     // We found a non-duplicated, non-quoted opening brace.
                     // Mark that we are now looking for a closing brace.
-                    if ((currentChar == '{') && ((templateEscapeMode == TemplateStringEscaping.Arb) || (templateEscapeMode == TemplateStringEscaping.DotNet)))
+                    if ((currentChar == '{') && ((templateEscapeMode == TemplateStringEscaping.Arb) || (templateEscapeMode == TemplateStringEscaping.ArbNoEscaping) || (templateEscapeMode == TemplateStringEscaping.DotNet)))
                     {
                         openBraceCount++;
                     }
                     else
                     // We found a non-duplicated, non-quoted closing brace.
-                    if ((currentChar == '}') && ((templateEscapeMode == TemplateStringEscaping.Arb) || (templateEscapeMode == TemplateStringEscaping.DotNet)))
+                    if ((currentChar == '}') && ((templateEscapeMode == TemplateStringEscaping.Arb) || (templateEscapeMode == TemplateStringEscaping.ArbNoEscaping) || (templateEscapeMode == TemplateStringEscaping.DotNet)))
                     {
                         // If we were looking for a closing brace, we found a match!
                         if (openBraceCount > 0)
@@ -111,13 +109,15 @@ namespace Tlumach.Base
                     }
                 }
 
-                // else: We are in quotes. All other characters,
-                // including single { and }, are ignored.
+                // else: We are in quotes. All other characters, including single { and }, are ignored.
                 i++;
             }
 
+            if (inQuotes)
+                throw new TemplateParserException("A hanging open quote detected in the following text:\n" + inputText);
+
             if (openBraceCount > 0)
-                throw new GenericParserException($"Unclosed opening curly bracket detected in the text '{inputText}'");
+                throw new GenericParserException("Unclosed opening curly bracket in the following text:\n" + inputText);
 
             // If we finished the loop without finding a match, return false.
             return false;
@@ -133,7 +133,7 @@ namespace Tlumach.Base
         /// </summary>
         /// <param name="fileName">the configuration file to read.</param>
         /// <param name="configuration">the loaded configuration or <see langword="null"/> if the method does not succeed.</param>
-        /// <returns>The constructed <seealso cref="TranslationTree"/> upon success or <see langword="null"/> otherwise. </returns>
+        /// <returns>The constructed <seealso cref="TranslationTree"/> upon success or <see langword="null"/> otherwise.</returns>
         /// <exception cref="ParserLoadException">Gets thrown when loading of a configuration file or a default translation file fails.</exception>
         /// <exception cref="TextFileParseException">Gets thrown when parsing of a default translation file fails.</exception>
         public TranslationTree? LoadTranslationStructure(string fileName, out TranslationConfiguration? configuration)
@@ -209,10 +209,10 @@ namespace Tlumach.Base
 
         /// <summary>
         /// Checks whether this parser can handle a translation file with the given extension.
-        /// <para>This method is not used for configuration files</para>
+        /// <para>This method is not used for configuration files.</para>
         /// </summary>
         /// <param name="fileExtension">the extension to check.</param>
-        /// <returns><see langword="true"/> if the extension is supported and <see langword="false"/> otherwise</returns>
+        /// <returns><see langword="true"/> if the extension is supported and <see langword="false"/> otherwise.</returns>
         public abstract bool CanHandleExtension(string fileExtension);
 
         /*/// <summary>

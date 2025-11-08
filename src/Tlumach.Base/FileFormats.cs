@@ -1,4 +1,4 @@
-﻿// <copyright file="FileFormats.cs" company="Allied Bits Ltd.">
+// <copyright file="FileFormats.cs" company="Allied Bits Ltd.">
 //
 // Copyright 2025 Allied Bits Ltd.
 //

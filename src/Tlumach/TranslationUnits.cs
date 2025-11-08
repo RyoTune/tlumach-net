@@ -77,7 +77,6 @@ public class TranslationUnit : BaseTranslationUnit
 /// </summary>
 public class TemplatedTranslationUnit : BaseTranslationUnit
 {
-
     public TemplatedTranslationUnit(TranslationManager translationManager, TranslationConfiguration translationConfiguration, string key)
         : base(translationManager, translationConfiguration, key)
     {
@@ -99,7 +98,7 @@ public class TemplatedTranslationUnit : BaseTranslationUnit
     /// <param name="parameters">a dictionary that contains parameter names as keys and actual values to substitute as values.</param>
     /// <returns>the requested text or an empty string.</returns>
     /// <exception cref="TemplateProcessingException">thrown if processing of the template fails.</exception>
-    public string GetValue(IDictionary<string, object> parameters)
+    public string GetValue(IDictionary<string, object?> parameters)
     {
         return GetValue(TranslationManager.CurrentCulture, parameters);
     }
@@ -107,27 +106,25 @@ public class TemplatedTranslationUnit : BaseTranslationUnit
     /// <summary>
     /// Processes the template translation entry by substituting the parameters with actual values and returns the final text.
     /// </summary>
-    /// <param name="cultureInfo">the culture/locale for which the text is needed.</param>
+    /// <param name="culture">the culture/locale for which the text is needed.</param>
     /// <param name="parameters">a dictionary that contains parameter names as keys and actual values to substitute as values.</param>
     /// <returns>the requested text or an empty string.</returns>
     /// <exception cref="TemplateProcessingException">thrown if processing of the template fails.</exception>
-    public string GetValue(CultureInfo cultureInfo, IDictionary<string, object> parameters)
+    public string GetValue(CultureInfo culture, IDictionary<string, object?> parameters)
     {
-        TranslationEntry? result = InternalGetValue(cultureInfo);
+        return InternalGetValue(culture)?.ProcessTemplatedValue(culture, TranslationConfiguration.TemplateEscapeMode, parameters) ?? string.Empty;
+    }
 
-        // If a value was obtained, it contains a template that we need to fill with values
-        if (result is not null)
-        {
-            return result.ProcessTemplatedValue(
-                (key) =>
-                {
-                    string keyUpper = key.ToUpperInvariant();
-                    return parameters.FirstOrDefault(e => e.Key.Equals(keyUpper, StringComparison.OrdinalIgnoreCase));
-                },
-                TranslationConfiguration.TemplateEscapeMode);
-        }
-
-        return string.Empty;
+    /// <summary>
+    /// Processes the template translation entry by substituting the parameters with actual values and returns the final text.
+    /// </summary>
+    /// <param name="culture">the culture/locale for which the text is needed.</param>
+    /// <param name="parameters">a dictionary that contains parameter names as keys and actual values to substitute as values.</param>
+    /// <returns>the requested text or an empty string.</returns>
+    /// <exception cref="TemplateProcessingException">thrown if processing of the template fails.</exception>
+    public string GetValue(CultureInfo culture, params object[] parameters)
+    {
+        return InternalGetValue(culture)?.ProcessTemplatedValue(culture, TranslationConfiguration.TemplateEscapeMode, parameters) ?? string.Empty;
     }
 
     /// <summary>
@@ -144,28 +141,12 @@ public class TemplatedTranslationUnit : BaseTranslationUnit
     /// <summary>
     /// Processes the template translation entry by substituting the parameters with actual values and returns the final text.
     /// </summary>
-    /// <param name="cultureInfo">the culture/locale for which the text is needed.</param>
+    /// <param name="culture">the culture/locale for which the text is needed.</param>
     /// <param name="parameters">an object, whose properties are used to provide values for parameters in the template. The names of the template's parameters are matched with the object property names in a case-insensitive manner.</param>
     /// <returns>the requested text or an empty string.</returns>
     /// <exception cref="TemplateProcessingException">is thrown if processing of the template fails.</exception>
-    public string GetValue(CultureInfo cultureInfo, object parameters)
+    public string GetValue(CultureInfo culture, object parameters)
     {
-        TranslationEntry? result = InternalGetValue(cultureInfo);
-
-        // If a value was obtained, it contains a template that we need to fill with values
-        if (result is not null)
-        {
-            return result.ProcessTemplatedValue(
-                (key) =>
-                {
-                    if (ReflectionUtils.TryGetPropertyValue(parameters, key, out object? value))
-                        return value;
-                    else
-                        return null;
-                },
-                TranslationConfiguration.TemplateEscapeMode);
-        }
-
-        return string.Empty;
+        return InternalGetValue(culture)?.ProcessTemplatedValue(culture, TranslationConfiguration.TemplateEscapeMode, parameters) ?? string.Empty;
     }
 }

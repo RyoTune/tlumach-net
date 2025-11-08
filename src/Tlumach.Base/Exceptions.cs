@@ -20,6 +20,7 @@ using System.Globalization;
 
 namespace Tlumach.Base
 {
+#pragma warning disable CA1032 // Implement standard exception constructors
     public class TlumachException : Exception
     {
         public TlumachException()
@@ -69,6 +70,23 @@ namespace Tlumach.Base
         }
 
         public GenericParserException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+    }
+
+    public class TemplateParserException : GenericParserException
+    {
+        public TemplateParserException()
+        {
+        }
+
+        public TemplateParserException(string message)
+            : base(message)
+        {
+        }
+
+        public TemplateParserException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
     }
@@ -198,4 +216,5 @@ namespace Tlumach.Base
             FileName = fileName;
         }
     }
+#pragma warning restore CA1032 // Implement standard exception constructors
 }

@@ -1,0 +1,39 @@
+![Tlumach](Tlumach.png "Tlumach")
+
+# Tlumach
+
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Allied-Bits-ltd/Tlumach/build-test.yml "GitHub Actions Workflow Status")](https://img.shields.io/github/actions/workflow/status/Allied-Bits-ltd/Tlumach/build-test.yml)
+
+[![NuGet](https://img.shields.io/nuget/v/AlliedBits.Tlumach.svg)](https://www.nuget.org/packages/AlliedBits.Tlumach) [![downloads](https://img.shields.io/nuget/dt/AlliedBits.Tlumach)](https://www.nuget.org/packages/AlliedBits.Tlumach)
+
+Tlumach.NET is a flexible library that provides translation and localization support to all kinds of .NET applications, from WinForms and console ones to Razor and Blazor, XAML, MAUI, and Avalonia.
+
+The goal of the library is to support different formats of translation files and to support different languages and locales concurrently (within even one thread).
+
+## Features
+
+The features of Tlumach include:
+
+* Integration with XAML (in WPF, WinUI, MAUI, and Avalonia projects) via bindings to provide localized UI. The markup extension is provided for easy integration.
+* The Generator class to generate source code with translation units for static use and for XAML UIs during compilation of the project.
+* Use via the translation manager or by accessing generated translation units, which enable syntax checking in design time.
+* Support for on-the-fly switching of current language/locale with automatic update of the UI.
+* Automatic fallback to the basic locale (e.g., "de-AT" -> "de-DE") translation or to the default translation if a a translation for a particular key is not available in the locale-specific translation.
+* The possibility to obtain translations for different languages/locales concurrently, even within one thread (usable in server scenarios when requests from different clients are handled).
+* Handling of translation files in JSON, Arb (JSON with additional features), simple INI, more sophisticated TOML formats and, in the future, of CSV and TSV files.
+* Loading of translations from assembly resources, from disk files, or from a custom source (via events).
+* Smart search for localized files using ISO 639-1 names (e.g., "de" or "hr") and using RFC 5646 locale identifiers (e.g., "de-AT", "pt-BR"). It is also possible to specify custom names for files with translations via a configuration file or to provide translation files via events, making it possible to fetch the translations from the network.
+* Support for multiple translation sets in one project. For example, you can keep server log strings in one file and client messages in another.
+* Each translation set can have a hierarchy of groups of translation entries, enabling easy management of translations.
+* Automatic recognition and support for templated strings in Arb and .NET formats. This includes support for .NET- and Arb-style placeholders and support of main ICU features ("select" and "plural" types) in Arb-style placeholders.
+* The possibility to control the found translation entries or provide entries for missing keys via events.
+
+## Supported platforms and frameworks
+
+* .NET 9.0 and later (a dedicated set of assemblies is provided)
+* Anything that loads .NET Standard 2.0 assemblies
+
+...on any operating system capable of running .NET 9+ or loading .NET Standard 2.0 assemblies.
+
+
+

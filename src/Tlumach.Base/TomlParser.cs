@@ -1,3 +1,21 @@
+// <copyright file="TomlParser.cs" company="Allied Bits Ltd.">
+//
+// Copyright 2025 Allied Bits Ltd.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// </copyright>
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,7 +24,6 @@ namespace Tlumach.Base
 {
     public class TomlParser : KeyValueTextParser
     {
-
         private enum StringMarker
         {
             Unknown,
@@ -38,12 +55,12 @@ namespace Tlumach.Base
             if (!_keyIsQuoted)
                 return base.IsValidKeyChar(value);
             else
-                return value != C_DOUBLE_QUOTE && value != '\n' && value != '\r';
+                return value != Utils.C_DOUBLE_QUOTE && value != '\n' && value != '\r';
         }
 
         protected override bool IsStartOfKey(string content, int pointer)
         {
-            if (content[pointer] == C_DOUBLE_QUOTE)
+            if (content[pointer] == Utils.C_DOUBLE_QUOTE)
             {
                 _keyIsQuoted = true;
                 return true;
@@ -58,23 +75,23 @@ namespace Tlumach.Base
             return false;
         }
 
-        protected override bool IsEndOfKey(string content, int pointer, out int newPosition)
+        protected override bool IsEndOfKey(string content, int offset, out int newPosition)
         {
             if (_keyIsQuoted)
             {
-                if (content[pointer] == C_DOUBLE_QUOTE)
+                if (content[offset] == Utils.C_DOUBLE_QUOTE)
                 {
-                    newPosition = pointer + 1;
+                    newPosition = offset + 1;
                     return true;
                 }
 
-                newPosition = pointer;
+                newPosition = offset;
                 return false;
             }
             else
             {
-                newPosition = pointer;
-                return char.IsWhiteSpace(content[pointer]) || IsSeparatorChar(content[pointer]);
+                newPosition = offset;
+                return char.IsWhiteSpace(content[offset]) || IsSeparatorChar(content[offset]);
             }
         }
 
@@ -89,9 +106,9 @@ namespace Tlumach.Base
 
         protected override bool IsStartOfValue(string content, int pointer)
         {
-            if (content[pointer] == C_SINGLE_QUOTE)
+            if (content[pointer] == Utils.C_SINGLE_QUOTE)
             {
-                if ((pointer <= content.Length - 3) && content[pointer + 1] == C_SINGLE_QUOTE && content[pointer + 2] == C_SINGLE_QUOTE)
+                if ((pointer <= content.Length - 3) && content[pointer + 1] == Utils.C_SINGLE_QUOTE && content[pointer + 2] == Utils.C_SINGLE_QUOTE)
                 {
                     _lastStartOfValue = StringMarker.MultilineLiteral;
                     return true;
@@ -101,9 +118,9 @@ namespace Tlumach.Base
                 return true;
             }
 
-            if (content[pointer] == C_DOUBLE_QUOTE)
+            if (content[pointer] == Utils.C_DOUBLE_QUOTE)
             {
-                if ((pointer <= content.Length - 3) && content[pointer + 1] == C_DOUBLE_QUOTE && content[pointer + 2] == C_DOUBLE_QUOTE)
+                if ((pointer <= content.Length - 3) && content[pointer + 1] == Utils.C_DOUBLE_QUOTE && content[pointer + 2] == Utils.C_DOUBLE_QUOTE)
                 {
                     _lastStartOfValue = StringMarker.MultilineBasic;
                     return true;
@@ -121,7 +138,7 @@ namespace Tlumach.Base
             newPosition = pointer;
             if (_lastStartOfValue == StringMarker.MultilineLiteral)
             {
-                if (content[pointer] == C_SINGLE_QUOTE && (pointer <= content.Length - 3) && content[pointer + 1] == C_SINGLE_QUOTE && content[pointer + 2] == C_SINGLE_QUOTE)
+                if (content[pointer] == Utils.C_SINGLE_QUOTE && (pointer <= content.Length - 3) && content[pointer + 1] == Utils.C_SINGLE_QUOTE && content[pointer + 2] == Utils.C_SINGLE_QUOTE)
                 {
                     newPosition = pointer + 3;
                     return true;
@@ -132,7 +149,7 @@ namespace Tlumach.Base
 
             if (_lastStartOfValue == StringMarker.Literal)
             {
-                if (content[pointer] == C_SINGLE_QUOTE)
+                if (content[pointer] == Utils.C_SINGLE_QUOTE)
                 {
                     newPosition = pointer + 1;
                     return true;
@@ -148,12 +165,12 @@ namespace Tlumach.Base
 
             if (_lastStartOfValue == StringMarker.MultilineBasic)
             {
-                if (content[pointer] == C_DOUBLE_QUOTE)
+                if (content[pointer] == Utils.C_DOUBLE_QUOTE)
                 {
-                    if (pointer > 0 && content[pointer - 1] == C_BACKSLASH) // the quote is escaped, we skip it
+                    if (pointer > 0 && content[pointer - 1] == Utils.C_BACKSLASH) // the quote is escaped, we skip it
                         return false;
 
-                    if (content[pointer] == C_DOUBLE_QUOTE && (pointer <= content.Length - 3) && content[pointer + 1] == C_DOUBLE_QUOTE && content[pointer + 2] == C_DOUBLE_QUOTE)
+                    if (content[pointer] == Utils.C_DOUBLE_QUOTE && (pointer <= content.Length - 3) && content[pointer + 1] == Utils.C_DOUBLE_QUOTE && content[pointer + 2] == Utils.C_DOUBLE_QUOTE)
                     {
                         newPosition = pointer + 3;
                         return true;
@@ -165,9 +182,9 @@ namespace Tlumach.Base
 
             if (_lastStartOfValue == StringMarker.Basic)
             {
-                if (content[pointer] == C_DOUBLE_QUOTE)
+                if (content[pointer] == Utils.C_DOUBLE_QUOTE)
                 {
-                    if (pointer > 0 && content[pointer - 1] == C_BACKSLASH) // the quote is escaped, we skip it
+                    if (pointer > 0 && content[pointer - 1] == Utils.C_BACKSLASH) // the quote is escaped, we skip it
                         return false;
 
                     // we have found a closing quote
@@ -186,31 +203,27 @@ namespace Tlumach.Base
             return false;
         }
 
-        protected override string UnwrapValue(string value)
+        protected override (string? escaped, string unescaped) UnwrapValue(string value)
         {
             switch (_lastStartOfValue)
             {
                 case StringMarker.Basic:
-                    if (GetTemplateEscapeMode() != TemplateStringEscaping.None)
-                        return Utils.UnescapeString(value.Substring(1, value.Length - 2));
-                    else
-                        return value.Substring(1, value.Length - 2);
-
-                case StringMarker.Literal:
-                    return value.Substring(1, value.Length - 2);
-
                 case StringMarker.MultilineBasic:
 
-                    if (GetTemplateEscapeMode() != TemplateStringEscaping.None)
-                        return Utils.UnescapeString(value.Substring(3, value.Length - 6));
-                    else
-                        return value.Substring(3, value.Length - 6);
+                    string basicToReturn = (_lastStartOfValue == StringMarker.Basic) ? value.Substring(1, value.Length - 2) : value.Substring(3, value.Length - 6);
 
+                    if (GetTemplateEscapeMode() != TemplateStringEscaping.None)
+                        return (basicToReturn, Utils.UnescapeString(basicToReturn));
+                    else
+                        return (null, basicToReturn);
+
+                case StringMarker.Literal:
                 case StringMarker.MultilineLiteral:
-                    return value.Substring(3, value.Length - 6);
+                    string literalToReturn = (_lastStartOfValue == StringMarker.Literal) ? value.Substring(1, value.Length - 2) : value.Substring(3, value.Length - 6);
+                    return (null, literalToReturn);
 
                 default:
-                    return value;
+                    return (null, value);
             }
         }
     }

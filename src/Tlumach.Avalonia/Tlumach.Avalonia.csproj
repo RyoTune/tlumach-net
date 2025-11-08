@@ -15,8 +15,8 @@
         <PackageReference Include="Avalonia" Version="11.*" />
     </ItemGroup>
 
-	<ItemGroup>
-	  <AdditionalFiles Include="../Shared/stylecop.json" />
-	</ItemGroup>
+    <ItemGroup>
+      <AdditionalFiles Include="../Shared/stylecop.json" />
+    </ItemGroup>
 
 </Project>

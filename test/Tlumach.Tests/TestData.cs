@@ -1,10 +1,14 @@
+// <copyright file="TestData.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
 using Tlumach.Base;
 
 using Xunit.Sdk;
 
 namespace Tlumach.Tests
 {
-    class TemplateExpressionTestData : TheoryData<string, TemplateStringEscaping, bool?>
+    internal class TemplateExpressionTestData : TheoryData<string, TemplateStringEscaping, bool?>
     {
         public TemplateExpressionTestData()
         {
@@ -75,7 +79,7 @@ namespace Tlumach.Tests
 
                 ("'{abc}'", TemplateStringEscaping.DotNet, true),
                 ("a '{ b }' c", TemplateStringEscaping.DotNet, true),
-                ("a { 'b' } c",TemplateStringEscaping.DotNet,  true), // Brackets are outside quotes
+                ("a { 'b' } c", TemplateStringEscaping.DotNet,  true), // Brackets are outside quotes
 
                 // Duplicated quotes (escaped)
                 ("''{abc}''", TemplateStringEscaping.None, false), // '' is not a toggle, so { } is valid
@@ -94,7 +98,7 @@ namespace Tlumach.Tests
                 ("a { '' } c", TemplateStringEscaping.Arb, true), // '' is inside valid { }
 
                 ("''{abc}''", TemplateStringEscaping.DotNet, true),
-                ("a ''{ b }'' c",TemplateStringEscaping.DotNet,  true),
+                ("a ''{ b }'' c", TemplateStringEscaping.DotNet,  true),
                 ("a '{ '' }' c", TemplateStringEscaping.DotNet, true),
                 ("a { '' } c", TemplateStringEscaping.DotNet, true),
 

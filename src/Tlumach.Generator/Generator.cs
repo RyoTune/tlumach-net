@@ -1,4 +1,4 @@
-﻿// <copyright file="Generator.cs" company="Allied Bits Ltd.">
+// <copyright file="Generator.cs" company="Allied Bits Ltd.">
 //
 // Copyright 2025 Allied Bits Ltd.
 //
@@ -72,7 +72,6 @@ namespace Tlumach.Generator
 
             context.RegisterSourceOutput(combinedProvider, (spc, source) =>
             {
-
                 AdditionalText text = source.Left.Left;
                 string projectDir = source.Left.Right;
                 string usingNamespace = source.Right;

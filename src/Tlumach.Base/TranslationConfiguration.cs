@@ -25,7 +25,6 @@ namespace Tlumach.Base
     /// </summary>
     public class TranslationConfiguration
     {
-
         /// <summary>
         /// The name of the default file (the one that will be loaded by default).
         /// </summary>
@@ -130,7 +129,7 @@ namespace Tlumach.Base
             DefaultFile = string.Empty;
         }
 
-        public string GetTemplateEscapeModeFullValue()
+        public string GetTemplateEscapeModeFullName()
         {
             return typeof(TemplateStringEscaping).Name + "." + TemplateEscapeMode.ToString();
         }

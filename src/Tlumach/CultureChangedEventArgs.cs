@@ -1,4 +1,4 @@
-﻿// <copyright file="CultureChangedEventArgs.cs" company="Allied Bits Ltd.">
+// <copyright file="CultureChangedEventArgs.cs" company="Allied Bits Ltd.">
 //
 // Copyright 2025 Allied Bits Ltd.
 //
@@ -16,12 +16,7 @@
 //
 // </copyright>
 
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Tlumach
 {

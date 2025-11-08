@@ -16,15 +16,6 @@
 //
 // </copyright>
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Globalization;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -53,7 +44,7 @@ namespace Tlumach.Base
         }
     }
 
-    public partial class ArbParser : BaseFileParser
+    public class ArbParser : BaseJsonParser
     {
         private const string ARB_KEY_LOCALE = "@@locale";
         private const string ARB_KEY_GLOBAL_CONTEXT = "@@context";
@@ -92,61 +83,7 @@ namespace Tlumach.Base
 
         public override bool CanHandleExtension(string fileExtension)
         {
-            return fileExtension.Equals(".arb", StringComparison.OrdinalIgnoreCase);
-        }
-
-        public override TranslationConfiguration? ParseConfiguration(string fileContent)
-        {
-            try
-            {
-                JObject? configObj = JObject.Parse(fileContent);
-
-                string? defaultFile = configObj.Value<string>(TranslationConfiguration.KEY_DEFAULT_FILE);
-                string? defaultLocale = configObj.Value<string>(TranslationConfiguration.KEY_DEFAULT_LOCALE);
-                string? generatedNamespace = configObj.Value<string>(TranslationConfiguration.KEY_GENERATED_NAMESPACE);
-                string? generatedClassName = configObj.Value<string>(TranslationConfiguration.KEY_GENERATED_CLASS);
-
-                TranslationConfiguration result = new TranslationConfiguration(defaultFile ?? string.Empty, generatedNamespace, generatedClassName, defaultLocale, GetTemplateEscapeMode());
-
-                if (string.IsNullOrEmpty(defaultFile))
-                    return result;
-
-                // If the configuration contains the Translations section, parse it
-                if (configObj.TryGetValue(TranslationConfiguration.KEY_SECTION_TRANSLATIONS, StringComparison.OrdinalIgnoreCase, out JToken? translationsToken) && translationsToken is JObject translationsObject)
-                {
-                    // Enumerate properties
-                    foreach (JProperty prop in translationsObject.Properties())
-                    {
-                        string lang = prop.Name.Trim();
-                        if (lang.Equals(TranslationConfiguration.KEY_TRANSLATION_ASTERISK, StringComparison.Ordinal))
-                            lang = TranslationConfiguration.KEY_TRANSLATION_DEFAULT;
-                        else
-                            lang = lang.ToUpperInvariant();
-                        if (prop.Value.Type == JTokenType.String)
-                        {
-                            string value = prop.Value.ToString().Trim();
-                            if (result.Translations.ContainsKey(lang))
-                                throw new GenericParserException($"Duplicate translation reference '{prop.Name}' specified in the list of translations");
-                            result.Translations.Add(lang, value);
-                        }
-                        else
-                        {
-                            throw new GenericParserException($"Translation reference '{prop.Name}' is not a string");
-                        }
-                    }
-                }
-
-                return result;
-            }
-            catch (JsonReaderException ex)
-            {
-                int pos = GetAbsolutePosition(fileContent, ex.LineNumber, ex.LinePosition);
-                throw new TextParseException(ex.Message, pos, pos, ex.LineNumber, ex.LinePosition);
-            }
-            catch (Exception ex)
-            {
-                throw new GenericParserException("Parsing of configuration has failed", ex);
-            }
+            return !string.IsNullOrEmpty(fileExtension) && fileExtension.Equals(".arb", StringComparison.OrdinalIgnoreCase);
         }
 
         /*public override bool IsValidConfigFile(string fileContent, out TranslationConfiguration? configuration)
@@ -161,48 +98,6 @@ namespace Tlumach.Base
             return false;
         }*/
 
-        public override Translation? LoadTranslation(string translationText)
-        {
-            try
-            {
-                JObject? jsonObj = JObject.Parse(translationText);
-
-                return InternalLoadTranslationEntryFromJSON(jsonObj, null, string.Empty);
-            }
-            catch (JsonReaderException ex)
-            {
-                int pos = GetAbsolutePosition(translationText, ex.LineNumber, ex.LinePosition);
-                throw new TextParseException(ex.Message, pos, pos, ex.LineNumber, ex.LinePosition);
-            }
-            catch (Exception ex)
-            {
-                throw new GenericParserException("Parsing of the translation has failed", ex);
-            }
-        }
-
-        protected override TranslationTree? InternalLoadTranslationStructure(string content)
-        {
-            try
-            {
-                JObject? jsonObj = JObject.Parse(content);
-
-                TranslationTree result = new();
-
-                InternalLoadTreeNodeFromJSON(jsonObj, result, result.RootNode);
-
-                return result;
-            }
-            catch (JsonReaderException ex)
-            {
-                int pos = GetAbsolutePosition(content, ex.LineNumber, ex.LinePosition);
-                throw new TextParseException(ex.Message, pos, pos, ex.LineNumber, ex.LinePosition);
-            }
-            catch (Exception ex)
-            {
-                throw new GenericParserException("Parsing of configuration has failed", ex);
-            }
-        }
-
         private static BaseFileParser Factory() => new ArbParser();
 
         /// <summary>
@@ -215,11 +110,11 @@ namespace Tlumach.Base
             foreach (var prop in jsonObj.Properties().Where(static p => p.Value.Type == JTokenType.Object))
             {
                 string name = prop.Name.Trim();
-                InternalAddSingplePlaceholderDefinition(entry, name, (JObject)prop.Value);
+                InternalAddSinglePlaceholderDefinition(entry, name, (JObject)prop.Value);
             }
         }
 
-        private static void InternalAddSingplePlaceholderDefinition(TranslationEntry entry, string placeholderName, JObject jsonObj)
+        private static void InternalAddSinglePlaceholderDefinition(TranslationEntry entry, string placeholderName, JObject jsonObj)
         {
             ArbPlaceholder placeholder = new(placeholderName);
 
@@ -315,7 +210,7 @@ namespace Tlumach.Base
                 else
                 {
                     // ... or add a new one
-                    entry = new(value);
+                    entry = new(value, escapedText: null, reference: null);
                     translation.Add(key, entry);
                 }
 
@@ -338,7 +233,11 @@ namespace Tlumach.Base
                 var jsonChild = (JObject)prop.Value;
 
                 // Process objects that contain properties of the entries
+#if NET9_0_OR_GREATER
+                if (name.StartsWith('@'))
+#else
                 if (name.StartsWith("@", StringComparison.Ordinal))
+#endif
                 {
                     if (name.Length == 1)
                         continue;
@@ -409,8 +308,11 @@ namespace Tlumach.Base
             }
         }
 
-        private Translation InternalLoadTranslationEntryFromJSON(JObject jsonObj, Translation? translation, string groupName)
+        protected override Translation InternalLoadTranslationEntryFromJSON(JObject jsonObj, Translation? translation, string groupName)
         {
+            if (jsonObj is null)
+                throw new ArgumentNullException(nameof(jsonObj));
+
             // When processing the top level, pick the metadata (locale, context, author, last modified) values if they are present
             if (translation is null)
             {
@@ -435,52 +337,25 @@ namespace Tlumach.Base
             return translation;
         }
 
-        private void InternalLoadTreeNodeFromJSON(JObject jsonObj, TranslationTree tree, TranslationTreeNode parentNode)
+        protected internal override bool? ShouldSkipStringProperty(string key)
         {
-            // Enumerate string properties, which will be keys
-            foreach (var prop in jsonObj.Properties().Where(static p => p.Value.Type == JTokenType.String))
-            {
-                string key = prop.Name.Trim();
-                // This should not happen but someone may misunderstand the format and use @ with string properties instead of objects
-                if (key.StartsWith("@", StringComparison.Ordinal))
-                    continue;
+            if (key?.Length > 0)
+                return key[0] == '@';
+            else
+                return null;
+        }
 
-                string? value = prop.Value<string>();
-
-                if (value is null)
-                    throw new GenericParserException($"The value of the key '{key}' is not a string");
-
-                if (parentNode.Keys.Keys.Contains(key, StringComparer.OrdinalIgnoreCase))
-                    throw new GenericParserException($"Duplicate key '{key}' specified");
-                parentNode.Keys.Add(key, new TranslationTreeLeaf(key, IsTemplatedText(value)));
-            }
-
-            // Enumerate object properties, which will be groups
-            foreach (var prop in jsonObj.Properties().Where(static p => p.Value.Type == JTokenType.Object))
-            {
-                string name = prop.Name.Trim();
-
-                // Skip child JSON nodes which, in ARB format, are supplementary information about an entry.
-                // This information is used when loading phrases, but not when building a tree.
-                if (name.StartsWith("@", StringComparison.Ordinal))
-                    continue;
-
-                if (parentNode.ChildNodes.Keys.Contains(name, StringComparer.OrdinalIgnoreCase))
-                    throw new GenericParserException($"Duplicate group name '{name}' specified");
-
-                var jsonChild = (JObject)prop.Value;
-
-                var childNode = parentNode.MakeNode(name);
-                if (childNode is null)
-                    throw new GenericParserException($"Group '{name}' could not be used to build a tree of translation entries");
-
-                InternalLoadTreeNodeFromJSON(jsonChild, tree, childNode);
-            }
+        protected internal override bool? ShouldSkipObjectProperty(string key)
+        {
+            if (key?.Length > 0)
+                return key[0] == '@';
+            else
+                return null;
         }
 
         internal override bool IsTemplatedText(string text)
         {
-            return ArbParser.StringHasParameters(text, TemplateEscapeMode);
+            return StringHasParameters(text, TemplateEscapeMode);
         }
     }
 }

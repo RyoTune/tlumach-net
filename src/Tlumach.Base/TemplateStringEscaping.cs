@@ -35,9 +35,15 @@ namespace Tlumach.Base
         Backslash,
 
         /// <summary>
-        /// In addition to <seealso cref="Backslash"/> processing, curly brackets are used to denote placeholders according to the rules defined for Arb files (those used in Dart language and Flutter framework).
+        /// Curly brackets are used to denote placeholders according to the rules defined for Arb files (those used in Dart language and Flutter framework) including the "use-escaping: true" setting.
         /// </summary>
         Arb,
+
+        /// <summary>
+        /// Curly brackets are used to denote placeholders according to the rules defined for Arb files (those used in Dart language and Flutter framework).
+        /// Unlike <seealso cref="Arb"/> mode, quote characters (') are not considered as escape symbols.
+        /// </summary>
+        ArbNoEscaping,
 
         /// <summary>
         /// In addition to <seealso cref="Backslash"/> processing, curly brackets are used to denote placeholders according to the .NET rules used by String.Format().

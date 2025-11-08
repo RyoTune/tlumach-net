@@ -16,8 +16,8 @@
       <ProjectReference Include="..\Tlumach\Tlumach.csproj" />
     </ItemGroup>
 
-	<ItemGroup>
-	  <AdditionalFiles Include="../Shared/stylecop.json" />
-	</ItemGroup>
+    <ItemGroup>
+      <AdditionalFiles Include="../Shared/stylecop.json" />
+    </ItemGroup>
 
 </Project>

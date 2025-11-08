@@ -1,3 +1,7 @@
+// <copyright file="BaseParserTests.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,15 +16,13 @@ namespace Tlumach.Tests
     [Trait("Category", "Base")]
     public class BaseParserTests
     {
-
         [Theory]
         [InlineData(TemplateStringEscaping.Backslash, "TemplateStringEscaping.Backslash")]
         [InlineData(TemplateStringEscaping.DotNet, "TemplateStringEscaping.DotNet")]
         public void ShouldConvertTemplateEscapeModeToStringRight(TemplateStringEscaping templateEscapeMode, string expected)
         {
             TranslationConfiguration config = new(string.Empty, null, null, null, templateEscapeMode);
-            Assert.Equal(expected, config.GetTemplateEscapeModeFullValue());
-
+            Assert.Equal(expected, config.GetTemplateEscapeModeFullName());
         }
     }
 }
