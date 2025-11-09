@@ -33,8 +33,13 @@ ScaffoldingReadMe.txt
 
 # NuGet Packages
 *.nupkg
+
 # NuGet Symbol Packages
 *.snupkg
+
+# Visual Studio artifacts
+*.user
+*.cache
 
 # Others
 ~$*

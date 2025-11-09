@@ -18,15 +18,15 @@ The features of Tlumach include:
 * The Generator class to generate source code with translation units for static use and for XAML UIs during compilation of the project.
 * Use via the translation manager or by accessing generated translation units, which enable syntax checking in design time.
 * Support for on-the-fly switching of current language/locale with automatic update of the UI.
-* Automatic fallback to the basic locale (e.g., "de-AT" -> "de-DE") translation or to the default translation if a a translation for a particular key is not available in the locale-specific translation.
+* Automatic fallback to the basic locale (e.g., "de-AT" -> "de-DE") translation or to the default translation if a translation for a particular key is not available in the locale-specific translation.
 * The possibility to obtain translations for different languages/locales concurrently, even within one thread (usable in server scenarios when requests from different clients are handled).
-* Handling of translation files in JSON, Arb (JSON with additional features), simple INI, more sophisticated TOML formats and, in the future, of CSV and TSV files.
+* Handling of translation files in JSON, Arb (JSON with additional features, used in Dart/Flutter), simple INI, more sophisticated TOML formats, and, in the future, CSV and TSV files.
 * Loading of translations from assembly resources, from disk files, or from a custom source (via events).
 * Smart search for localized files using ISO 639-1 names (e.g., "de" or "hr") and using RFC 5646 locale identifiers (e.g., "de-AT", "pt-BR"). It is also possible to specify custom names for files with translations via a configuration file or to provide translation files via events, making it possible to fetch the translations from the network.
 * Support for multiple translation sets in one project. For example, you can keep server log strings in one file and client messages in another.
 * Each translation set can have a hierarchy of groups of translation entries, enabling easy management of translations.
 * Automatic recognition and support for templated strings in Arb and .NET formats. This includes support for .NET- and Arb-style placeholders and support of main ICU features ("select" and "plural" types) in Arb-style placeholders.
-* The possibility to control the found translation entries or provide entries for missing keys via events.
+* The possibility to control the found translation entries or provide entries for missing keys via events (may be necessary if an application should use some phrases configured by a user rather than from translations).
 
 ## Supported platforms and frameworks
 
@@ -34,6 +34,18 @@ The features of Tlumach include:
 * Anything that loads .NET Standard 2.0 assemblies
 
 ...on any operating system capable of running .NET 9+ or loading .NET Standard 2.0 assemblies.
+
+## Documentation
+
+Tlumach documentation can be conveniently read in the [Tlumach section of Allied Bits site](https://alliedbits.com/tlumach).
+The source files of the documentation are available in the [Tlumach repository](https://github.com/Allied-Bits-Ltd/tlumach), in the "docs" directory.
+
+## Help and support
+
+For general discussions and suggestions, you are welcome to use the [Discussions section](https://github.com/Allied-Bits-Ltd/tlumach/discussions).
+
+If you need help with issues or want to report a bug, [please open an issue](https://github.com/Allied-Bits-Ltd/tlumach/issues/new/choose) and include the necessary details (including the relevant configuration and translation files) to help us better understand the problem. Providing this information will aid in resolving the issue effectively.
+
 
 
 

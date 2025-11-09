@@ -1,0 +1,11 @@
+{
+    "defaultFile": "Strings.json",
+    "translations": {
+        "de-AT": "Strings_de-AT.json",
+        "de": "Strings_de.json",
+        "pl": "Strings_pl.json",
+        "sk": "Strings_sk.json",
+        "hr": "Strings_hr.json",
+        "*" : "Strings.json"
+        }
+}

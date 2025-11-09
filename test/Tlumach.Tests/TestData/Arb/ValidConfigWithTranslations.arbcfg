@@ -1,0 +1,11 @@
+{
+    "defaultFile": "StringsWithTranslations.arb",
+    "translations": {
+        "de-AT": "Strings_de-AT.arb",
+        "de": "Strings_de.arb",
+        "pl": "Strings_pl.arb",
+        "sk": "Strings_sk.arb",
+        "hr": "Strings_hr.arb",
+        "*" : "Strings.arb"
+    }
+}

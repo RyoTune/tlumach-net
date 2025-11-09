@@ -20,11 +20,15 @@ using System.Text;
 
 namespace Tlumach.Base
 {
+#pragma warning disable CA1510 // Use 'ArgumentNullException.ThrowIfNull' instead of explicitly throwing a new exception instance
     public class BaseGenerator
     {
         private static string OwnName(string keyName)
         {
+#pragma warning disable CA1307 // '...' has a method overload that takes a 'StringComparison' parameter. Replace this call ... for clarity of intent.
             int idx = keyName.IndexOf('.');
+#pragma warning restore CA1307 // '...' has a method overload that takes a 'StringComparison' parameter. Replace this call ... for clarity of intent.
+
             if (idx == -1)
                 return keyName;
             else
@@ -34,33 +38,31 @@ namespace Tlumach.Base
                 return keyName.Substring(idx + 1);
         }
 
-        protected string? GenerateClass(string configFile, string projectDir, string usingNamespace)
+        protected static string? GenerateClass(string configFile, string projectDir, string usingNamespace)
         {
             if (configFile is null)
                 throw new ArgumentNullException(nameof(configFile));
 
-            string filename = configFile;
-
             TranslationConfiguration? configuration;
 
             // The config parser will parse configuration and will find the correct parser for the files referenced by the configuration
-            BaseFileParser? parser = FileFormats.GetConfigParser(Path.GetExtension(filename));
+            BaseFileParser? parser = FileFormats.GetConfigParser(Path.GetExtension(configFile));
             if (parser is null)
                 return null;
 
-            TranslationTree? translationTree = parser.LoadTranslationStructure(filename, out configuration);
+            TranslationTree? translationTree = parser.LoadTranslationStructure(configFile, out configuration);
 
             if (configuration is null)
-                throw new ParserLoadException(filename, $"Failed to load the configuration from '{filename}'");
+                throw new ParserLoadException(configFile, $"Failed to load the configuration from '{configFile}'");
 
             if (translationTree is null)
-                throw new ParserLoadException(filename, $"Failed to load the default language file referenced by '{filename}'");
+                throw new ParserLoadException(configFile, $"Failed to load the default language file referenced by '{configFile}'");
 
             if (string.IsNullOrEmpty(configuration.Namespace))
-                throw new ParserConfigException(filename, $"The configuration file '{filename}' does not contain the namespace for the class to be generated, which must be specified in the '{TranslationConfiguration.KEY_GENERATED_NAMESPACE}' setting");
+                throw new ParserConfigException(configFile, $"The configuration file '{configFile}' does not contain the namespace for the class to be generated, which must be specified in the '{TranslationConfiguration.KEY_GENERATED_NAMESPACE}' setting");
 
             if (string.IsNullOrEmpty(configuration.ClassName))
-                throw new ParserConfigException(filename, $"The configuration file '{filename}' does not contain the name of the class to be generated, which must be specified in the '{TranslationConfiguration.KEY_GENERATED_CLASS}' setting");
+                throw new ParserConfigException(configFile, $"The configuration file '{configFile}' does not contain the name of the class to be generated, which must be specified in the '{TranslationConfiguration.KEY_GENERATED_CLASS}' setting");
 
             StringBuilder builder = new();
 
@@ -69,7 +71,7 @@ namespace Tlumach.Base
             return builder.ToString();
         }
 
-        private void EmitMainBody(StringBuilder builder, string usingNamespace, TranslationConfiguration configuration, TranslationTree translationTree)
+        private static void EmitMainBody(StringBuilder builder, string usingNamespace, TranslationConfiguration configuration, TranslationTree translationTree)
         {
             builder.AppendLine("using System;\nusing System.Reflection;\n\n");
             builder.AppendLine("using Tlumach.Base;");
@@ -87,7 +89,7 @@ namespace Tlumach.Base
             else
                 builder.AppendLine("    private static string? _defaultFileLocale = null;");
             builder.AppendLine();
-            builder.Append("    private static TranslationConfiguration _translationConfiguration = new TranslationConfiguration(typeof(").Append(configuration.ClassName).Append(").Assembly, \"").Append(configuration.DefaultFile).Append("\", _defaultFileLocale, ").Append(configuration.GetTemplateEscapeModeFullName()).AppendLine (");\n");
+            builder.Append("    private static TranslationConfiguration _translationConfiguration = new TranslationConfiguration(typeof(").Append(configuration.ClassName).Append(").Assembly, \"").Append(configuration.DefaultFile).Append("\", _defaultFileLocale, ").Append(configuration.GetTemplateEscapeModeFullName()).AppendLine(");\n");
 
             if (configuration.Translations.Count > 0)
             {
@@ -111,7 +113,7 @@ namespace Tlumach.Base
             builder.AppendLine("}");
         }
 
-        private void EmitGroupUnits(StringBuilder builder, TranslationTree translationTree, TranslationTreeNode node, int level, string @namespace, string namePrefix)
+        private static void EmitGroupUnits(StringBuilder builder, TranslationTree translationTree, TranslationTreeNode node, int level, string @namespace, string namePrefix)
         {
             if (builder is null)
                 throw new ArgumentNullException(nameof(builder));
@@ -149,7 +151,7 @@ namespace Tlumach.Base
             {
                 subKey = node.ChildNodes[child].Name;
                 builder.AppendLine();
-                builder.Append(indent).Append("public static class ").Append(subKey).AppendLine();
+                builder.Append(indent).Append("public static class ").AppendLine(subKey);
                 builder.Append(indent).AppendLine("{");
                 EmitGroupUnits(builder, translationTree, node.ChildNodes[child], level + 1, @namespace, namePrefix + subKey + '.');
                 builder.Append(indent).AppendLine("}");

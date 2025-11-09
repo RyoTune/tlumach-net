@@ -54,7 +54,12 @@ namespace Tlumach.Base
         public TranslationTreeNode? FindNode(string name)
         {
             TranslationTreeNode? result = null;
+            if (string.IsNullOrEmpty(name))
+                return null;
+#pragma warning disable CA1307 // '...' has a method overload that takes a 'StringComparison' parameter. Replace this call ... for clarity of intent.
             int idx = name.IndexOf('.');
+#pragma warning restore CA1307 // '...' has a method overload that takes a 'StringComparison' parameter. Replace this call ... for clarity of intent.
+
             if (idx == -1)
             {
                 if (ChildNodes.TryGetValue(name, out result))
@@ -68,16 +73,19 @@ namespace Tlumach.Base
                     return result.FindNode(name.Substring(idx + 1));
                 }
             }
+
             return null;
         }
 
         public TranslationTreeNode? MakeNode(string name)
         {
             TranslationTreeNode? result = null;
-            if (name.Length == 0)
+            if (string.IsNullOrEmpty(name))
                 return null;
-
+#pragma warning disable CA1307 // '...' has a method overload that takes a 'StringComparison' parameter. Replace this call ... for clarity of intent.
             int idx = name.IndexOf('.');
+#pragma warning restore CA1307 // '...' has a method overload that takes a 'StringComparison' parameter. Replace this call ... for clarity of intent.
+
             if (idx == -1)
             {
                 if (ChildNodes.TryGetValue(name, out result))

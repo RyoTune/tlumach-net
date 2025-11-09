@@ -1,0 +1,8 @@
+{
+    "defaultFile": "StringsWithGroups.arb",
+    "translations": {
+        "de-AT": "StringsWithGroupsExplicit_de-AT.arb",
+        "*" : "StringsWithGroupsExplicitOther.arb"
+    }
+
+}

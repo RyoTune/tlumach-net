@@ -22,6 +22,9 @@ using System.Text;
 
 namespace Tlumach.Base
 {
+    /// <summary>
+    /// The parser for TOML translation files.
+    /// </summary>
     public class TomlParser : KeyValueTextParser
     {
         private enum StringMarker
@@ -33,7 +36,7 @@ namespace Tlumach.Base
             MultilineLiteral,
         }
 
-        private bool _keyIsQuoted = false;
+        private bool _keyIsQuoted;
 
         private StringMarker _lastStartOfValue = StringMarker.Unknown;
 
@@ -42,6 +45,11 @@ namespace Tlumach.Base
             FileFormats.RegisterConfigParser(".tomlcfg", Factory);
             FileFormats.RegisterParser(".toml", Factory);
         }
+
+        /// <summary>
+        /// Initializes the parser class, making it available for use.
+        /// </summary>
+        public static void Use() { }
 
         public override bool CanHandleExtension(string fileExtension)
         {
@@ -58,15 +66,16 @@ namespace Tlumach.Base
                 return value != Utils.C_DOUBLE_QUOTE && value != '\n' && value != '\r';
         }
 
-        protected override bool IsStartOfKey(string content, int pointer)
+#pragma warning disable CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
+        protected override bool IsStartOfKey(string content, int offset)
         {
-            if (content[pointer] == Utils.C_DOUBLE_QUOTE)
+            if (content[offset] == Utils.C_DOUBLE_QUOTE)
             {
                 _keyIsQuoted = true;
                 return true;
             }
             else
-            if (content[pointer] == '_' || content[pointer] == '-' || content[pointer] == '.' || char.IsLetter(content[pointer]))
+            if (content[offset] == '_' || content[offset] == '-' || content[offset] == '.' || char.IsLetter(content[offset]))
             {
                 _keyIsQuoted = false;
                 return true;
@@ -101,14 +110,18 @@ namespace Tlumach.Base
                 ? value
                 : value.Substring(1, value.Length - 2);
         }
+#pragma warning restore CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
 
         protected override bool IsSeparatorChar(char candidate) => candidate == '=';
 
-        protected override bool IsStartOfValue(string content, int pointer)
+        protected override bool IsStartOfValue(string content, int offset)
         {
-            if (content[pointer] == Utils.C_SINGLE_QUOTE)
+            if (content is null)
+                return false;
+
+            if (content[offset] == Utils.C_SINGLE_QUOTE)
             {
-                if ((pointer <= content.Length - 3) && content[pointer + 1] == Utils.C_SINGLE_QUOTE && content[pointer + 2] == Utils.C_SINGLE_QUOTE)
+                if ((offset <= content.Length - 3) && content[offset + 1] == Utils.C_SINGLE_QUOTE && content[offset + 2] == Utils.C_SINGLE_QUOTE)
                 {
                     _lastStartOfValue = StringMarker.MultilineLiteral;
                     return true;
@@ -118,9 +131,9 @@ namespace Tlumach.Base
                 return true;
             }
 
-            if (content[pointer] == Utils.C_DOUBLE_QUOTE)
+            if (content[offset] == Utils.C_DOUBLE_QUOTE)
             {
-                if ((pointer <= content.Length - 3) && content[pointer + 1] == Utils.C_DOUBLE_QUOTE && content[pointer + 2] == Utils.C_DOUBLE_QUOTE)
+                if ((offset <= content.Length - 3) && content[offset + 1] == Utils.C_DOUBLE_QUOTE && content[offset + 2] == Utils.C_DOUBLE_QUOTE)
                 {
                     _lastStartOfValue = StringMarker.MultilineBasic;
                     return true;
@@ -133,14 +146,17 @@ namespace Tlumach.Base
             return false;
         }
 
-        protected override bool? IsEndOfValue(string content, int pointer, out int newPosition)
+        protected override bool? IsEndOfValue(string content, int offset, out int newPosition)
         {
-            newPosition = pointer;
+            newPosition = offset;
+            if (content is null)
+                return false;
+
             if (_lastStartOfValue == StringMarker.MultilineLiteral)
             {
-                if (content[pointer] == Utils.C_SINGLE_QUOTE && (pointer <= content.Length - 3) && content[pointer + 1] == Utils.C_SINGLE_QUOTE && content[pointer + 2] == Utils.C_SINGLE_QUOTE)
+                if (content[offset] == Utils.C_SINGLE_QUOTE && (offset <= content.Length - 3) && content[offset + 1] == Utils.C_SINGLE_QUOTE && content[offset + 2] == Utils.C_SINGLE_QUOTE)
                 {
-                    newPosition = pointer + 3;
+                    newPosition = offset + 3;
                     return true;
                 }
 
@@ -149,13 +165,13 @@ namespace Tlumach.Base
 
             if (_lastStartOfValue == StringMarker.Literal)
             {
-                if (content[pointer] == Utils.C_SINGLE_QUOTE)
+                if (content[offset] == Utils.C_SINGLE_QUOTE)
                 {
-                    newPosition = pointer + 1;
+                    newPosition = offset + 1;
                     return true;
                 }
 
-                if (content[pointer] == '\n')
+                if (content[offset] == '\n')
                 {
                     return null;
                 }
@@ -165,14 +181,14 @@ namespace Tlumach.Base
 
             if (_lastStartOfValue == StringMarker.MultilineBasic)
             {
-                if (content[pointer] == Utils.C_DOUBLE_QUOTE)
+                if (content[offset] == Utils.C_DOUBLE_QUOTE)
                 {
-                    if (pointer > 0 && content[pointer - 1] == Utils.C_BACKSLASH) // the quote is escaped, we skip it
+                    if (offset > 0 && content[offset - 1] == Utils.C_BACKSLASH) // the quote is escaped, we skip it
                         return false;
 
-                    if (content[pointer] == Utils.C_DOUBLE_QUOTE && (pointer <= content.Length - 3) && content[pointer + 1] == Utils.C_DOUBLE_QUOTE && content[pointer + 2] == Utils.C_DOUBLE_QUOTE)
+                    if (content[offset] == Utils.C_DOUBLE_QUOTE && (offset <= content.Length - 3) && content[offset + 1] == Utils.C_DOUBLE_QUOTE && content[offset + 2] == Utils.C_DOUBLE_QUOTE)
                     {
-                        newPosition = pointer + 3;
+                        newPosition = offset + 3;
                         return true;
                     }
                 }
@@ -182,17 +198,17 @@ namespace Tlumach.Base
 
             if (_lastStartOfValue == StringMarker.Basic)
             {
-                if (content[pointer] == Utils.C_DOUBLE_QUOTE)
+                if (content[offset] == Utils.C_DOUBLE_QUOTE)
                 {
-                    if (pointer > 0 && content[pointer - 1] == Utils.C_BACKSLASH) // the quote is escaped, we skip it
+                    if (offset > 0 && content[offset - 1] == Utils.C_BACKSLASH) // the quote is escaped, we skip it
                         return false;
 
                     // we have found a closing quote
-                    newPosition = pointer + 1;
+                    newPosition = offset + 1;
                     return true;
                 }
 
-                if (content[pointer] == '\n')
+                if (content[offset] == '\n')
                 {
                     return null;
                 }
@@ -203,6 +219,7 @@ namespace Tlumach.Base
             return false;
         }
 
+#pragma warning disable CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
         protected override (string? escaped, string unescaped) UnwrapValue(string value)
         {
             switch (_lastStartOfValue)
@@ -226,5 +243,7 @@ namespace Tlumach.Base
                     return (null, value);
             }
         }
+#pragma warning restore CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
+
     }
 }

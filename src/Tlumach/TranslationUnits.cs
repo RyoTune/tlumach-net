@@ -27,7 +27,7 @@ public class BaseTranslationUnit
 {
     private readonly TranslationConfiguration _translationConfiguration;
 
-    protected TranslationManager TranslationManager { get; }
+    public TranslationManager TranslationManager { get; }
 
     public string Key { get; internal set; }
 
@@ -42,12 +42,12 @@ public class BaseTranslationUnit
 
     protected TranslationEntry? InternalGetValue(CultureInfo cultureInfo)
     {
-        return TranslationManager.GetValue(TranslationConfiguration, cultureInfo, Key);
+        return TranslationManager.GetValue(TranslationConfiguration, Key, cultureInfo);
     }
 
     protected string InternalGetValueAsText(CultureInfo cultureInfo)
     {
-        return TranslationManager.GetValue(TranslationConfiguration, cultureInfo, Key)?.Text ?? string.Empty;
+        return TranslationManager.GetValue(TranslationConfiguration, Key, cultureInfo)?.Text ?? string.Empty;
     }
 }
 

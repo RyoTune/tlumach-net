@@ -22,6 +22,9 @@ using System.Text;
 
 namespace Tlumach.Base
 {
+    /// <summary>
+    /// The base parser for key-value configuration and translation files (ini and toml).
+    /// </summary>
     public abstract class KeyValueTextParser : BaseFileParser
     {
         private enum TextParserState
@@ -35,7 +38,7 @@ namespace Tlumach.Base
             CapturingSectionName,
         }
 
-        private static int _translationsPrefixLength = TranslationConfiguration.KEY_SECTION_TRANSLATIONS_DOT.Length;
+        private static readonly int _translationsPrefixLength = TranslationConfiguration.KEY_SECTION_TRANSLATIONS_DOT.Length;
 
         protected virtual char LineCommentChar { get; }
 
@@ -58,20 +61,23 @@ namespace Tlumach.Base
             Translation result = new (locale: null);
             TranslationEntry entry;
 
+            if (string.IsNullOrEmpty(translationText))
+                return null;
+
             Dictionary<string, (string? escaped, string unescaped)?> lines = LoadAsDictionary(translationText);
 
             foreach (var line in lines)
             {
                 if (line.Value is null)
                 {
-                    currentGroup = line.Key;
+                    currentGroup = line.Key.Trim();
                 }
                 else
                 {
                     if (currentGroup.Length == 0)
-                        key = line.Key;
+                        key = line.Key.Trim();
                     else
-                        key = currentGroup + "." + line.Key;
+                        key = currentGroup + "." + line.Key.Trim();
 
                     value = line.Value.Value.unescaped;
                     escapedValue = line.Value.Value.escaped;
@@ -86,7 +92,7 @@ namespace Tlumach.Base
                         reference = null;
                     }
 
-                    entry = new TranslationEntry(value, escapedValue, reference);
+                    entry = new TranslationEntry(key, value, escapedValue, reference);
 
                     if (reference is not null)
                     {
@@ -97,7 +103,7 @@ namespace Tlumach.Base
                             entry.IsTemplated = IsTemplatedText(value);
                     }
 
-                    result.Add(key, entry);
+                    result.Add(key.ToUpperInvariant(), entry);
                 }
             }
 
@@ -106,21 +112,24 @@ namespace Tlumach.Base
 
         public override TranslationConfiguration? ParseConfiguration(string fileContent)
         {
+            if (string.IsNullOrEmpty(fileContent))
+                return null;
+
             Dictionary<string, (string? escaped, string unescaped)?> lines = LoadAsDictionary(fileContent);
 
             (string? escaped, string unescaped)? valueTuple;
 
             lines.TryGetValue(TranslationConfiguration.KEY_DEFAULT_FILE, out valueTuple);
-            string? defaultFile = valueTuple?.unescaped;
+            string? defaultFile = valueTuple?.unescaped?.Trim();
 
             lines.TryGetValue(TranslationConfiguration.KEY_DEFAULT_LOCALE, out valueTuple);
-            string? defaultLocale = valueTuple?.unescaped;
+            string? defaultLocale = valueTuple?.unescaped?.Trim();
 
             lines.TryGetValue(TranslationConfiguration.KEY_GENERATED_NAMESPACE, out valueTuple);
-            string? generatedNamespace = valueTuple?.unescaped;
+            string? generatedNamespace = valueTuple?.unescaped?.Trim();
 
             lines.TryGetValue(TranslationConfiguration.KEY_GENERATED_CLASS, out valueTuple);
-            string? generatedClassName = valueTuple?.unescaped;
+            string? generatedClassName = valueTuple?.unescaped?.Trim();
 
             TranslationConfiguration result = new TranslationConfiguration(defaultFile ?? string.Empty, generatedNamespace, generatedClassName, defaultLocale, GetTemplateEscapeMode());
 
@@ -409,17 +418,17 @@ namespace Tlumach.Base
 
         protected abstract bool IsSeparatorChar(char candidate);
 
-        protected abstract bool IsStartOfValue(string content, int pointer);
+        protected abstract bool IsStartOfValue(string content, int offset);
 
         /// <summary>
         /// Detects if the end of a value has been reached.
         /// </summary>
         /// <param name="content">content to check.</param>
-        /// <param name="pointer">current position within the content.</param>
+        /// <param name="offset">current position within the content.</param>
         /// <param name="newPosition">upon return is set to a position next to the end-of-value marker (indicates to which value the pointer must be set).</param>
         /// <returns><see langword="true"/> if the end of the value has been reached, <see langword="false"/> if the end has not been reached, and <see langword="null"/> if the end of line was encountered and a single-line value was not closed.</returns>
         /// <exception cref="TextParseException">thrown when an error occurs.</exception>
-        protected abstract bool? IsEndOfValue(string content, int pointer, out int newPosition);
+        protected abstract bool? IsEndOfValue(string content, int offset, out int newPosition);
 
         /// <summary>
         /// Strips format-specific markers that denote the beginning and the end of a value.

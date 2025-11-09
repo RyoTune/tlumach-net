@@ -26,6 +26,9 @@ using Newtonsoft.Json.Linq;
 
 namespace Tlumach.Base
 {
+    /// <summary>
+    /// The base parser for JSON-formatted configuration and translation files.
+    /// </summary>
     public abstract class BaseJsonParser : BaseFileParser
     {
         public override TranslationConfiguration? ParseConfiguration(string fileContent)
@@ -34,10 +37,10 @@ namespace Tlumach.Base
             {
                 JObject? configObj = JObject.Parse(fileContent);
 
-                string? defaultFile = configObj.Value<string>(TranslationConfiguration.KEY_DEFAULT_FILE);
-                string? defaultLocale = configObj.Value<string>(TranslationConfiguration.KEY_DEFAULT_LOCALE);
-                string? generatedNamespace = configObj.Value<string>(TranslationConfiguration.KEY_GENERATED_NAMESPACE);
-                string? generatedClassName = configObj.Value<string>(TranslationConfiguration.KEY_GENERATED_CLASS);
+                string? defaultFile = configObj.Value<string>(TranslationConfiguration.KEY_DEFAULT_FILE)?.Trim();
+                string? defaultLocale = configObj.Value<string>(TranslationConfiguration.KEY_DEFAULT_LOCALE)?.Trim();
+                string? generatedNamespace = configObj.Value<string>(TranslationConfiguration.KEY_GENERATED_NAMESPACE)?.Trim();
+                string? generatedClassName = configObj.Value<string>(TranslationConfiguration.KEY_GENERATED_CLASS)?.Trim();
 
                 TranslationConfiguration result = new TranslationConfiguration(defaultFile ?? string.Empty, generatedNamespace, generatedClassName, defaultLocale, GetTemplateEscapeMode());
 
@@ -132,14 +135,14 @@ namespace Tlumach.Base
             foreach (var prop in jsonObj.Properties().Where(static p => p.Value.Type == JTokenType.String))
             {
                 string key = prop.Name.Trim();
-                
+
                 bool? skipStringPropertyKey = ShouldSkipStringProperty(key);
                 if (skipStringPropertyKey is null)
                     throw new GenericParserException($"Invalid key '{key}' encountered");
                 if (skipStringPropertyKey == true)
                     continue;
 
-                string? value = prop.Value<string>();
+                string? value = prop.Value.Value<string>();
 
                 if (value is null)
                     throw new GenericParserException($"The value of the key '{key}' is not a string");
@@ -166,7 +169,9 @@ namespace Tlumach.Base
                 if (parentNode.ChildNodes.Keys.Contains(name, StringComparer.OrdinalIgnoreCase))
                     throw new GenericParserException($"Duplicate group name '{name}' specified");
 
-                var jsonChild = (JObject)prop.Value;
+                var jsonChild = prop.Value.Value<JObject>();
+                if (jsonChild is null)
+                    throw new GenericParserException($"The value of the key '{name}' is not an object");
 
                 var childNode = parentNode.MakeNode(name);
                 if (childNode is null)
@@ -176,6 +181,7 @@ namespace Tlumach.Base
             }
         }
 
+#pragma warning disable CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
         protected internal virtual bool? ShouldSkipStringProperty(string key)
         {
             if (key.Length == 0)
@@ -192,4 +198,6 @@ namespace Tlumach.Base
                 return false;
         }
     }
+#pragma warning restore CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
+
 }

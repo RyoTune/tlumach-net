@@ -24,5 +24,18 @@ namespace Tlumach.Tests
             TranslationConfiguration config = new(string.Empty, null, null, null, templateEscapeMode);
             Assert.Equal(expected, config.GetTemplateEscapeModeFullName());
         }
+
+        [Theory]
+        [ClassData(typeof(TemplateExpressionTestData))]
+        public void ShouldDetectTemplatedString(string input, TemplateStringEscaping escaping, bool? expected)
+        {
+            ArbParser.TemplateEscapeMode = escaping;
+
+            if (expected is null)
+                Assert.Throws<GenericParserException>(() => ArbParser.StringHasParameters(input, escaping));
+            else
+                Assert.Equal(expected, ArbParser.StringHasParameters(input, escaping));
+        }
+
     }
 }

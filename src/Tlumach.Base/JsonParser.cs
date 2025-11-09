@@ -24,6 +24,9 @@ using Newtonsoft.Json.Linq;
 
 namespace Tlumach.Base
 {
+    /// <summary>
+    /// The parser for simpler JSON translation files.
+    /// </summary>
     public class JsonParser : BaseJsonParser
     {
         public static TemplateStringEscaping TemplateEscapeMode { get; set; }
@@ -40,6 +43,11 @@ namespace Tlumach.Base
             FileFormats.RegisterParser(".json", Factory);
         }
 
+        /// <summary>
+        /// Initializes the parser class, making it available for use.
+        /// </summary>
+        public static void Use() { }
+
         protected override TemplateStringEscaping GetTemplateEscapeMode()
         {
             return TemplateEscapeMode;
@@ -50,6 +58,7 @@ namespace Tlumach.Base
             return !string.IsNullOrEmpty(fileExtension) && fileExtension.Equals(".json", StringComparison.OrdinalIgnoreCase);
         }
 
+#pragma warning disable CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
         protected override Translation InternalLoadTranslationEntryFromJSON(JObject jsonObj, Translation? translation, string groupName)
         {
             // When processing the top level, pick the metadata (locale, context, author, last modified) values if they are present
@@ -63,6 +72,7 @@ namespace Tlumach.Base
 
             return translation;
         }
+#pragma warning restore CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
 
         private void InternalEnumerateStringPropertiesOfJSONObject(JObject jsonObj, Translation translation, string groupName)
         {
@@ -72,7 +82,6 @@ namespace Tlumach.Base
                 string key;
 
                 string? value;
-                string? target = null;
                 string? reference = null;
 
                 key = prop.Name.Trim();
@@ -96,14 +105,13 @@ namespace Tlumach.Base
                 else
                 {
                     // ... or add a new one
-                    entry = new(value, escapedText: null, reference: null);
-                    translation.Add(key, entry);
+                    entry = new(key, value, escapedText: null, reference: null);
+                    translation.Add(key.ToUpperInvariant(), entry);
                 }
 
                 if (value is not null)
                     entry.IsTemplated = IsTemplatedText(value);
                 entry.Reference = reference;
-                entry.Target = target;
             }
         }
 

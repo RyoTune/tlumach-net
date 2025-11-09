@@ -9,11 +9,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach", "Tlumach\Tlumach.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Generator", "Tlumach.Generator\Tlumach.Generator.csproj", "{929CA0B9-000F-4B19-8166-C19FF9884AF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Reactive", "Tlumach.Reactive\Tlumach.Reactive.csproj", "{E329BA77-6AE8-4AE3-A11D-E5FDC8188EA7}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Avalonia", "Tlumach.Avalonia\Tlumach.Avalonia.csproj", "{B84AD767-A2BB-4B14-95B4-A8DD6559830A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Tests", "..\test\Tlumach.Tests\Tlumach.Tests.csproj", "{F88396A1-6E68-4BE3-8018-FFBC0EB5562B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.WPF", "Tlumach.WPF\Tlumach.WPF.csproj", "{C60C67A5-7074-0837-AD46-F5FA7E54DB88}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.MAUI", "Tlumach.MAUI\Tlumach.MAUI.csproj", "{2EE4D7B5-7633-F841-91B3-595D77574741}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.WinUI", "Tlumach.WinUI\Tlumach.WinUI.csproj", "{99EBF04B-9EA7-46EE-A641-C2CF434B5E15}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,10 +37,6 @@ Global
 		{929CA0B9-000F-4B19-8166-C19FF9884AF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{929CA0B9-000F-4B19-8166-C19FF9884AF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{929CA0B9-000F-4B19-8166-C19FF9884AF7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E329BA77-6AE8-4AE3-A11D-E5FDC8188EA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E329BA77-6AE8-4AE3-A11D-E5FDC8188EA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E329BA77-6AE8-4AE3-A11D-E5FDC8188EA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E329BA77-6AE8-4AE3-A11D-E5FDC8188EA7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B84AD767-A2BB-4B14-95B4-A8DD6559830A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B84AD767-A2BB-4B14-95B4-A8DD6559830A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B84AD767-A2BB-4B14-95B4-A8DD6559830A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -45,6 +45,18 @@ Global
 		{F88396A1-6E68-4BE3-8018-FFBC0EB5562B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F88396A1-6E68-4BE3-8018-FFBC0EB5562B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F88396A1-6E68-4BE3-8018-FFBC0EB5562B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C60C67A5-7074-0837-AD46-F5FA7E54DB88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C60C67A5-7074-0837-AD46-F5FA7E54DB88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C60C67A5-7074-0837-AD46-F5FA7E54DB88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C60C67A5-7074-0837-AD46-F5FA7E54DB88}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2EE4D7B5-7633-F841-91B3-595D77574741}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EE4D7B5-7633-F841-91B3-595D77574741}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EE4D7B5-7633-F841-91B3-595D77574741}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EE4D7B5-7633-F841-91B3-595D77574741}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99EBF04B-9EA7-46EE-A641-C2CF434B5E15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99EBF04B-9EA7-46EE-A641-C2CF434B5E15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99EBF04B-9EA7-46EE-A641-C2CF434B5E15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99EBF04B-9EA7-46EE-A641-C2CF434B5E15}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

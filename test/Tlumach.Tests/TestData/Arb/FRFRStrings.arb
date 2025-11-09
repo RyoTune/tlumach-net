@@ -1,0 +1,8 @@
+// This is a default translation file with French as a default language.
+{
+    "@@locale": "fr-FR",
+    "@@context": "Test fileset",
+    "Hello": "Salut",
+    "Welcome" : "Bienvenue",
+	"Bye" : "Au revoir"
+}

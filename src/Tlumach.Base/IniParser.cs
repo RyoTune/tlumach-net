@@ -22,6 +22,9 @@ using System.Text;
 
 namespace Tlumach.Base
 {
+    /// <summary>
+    /// The parser for simple ini-style translation files.
+    /// </summary>
     public class IniParser : KeyValueTextParser
     {
         protected override char LineCommentChar => ';';
@@ -32,22 +35,30 @@ namespace Tlumach.Base
             FileFormats.RegisterParser(".ini", Factory);
         }
 
+        /// <summary>
+        /// Initializes the parser class, making it available for use.
+        /// </summary>
+        public static void Use() { }
+
         public override bool CanHandleExtension(string fileExtension)
         {
             return ".ini".Equals(fileExtension, StringComparison.OrdinalIgnoreCase);
         }
 
-        protected override bool IsStartOfKey(string content, int pointer) => content[pointer] == '_' || char.IsLetter(content[pointer]);
+        protected override bool IsStartOfKey(string content, int offset) => content is not null && (content[offset] == '_' || char.IsLetter(content[offset]));
 
-        protected override bool IsEndOfKey(string content, int pointer, out int newPosition)
+        protected override bool IsEndOfKey(string content, int offset, out int newPosition)
         {
-            if (char.IsWhiteSpace(content[pointer]) || IsSeparatorChar(content[pointer]))
+            newPosition = offset;
+            if (content is null)
+                return false;
+
+            if (char.IsWhiteSpace(content[offset]) || IsSeparatorChar(content[offset]))
             {
-                newPosition = pointer + 1;
+                newPosition = offset + 1;
                 return true;
             }
 
-            newPosition = pointer;
             return false;
         }
 
@@ -55,14 +66,15 @@ namespace Tlumach.Base
 
         protected override bool IsSeparatorChar(char candidate) => candidate == '=' || candidate == ':';
 
-        protected override bool IsStartOfValue(string content, int pointer) => true; // In ini files, everything is a value (all non-values, such as EOL and space, are handled by TextParser)
+        protected override bool IsStartOfValue(string content, int offset) => true; // In ini files, everything is a value (all non-values, such as EOL and space, are handled by TextParser)
 
         private static BaseFileParser Factory() => new IniParser();
 
-        protected override bool? IsEndOfValue(string content, int pointer, out int newPosition)
+#pragma warning disable CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
+        protected override bool? IsEndOfValue(string content, int offset, out int newPosition)
         {
-            newPosition = pointer;
-            return content[pointer] == '\n';
+            newPosition = offset;
+            return content[offset] == '\n';
         }
 
         protected override (string? escaped, string unescaped) UnwrapValue(string value)
@@ -86,5 +98,6 @@ namespace Tlumach.Base
 
             return (null, value);
         }
+#pragma warning restore CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
     }
 }

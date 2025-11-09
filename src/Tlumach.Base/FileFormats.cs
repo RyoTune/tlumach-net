@@ -32,10 +32,14 @@ namespace Tlumach.Base
         /// <returns>An instance of the found parser or <see langword="null"/> otherwise.</returns>
         public static BaseFileParser? GetConfigParser(string extension)
         {
+            if (string.IsNullOrEmpty(extension))
+                return null;
+#pragma warning disable CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
             if (_configParserFactories.TryGetValue(extension.ToLowerInvariant(), out var parserFunc) && parserFunc is not null)
                 return parserFunc.Invoke();
             else
                 return null;
+#pragma warning restore CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
         }
 
         /// <summary>
@@ -45,33 +49,44 @@ namespace Tlumach.Base
         /// <returns>An instance of the found parser or <see langword="null"/> otherwise.</returns>
         public static BaseFileParser? GetParser(string extension)
         {
+            if (string.IsNullOrEmpty(extension))
+                return null;
+#pragma warning disable CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
             if (_parserFactories.TryGetValue(extension.ToLowerInvariant(), out var parserFunc) && parserFunc is not null)
                 return parserFunc.Invoke();
             else
                 return null;
+#pragma warning restore CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
         }
 
-        /// <summary>
-        /// Returns the list of extensions registered as recognized for translation files.
-        /// </summary>
-        /// <returns>A list of registered extensions, in lowercase.</returns>
+            /// <summary>
+            /// Returns the list of extensions registered as recognized for translation files.
+            /// </summary>
+            /// <returns>A list of registered extensions, in lowercase.</returns>
         public static IList<string> GetSupportedExtensions()
         {
             return _parserFactories.Keys.ToList();
         }
 
+#pragma warning disable CA1864 // To avoid double lookup, call 'TryAdd' instead of calling 'Add' with a 'ContainsKey' guard
         internal static void RegisterConfigParser(string extension, Func<BaseFileParser> factory)
         {
+#pragma warning disable CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
             string extLower = extension.ToLowerInvariant();
             if (!_configParserFactories.ContainsKey(extLower))
                 _configParserFactories.Add(extLower, factory);
+#pragma warning restore CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
         }
 
         internal static void RegisterParser(string extension, Func<BaseFileParser> factory)
         {
+#pragma warning disable CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
             string extLower = extension.ToLowerInvariant();
             if (!_parserFactories.ContainsKey(extLower))
-                _parserFactories.Add(extension.ToLowerInvariant(), factory);
+                _parserFactories.Add(extLower, factory);
+#pragma warning restore CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
+
         }
+#pragma warning restore CA1864 // To avoid double lookup, call 'TryAdd' instead of calling 'Add' with a 'ContainsKey' guard
     }
 }

@@ -20,6 +20,7 @@ using System.Text;
 
 namespace Tlumach.Base
 {
+#pragma warning disable CA1510 // Use 'ArgumentNullException.ThrowIfNull' instead of explicitly throwing a new exception instance
     public abstract partial class BaseFileParser
     {
         public static bool RecognizeFileRefs { get; set; }
@@ -129,7 +130,7 @@ namespace Tlumach.Base
         }
 
         /// <summary>
-        /// Loads the keys from the default translation file and builds a tree of keys.
+        /// Parses the specified configuration file, then loads the keys from the specified default translation file and builds a tree of keys.
         /// </summary>
         /// <param name="fileName">the configuration file to read.</param>
         /// <param name="configuration">the loaded configuration or <see langword="null"/> if the method does not succeed.</param>
@@ -138,6 +139,9 @@ namespace Tlumach.Base
         /// <exception cref="TextFileParseException">Gets thrown when parsing of a default translation file fails.</exception>
         public TranslationTree? LoadTranslationStructure(string fileName, out TranslationConfiguration? configuration)
         {
+            if (fileName is null)
+                throw new ArgumentNullException(nameof(fileName));
+
             // First, load the configuration
             string? configContent;
             try
@@ -149,18 +153,24 @@ namespace Tlumach.Base
                 throw new ParserLoadException(fileName, $"Loading of the configuration file '{fileName}' has failed", ex);
             }
 
+            // parse the configuration
             try
             {
                 configuration = ParseConfiguration(configContent);
             }
             catch (GenericParserException ex)
             {
-                throw new ParserFileException(fileName, $"Parsing of the configuration file '{fileName}' has failed with an error: {ex.Message}", ex.InnerException);
+                if (ex.InnerException is not null)
+                    throw new ParserFileException(fileName, $"Parsing of the configuration file '{fileName}' has failed with an error: {ex.Message}", ex.InnerException);
+                else
+                    throw new ParserFileException(fileName, $"Parsing of the configuration file '{fileName}' has failed with an error: {ex.Message}");
             }
 
+            // check if configuration was loaded
             if (configuration is null)
                 return null;
 
+            // check if the configuration contains a reference to the default file
             if (string.IsNullOrEmpty(configuration.DefaultFile))
                 throw new ParserConfigException($"Configuration file '{fileName}' does not contain a reference to a default translation file. The reference must be specified as a '{TranslationConfiguration.KEY_DEFAULT_FILE}' setting.");
 
@@ -168,11 +178,14 @@ namespace Tlumach.Base
             string defaultFile = configuration.DefaultFile;
             if (!Path.IsPathRooted(defaultFile))
             {
-                defaultFile = Path.Combine(Path.GetDirectoryName(fileName), defaultFile);
+                string? dir = Path.GetDirectoryName(fileName);
+                if (!string.IsNullOrEmpty(dir))
+                    defaultFile = Path.Combine(dir, defaultFile);
             }
 
-            string fileExt = Path.GetFileNameWithoutExtension(defaultFile)?.ToLowerInvariant() ?? string.Empty;
-
+#pragma warning disable CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
+            string fileExt = Path.GetExtension(defaultFile)?.ToLowerInvariant() ?? string.Empty;
+#pragma warning restore CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
             BaseFileParser? parser;
             if (CanHandleExtension(fileExt))
                 parser = this;
@@ -180,7 +193,7 @@ namespace Tlumach.Base
                 parser = FileFormats.GetParser(fileExt);
 
             if (parser is null)
-                throw new ParserLoadException(fileName, $"No parser found for the {fileExt} file extension that the default translation file '{defaultFile}' has");
+                throw new ParserLoadException(fileName, $"No parser found for the '{fileExt}' file extension that the default translation file '{defaultFile}' has");
 
             // Read the default translation file
             string? defaultContent;
@@ -203,7 +216,10 @@ namespace Tlumach.Base
             }
             catch (TextParseException ex)
             {
-                throw new TextFileParseException(defaultFile, ex.Message, ex.StartPosition, ex.EndPosition, ex.LineNumber, ex.ColumnNumber, ex.InnerException);
+                if (ex.InnerException is not null)
+                    throw new TextFileParseException(defaultFile, ex.Message, ex.StartPosition, ex.EndPosition, ex.LineNumber, ex.ColumnNumber, ex.InnerException);
+                else
+                    throw new TextFileParseException(defaultFile, ex.Message, ex.StartPosition, ex.EndPosition, ex.LineNumber, ex.ColumnNumber);
             }
         }
 
@@ -214,6 +230,31 @@ namespace Tlumach.Base
         /// <param name="fileExtension">the extension to check.</param>
         /// <returns><see langword="true"/> if the extension is supported and <see langword="false"/> otherwise.</returns>
         public abstract bool CanHandleExtension(string fileExtension);
+
+        /*/// <summary>
+        /// Checks whether the specified file is a configuration file of the given format.
+        /// </summary>
+        /// <param name="fileContent">the content of the file.</param>
+        /// <param name="configuration">the loaded configuration.</param>
+        /// <returns><see langword="true"/> if the config file is recognized and <see langword="false"/> otherwise</returns>
+        public abstract bool IsValidConfigFile(string fileContent, out TranslationConfiguration? configuration);
+*/
+
+        /// <summary>
+        /// Loads configuration from the file.
+        /// </summary>
+        /// <param name="filename">the name of the file to load the configuration from.</param>
+        /// <returns>the loaded configuration or <see langword="null"/> if loading failed.</returns>
+        public TranslationConfiguration? ParseConfigurationFile(string filename)
+        {
+            if (filename is null)
+                throw new ArgumentNullException(nameof(filename));
+
+            string? fileContent = Utils.ReadFileFromDisk(filename.Trim());
+            if (fileContent is null)
+                return null;
+            return ParseConfiguration(fileContent);
+        }
 
         /*/// <summary>
         /// Checks whether the specified file is a configuration file of the given format.
@@ -255,6 +296,8 @@ namespace Tlumach.Base
         /// <returns><see langword="true"/> if the text is a reference and <see langword="false"/> otherwise.</returns>
         internal virtual bool IsReference(string text) => RecognizeFileRefs && text.Length > 0 && text[0] == '@';
 
+#pragma warning disable CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
+
         protected static int GetAbsolutePosition(string text, int lineNumber, int linePosition)
         {
             // LineNumber and LinePosition are 1-based
@@ -274,5 +317,6 @@ namespace Tlumach.Base
             // Add position within the target line (minus 1 because LinePosition is 1-based)
             return index + (linePosition - 1);
         }
+#pragma warning restore CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
     }
 }

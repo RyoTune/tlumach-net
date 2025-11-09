@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Tlumach.Reactive\Tlumach.Reactive.csproj" />
     <ProjectReference Include="..\Tlumach\Tlumach.csproj" />
   </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="11.*" />
+        <PackageReference Include="System.Reactive" Version="6.*" />
     </ItemGroup>
 
     <ItemGroup>

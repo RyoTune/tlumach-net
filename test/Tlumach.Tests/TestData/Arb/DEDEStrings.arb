@@ -1,0 +1,8 @@
+// This is a default translation file with Deutsch as a default language.
+{
+    "@@locale": "de-DE",
+    "@@context": "Test fileset",
+    "Hello": "Hallo",
+    "Welcome" : "Willkommen",
+	"Bye" : "Tschüss"
+}

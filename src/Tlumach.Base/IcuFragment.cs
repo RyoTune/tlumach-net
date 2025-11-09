@@ -23,6 +23,9 @@ using System.Text;
 
 namespace Tlumach.Base
 {
+    /// <summary>
+    /// The parser to handle ICU-compatible placeholders in templated strings.
+    /// </summary>
     internal static class IcuFragment
     {
         /// <summary>
@@ -60,8 +63,6 @@ namespace Tlumach.Base
         /// <exception cref="TemplateParserException">thrown if an error or an unsupported ICU feature is detected.</exception>
         internal static string? EvaluateNoName(string content, object value, Func<string, int, object?> getParamValueFunc, CultureInfo? culture = null, Func<decimal, CultureInfo?, string>? pluralCategory = null)
         {
-            string? result; // null will indicate failure
-
             culture ??= CultureInfo.InvariantCulture;
             pluralCategory ??= SimplePluralCategory; // swap with a CLDR-aware resolver later
 
@@ -75,9 +76,11 @@ namespace Tlumach.Base
             if (!reader.TryReadChar(',')) // Not ICU pattern; treat as simple`
                 return null;
 
+#pragma warning disable CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
             reader.SkipWs();
             var kind = reader.ReadIdentifier(out _).ToLowerInvariant();
             reader.SkipWs();
+#pragma warning restore CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
 
             if (!reader.TryReadChar(','))
                 throw new TemplateParserException("ICU fragment: expected second comma");
@@ -151,14 +154,16 @@ namespace Tlumach.Base
             }
         }
 
-        private static string RenderPluralText(string template, decimal n, int offset,
-            object? value, Func<string, int, object?> getParamValueFunc, CultureInfo culture)
+#pragma warning disable CA1307 // '...' has a method overload that takes a 'StringComparison' parameter. Replace this call ... for clarity of intent.
+        private static string RenderPluralText(string template, decimal n, int offset, object? value, Func<string, int, object?> getParamValueFunc, CultureInfo culture)
         {
             // Replace '#' with (n - offset) using culture
             var number = n - offset;
             var replaced = template.Replace("#", number.ToString(culture));
+
             return RenderText(replaced, getParamValueFunc);
         }
+#pragma warning restore CA1307 // '...' has a method overload that takes a 'StringComparison' parameter. Replace this call ... for clarity of intent.
 
         // Very small {name} expander for nested simple placeholders inside branch text.
         // Escaping/advanced ICU nesting is intentionally out of scope for this subset.
@@ -229,7 +234,7 @@ namespace Tlumach.Base
                 reader.SkipWs();
                 if (reader.Peek() == '}')
                 {
-                    reader.ReadChar();
+                    reader.SkipChar();
                     break;
                 }
 
@@ -267,12 +272,13 @@ namespace Tlumach.Base
             }
         }
 
-        private static string SimplePluralCategory(decimal num, CultureInfo? _)
+        private static string SimplePluralCategory(decimal num, CultureInfo? culture)
         {
             return num switch
             {
                 0 => "zero",
                 1 => "one",
+                2 => "two",
                 _ => "other",
             };
         }
@@ -298,29 +304,40 @@ namespace Tlumach.Base
         {
             private readonly string _sourceText;
 
-            private int _pointer;
+            private int _offset;
 
             public Reader(string sourceText)
             {
                 _sourceText = sourceText;
-                _pointer = 0;
+                _offset = 0;
             }
 
-            public char Peek() => _pointer < _sourceText.Length ? _sourceText[_pointer] : '\0';
+            public char Peek() => _offset < _sourceText.Length ? _sourceText[_offset] : '\0';
 
-            public char ReadChar() => _pointer < _sourceText.Length ? _sourceText[_pointer++] : '\0';
+            public bool SkipChar()
+            {
+                if (_offset < _sourceText.Length)
+                {
+                    _offset++;
+                    return true;
+                }
+
+                return false;
+            }
+
+            public char ReadChar() => _offset < _sourceText.Length ? _sourceText[_offset++] : '\0';
 
             public void SkipWs()
             {
-                while (_pointer < _sourceText.Length && char.IsWhiteSpace(_sourceText[_pointer]))
-                    _pointer++;
+                while (_offset < _sourceText.Length && char.IsWhiteSpace(_sourceText[_offset]))
+                    _offset++;
             }
 
             public bool TryReadChar(char c)
             {
                 if (Peek() == c)
                 {
-                    _pointer++;
+                    _offset++;
                     return true;
                 }
 
@@ -330,40 +347,41 @@ namespace Tlumach.Base
             public string ReadIdentifier(out bool simpleIdentifier)
             {
                 SkipWs();
-                int start = _pointer;
+                int start = _offset;
 
-                if (_pointer >= _sourceText.Length || !(char.IsLetter(_sourceText[_pointer]) || _sourceText[_pointer] == '_'))
-                    throw new TemplateParserException("Expected identifier");
+                if (_offset >= _sourceText.Length || !(char.IsLetter(_sourceText[_offset]) || _sourceText[_offset] == '_'))
+                    throw new TemplateParserException("Could not find an expected identifier");
 
-                _pointer++;
+                _offset++;
 
-                while (_pointer < _sourceText.Length && (char.IsLetterOrDigit(_sourceText[_pointer]) || _sourceText[_pointer] == '_'))
-                    _pointer++;
-                simpleIdentifier = _pointer == _sourceText.Length;
+                while (_offset < _sourceText.Length && (char.IsLetterOrDigit(_sourceText[_offset]) || _sourceText[_offset] == '_'))
+                    _offset++;
 
-                return _sourceText.Substring(start, _pointer - start);
+                simpleIdentifier = _offset == _sourceText.Length;
+
+                return _sourceText.Substring(start, _offset - start);
             }
 
             public string ReadNumberToken()
             {
                 SkipWs();
-                int start = _pointer;
+                int start = _offset;
 
-                if (_pointer < _sourceText.Length && (_sourceText[_pointer] == '+' || _sourceText[_pointer] == '-'))
-                    _pointer++;
+                if (_offset < _sourceText.Length && (_sourceText[_offset] == '+' || _sourceText[_offset] == '-'))
+                    _offset++;
 
                 bool any = false;
 
-                while (_pointer < _sourceText.Length && char.IsDigit(_sourceText[_pointer]))
+                while (_offset < _sourceText.Length && char.IsDigit(_sourceText[_offset]))
                 {
-                    _pointer++;
+                    _offset++;
                     any = true;
                 }
 
                 if (!any)
-                    throw new TemplateParserException("Expected number");
+                    throw new TemplateParserException("Could not find an expected number");
 
-                return _sourceText.Substring(start, _pointer - start);
+                return _sourceText.Substring(start, _offset - start);
             }
 
             public string ReadOptionKey()
@@ -371,39 +389,43 @@ namespace Tlumach.Base
                 SkipWs();
                 if (Peek() == '=')
                 {
-                    ReadChar();
+                    if (!SkipChar())
+                        throw new TemplateParserException("Unexpected end of expression");
 
                     var num = ReadNumberToken();
                     return "=" + num;
                 }
-
+#pragma warning disable CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
                 return ReadIdentifier(out _).ToLowerInvariant();
+#pragma warning restore CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
             }
 
             public string ReadBracedText()
             {
                 SkipWs();
+
                 if (!TryReadChar('{'))
-                    throw new TemplateParserException("Expected '{' starting branch text");
+                    throw new TemplateParserException("Could not find an expected '{' starting branch text");
 
                 int depth = 1;
-                int start = _pointer;
+                int start = _offset;
 
-                while (_pointer < _sourceText.Length && depth > 0)
+                while (_offset < _sourceText.Length && depth > 0)
                 {
-                    if (_sourceText[_pointer] == '{')
+                    if (_sourceText[_offset] == '{')
                         depth++;
                     else
-                    if (_sourceText[_pointer] == '}')
+                    if (_sourceText[_offset] == '}')
                         depth--;
-                    _pointer++;
+
+                    _offset++;
                 }
 
                 if (depth != 0)
                     throw new TemplateParserException("Unbalanced braces in branch text");
 
                 // remove outer braces
-                return _sourceText.Substring(start, (_pointer - 1) - start);
+                return _sourceText.Substring(start, (_offset - 1) - start);
             }
         }
     }

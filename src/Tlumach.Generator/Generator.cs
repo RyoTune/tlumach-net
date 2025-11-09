@@ -22,31 +22,31 @@ using Tlumach.Base;
 
 namespace Tlumach.Generator
 {
-    internal static class Diags
-    {
-        internal static readonly DiagnosticDescriptor TlumachGenError = new(
-            id: "TLUMACHGEN001",
-            title: "Tlumach generator failed",
-            messageFormat: "Failed while processing {0}: {1}",
-            category: "TlumachGenerator",
-            defaultSeverity: DiagnosticSeverity.Error,
-            isEnabledByDefault: true);
-
-        internal static readonly DiagnosticDescriptor TlumachGenInfo = new(
-            id: "TLUMACHGEN100",
-            title: "Tlumach generator info",
-            messageFormat: "{0}",
-            category: "TlumachGenerator",
-            defaultSeverity: DiagnosticSeverity.Info,
-            isEnabledByDefault: true);
-    }
-
     /// <summary>
     /// Generates source code files with translation units from all configuration files found in the project.
     /// </summary>
     [Generator]
     public class Generator : BaseGenerator, IIncrementalGenerator
     {
+        internal static class Diags
+        {
+            internal static readonly DiagnosticDescriptor TlumachGenError = new(
+                id: "TLUMACHGEN001",
+                title: "Tlumach generator failed",
+                messageFormat: "Failed while processing {0}: {1}",
+                category: "TlumachGenerator",
+                defaultSeverity: DiagnosticSeverity.Error,
+                isEnabledByDefault: true);
+
+            internal static readonly DiagnosticDescriptor TlumachGenInfo = new(
+                id: "TLUMACHGEN100",
+                title: "Tlumach generator info",
+                messageFormat: "{0}",
+                category: "TlumachGenerator",
+                defaultSeverity: DiagnosticSeverity.Info,
+                isEnabledByDefault: true);
+        }
+
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             IncrementalValueProvider<string> generatedUsingNamespaceProvider = context.AnalyzerConfigOptionsProvider
@@ -70,7 +70,7 @@ namespace Tlumach.Generator
 
             var combinedProvider = translationFiles.Combine(projectDirProvider).Combine(generatedUsingNamespaceProvider);
 
-            context.RegisterSourceOutput(combinedProvider, (spc, source) =>
+            context.RegisterSourceOutput(combinedProvider, static (spc, source) =>
             {
                 AdditionalText text = source.Left.Left;
                 string projectDir = source.Left.Right;
@@ -142,7 +142,7 @@ namespace Tlumach.Generator
             return parser is not null;
         }
 
-        protected string? GenerateClass(AdditionalText configFile, string projectDir, string usingNamespace)
+        protected static string? GenerateClass(AdditionalText configFile, string projectDir, string usingNamespace)
         {
             return GenerateClass(configFile.Path, projectDir, usingNamespace);
         }

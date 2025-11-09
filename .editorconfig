@@ -29,14 +29,18 @@ dotnet_diagnostic.RCS1194.severity = none
 # Disable the "Use string interpolation instead of 'string.Concat'" suggestion as Concat should be generally faster.
 dotnet_diagnostic.RCS1267.severity = none
 
+dotnet_diagnostic.S125.severity = suggestion # Remove this commented out code.
+
 # Disable the "Use StringBuilder" suggestion - StringBuilder is generally slow than a couple of concatenations (in modern .NET, the + operation for strings is implemented via a call to string.Concat)
 dotnet_diagnostic.S1643.severity = none
+
+dotnet_diagnostic.S3973.severity = none # Use curly braces or indentation to denote the code conditionally executed by this 'else'
 
 dotnet_diagnostic.SA0001.severity = warning
 
 dotnet_diagnostic.SA0002.severity = warning
 
-dotnet_diagnostic.SA1000.severity = warning
+dotnet_diagnostic.SA1000.severity = none
 
 dotnet_diagnostic.SA1001.severity = warning
 
@@ -56,7 +60,7 @@ dotnet_diagnostic.SA1008.severity = warning
 
 dotnet_diagnostic.SA1009.severity = warning
 
-dotnet_diagnostic.SA1010.severity = warning
+dotnet_diagnostic.SA1010.severity = suggestion # Opening square brackets should not be preceded by a space.
 
 dotnet_diagnostic.SA1011.severity = warning
 
@@ -288,7 +292,7 @@ dotnet_diagnostic.SA1510.severity = warning
 
 dotnet_diagnostic.SA1511.severity = warning
 
-dotnet_diagnostic.SA1512.severity = warning
+dotnet_diagnostic.SA1512.severity = suggestion
 
 dotnet_diagnostic.SA1513.severity = warning
 

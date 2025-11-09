@@ -1,4 +1,4 @@
-﻿// <copyright file="Translate.cs" company="Allied Bits Ltd.">
+// <copyright file="Translate.cs" company="Allied Bits Ltd.">
 //
 // Copyright 2025 Allied Bits Ltd.
 //
@@ -18,8 +18,51 @@
 
 using System.Runtime.CompilerServices;
 
+using Tlumach;
+
 namespace Tlumach.MAUI
 {
+    using System;
+
+    using Microsoft.Maui.Controls;
+    
+    [ContentProperty(nameof(Unit))]
+    [AcceptEmptyServiceProvider]
+    public sealed class Translate : BindableObject, IMarkupExtension<BindingBase>
+    {
+        private readonly XamlTranslateCore _core =
+            new XamlTranslateCore(a => MainThread.BeginInvokeOnMainThread(a));
+
+        // Bindable Unit so XAML can do: Unit="{Binding MyTranslationUnit}"
+        public static readonly BindableProperty UnitProperty =
+            BindableProperty.Create(
+                nameof(Unit),
+                typeof(TranslationUnit),
+                typeof(Translate),
+                defaultValue: null,
+                propertyChanged: OnUnitChanged);
+
+        public TranslationUnit? Unit
+        {
+            get => (TranslationUnit?)GetValue(UnitProperty);
+            set => SetValue(UnitProperty, value);
+        }
+
+        private static void OnUnitChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            var ext = (Translate)bindable;
+            ext._core.Unit = (TranslationUnit?)newValue;
+        }
+
+        public BindingBase ProvideValue(IServiceProvider serviceProvider)
+            => new Binding(nameof(XamlTranslateCore.Value), source: _core, mode: BindingMode.OneWay);
+
+        object IMarkupExtension.ProvideValue(IServiceProvider serviceProvider)
+            => ProvideValue(serviceProvider);
+    }
+
+    /*
+
     [ContentProperty(nameof(Unit))]
     [AcceptEmptyServiceProvider]
     public sealed class Translate : BindableObject, IMarkupExtension<BindingBase>
@@ -103,4 +146,5 @@ namespace Tlumach.MAUI
             });
         }
     }
+    */
 }

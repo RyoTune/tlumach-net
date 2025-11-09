@@ -22,6 +22,8 @@ using System.Xml.XPath;
 
 namespace Tlumach.Base
 {
+#pragma warning disable CA1510 // Use 'ArgumentNullException.ThrowIfNull' instead of explicitly throwing a new exception instance
+
     /// <summary>
     /// <para>
     /// Represents an entry in the translation file.
@@ -35,12 +37,17 @@ namespace Tlumach.Base
     /// </summary>
     public class TranslationEntry
     {
-        private bool _locked = false;
-        private string? _text = null;
-        private string? _escapedText = null;
-        private string? _reference = null;
+        private bool _locked;
+        private string? _text;
+        private string? _escapedText;
+        private string? _reference;
 
         public static TranslationEntry Empty { get; }
+
+        /// <summary>
+        /// Gets the original key of the entry.
+        /// </summary>
+        public string Key { get; }
 
         /// <summary>
         /// Gets or sets a localized text. This text has been un-escaped (if needed) during loading from the translation file.
@@ -71,7 +78,7 @@ namespace Tlumach.Base
         /// <summary>
         /// Indicates that the text is a template. When it is, use the <see cref="ProcessTemplatedValue"/> method to format the template.
         /// </summary>
-        public bool IsTemplated { get; set; } = false;
+        public bool IsTemplated { get; set; }
 
         /// <summary>
         /// Gets or sets an optional reference to an external file with the translation value.
@@ -147,8 +154,9 @@ namespace Tlumach.Base
         /// <param name="text">an optional localized text of the translation entry that has been un-escaped if necessary.</param>
         /// <param name="escapedText">an optional localized text of the translation entry that has not been un-escaped.</param>
         /// <param name="reference">an optional reference to an external file with the text.</param>
-        public TranslationEntry(string? text, string? escapedText = null, string? reference = null)
+        public TranslationEntry(string key, string? text, string? escapedText = null, string? reference = null)
         {
+            Key = key;
             Text = text;
             EscapedText = escapedText;
             Reference = reference;
@@ -166,7 +174,11 @@ namespace Tlumach.Base
                 return Text ?? string.Empty;
             else
             if (templateEscapeMode == TemplateStringEscaping.DotNet) // with .NET, we simply use the .NET formatter
-                return string.Format(Text, parameters);
+            {
+                return string.IsNullOrEmpty(Text)
+                    ? string.Empty
+                    : string.Format(Text, parameters);
+            }
             else
             {
                 // In the case of Arb format, we need to pick parameters by index
@@ -340,7 +352,7 @@ namespace Tlumach.Base
                                         try
                                         {
                                             charCode = int.Parse(hex, System.Globalization.NumberStyles.HexNumber);
-                                            builder.Append((char) charCode);
+                                            builder.Append((char)charCode);
                                         }
                                         catch (FormatException)
                                         {
@@ -613,13 +625,16 @@ namespace Tlumach.Base
                         else
                         if (placeholderType.Equals("DateTime", StringComparison.OrdinalIgnoreCase))
                         {
-                            if (value is not DateTime
 #if NET9_0_OR_GREATER
-                                && (value is not DateOnly) && (value is not TimeOnly)
+                            if (value is not DateTime && (value is not DateOnly) && (value is not TimeOnly))
+                            {
+#else
+                            if (value is not DateTime)
+                            {
 #endif
-                                )
                                 //throw new TemplateParserException($"The placeholder '{placeholderName}' was declared as DateTime, but a value of type {value.GetType().Name} was provided for use by the formatter");
                                 placeholderType = "String";
+                            }
                         }
                     }
                 }

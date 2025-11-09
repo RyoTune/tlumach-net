@@ -65,11 +65,13 @@ namespace Tlumach.Base
         {
         }
 
-        public GenericParserException(string message) : base(message)
+        public GenericParserException(string message)
+            : base(message)
         {
         }
 
-        public GenericParserException(string message, Exception innerException) : base(message, innerException)
+        public GenericParserException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
     }

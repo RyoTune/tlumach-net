@@ -21,6 +21,8 @@ using Newtonsoft.Json.Linq;
 
 namespace Tlumach.Base
 {
+#pragma warning disable CA1510 // Use 'ArgumentNullException.ThrowIfNull' instead of explicitly throwing a new exception instance
+
     public class ArbPlaceholder : Placeholder
     {
         public ArbPlaceholder(string name)
@@ -75,6 +77,11 @@ namespace Tlumach.Base
             FileFormats.RegisterConfigParser(".arbcfg", Factory);
             FileFormats.RegisterParser(".arb", Factory);
         }
+
+        /// <summary>
+        /// Initializes the parser class, making it available for use.
+        /// </summary>
+        public static void Use() { }
 
         protected override TemplateStringEscaping GetTemplateEscapeMode()
         {
@@ -175,8 +182,10 @@ namespace Tlumach.Base
                     translation.CustomProperties.Add(key.Substring(4), value);
                     continue;
                 }
-
+#pragma warning disable CA1307 // '...' has a method overload that takes a 'StringComparison' parameter. Replace this call ... for clarity of intent.
                 int atIdx = key.IndexOf('@');
+#pragma warning restore CA1307 // '...' has a method overload that takes a 'StringComparison' parameter. Replace this call ... for clarity of intent.
+
                 if (atIdx == 0)
                     continue;
                 else
@@ -210,8 +219,8 @@ namespace Tlumach.Base
                 else
                 {
                     // ... or add a new one
-                    entry = new(value, escapedText: null, reference: null);
-                    translation.Add(key, entry);
+                    entry = new(key, value, escapedText: null, reference: null);
+                    translation.Add(key.ToUpperInvariant(), entry);
                 }
 
                 if (value is not null)
@@ -248,7 +257,7 @@ namespace Tlumach.Base
 
                     // Locate an entry, to which the properties belong. If the entry is not found, add one.
                     if (!translation.TryGetValue(key, out entry))
-                        entry = new TranslationEntry(text: null, reference: null);
+                        entry = new TranslationEntry(key, text: null, reference: null);
 
                     foreach (var childProp in jsonChild.Properties())
                     {

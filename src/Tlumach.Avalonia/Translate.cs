@@ -19,15 +19,13 @@
 using Avalonia;
 using Avalonia.Markup.Xaml;
 
-using Tlumach.Reactive;
-
 namespace Tlumach.Avalonia
 {
     public sealed class Translate : MarkupExtension
     {
-        private readonly Tlumach.Reactive.TranslationUnit _translationUnit;
+        private readonly Tlumach.Avalonia.TranslationUnit _translationUnit;
 
-        public Translate(Tlumach.Reactive.TranslationUnit translationUnit)
+        public Translate(Tlumach.Avalonia.TranslationUnit translationUnit)
         {
             _translationUnit = translationUnit ?? throw new ArgumentNullException(nameof(translationUnit));
         }

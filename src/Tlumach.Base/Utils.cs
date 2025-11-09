@@ -22,6 +22,9 @@ using System.Text;
 
 namespace Tlumach.Base
 {
+#pragma warning disable CA1510 // Use 'ArgumentNullException.ThrowIfNull' instead of explicitly throwing a new exception instance
+#pragma warning disable CA1305 // The behavior of '...' could vary based on the current user's locale settings. Replace this call ...
+
     /// <summary>
     /// Contains helper functions, usable across the library.
     /// </summary>
@@ -67,10 +70,12 @@ namespace Tlumach.Base
                     return null;
                 return reader.ReadToEnd();
             }
-            catch
+#pragma warning disable CA1031 // Modify '...' to catch a more specific allowed exception type, or rethrow the exception
+            catch (Exception)
             {
                 return null;
             }
+#pragma warning restore CA1031 // Modify '...' to catch a more specific allowed exception type, or rethrow the exception
         }
 
         public static DateTime ParseDate(string date, string format)
@@ -85,10 +90,12 @@ namespace Tlumach.Base
                 else
                     return DateTime.MinValue;
             }
+#pragma warning disable CA1031 // Modify '...' to catch a more specific allowed exception type, or rethrow the exception
             catch (Exception)
             {
                 return DateTime.MinValue;
             }
+#pragma warning restore CA1031 // Modify '...' to catch a more specific allowed exception type, or rethrow the exception
         }
 
         public static DateTime? ParseDateISO8601(string? date)
@@ -114,6 +121,9 @@ namespace Tlumach.Base
         /// <returns>a decoded string.</returns>
         public static string UnescapeString(string value)
         {
+            if (string.IsNullOrEmpty(value))
+                return string.Empty;
+
             StringBuilder builder = new(value.Length);
 
             int charCode;
@@ -190,6 +200,7 @@ namespace Tlumach.Base
             return builder.ToString();
         }
 
+#pragma warning disable CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
         /// <summary>
         /// Extracts the number from a string when the string starts with a positive decimal number.
         /// </summary>
@@ -210,6 +221,7 @@ namespace Tlumach.Base
             charsUsed = 0;
             return -1;
         }
+#pragma warning restore CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
 
         /// <summary>
         /// Checks if the argument is of a numeric type.
@@ -405,7 +417,10 @@ namespace Tlumach.Base
 
             // Culture helpers
             var dfi = culture.DateTimeFormat;
+#pragma warning disable CA1307 // '...' has a method overload that takes a 'StringComparison' parameter. Replace this call ... for clarity of intent.
             bool hasAmPm = dfi.ShortTimePattern.Contains('t'); // if "tt" appears, it's 12-hour
+#pragma warning restore CA1307 // '...' has a method overload that takes a 'StringComparison' parameter. Replace this call ... for clarity of intent.
+
             string JHour(string one = "h", string twentyFour = "H") => hasAmPm ? one : twentyFour;
             string JAmPm() => hasAmPm ? " tt" : string.Empty;
 
@@ -425,12 +440,15 @@ namespace Tlumach.Base
 
                         // also trim one separator on either side if duplicated
                         // (lightweight heuristic – keeps most cultures tidy)
+#pragma warning disable CA1307 // '...' has a method overload that takes a 'StringComparison' parameter. Replace this call ... for clarity of intent.
                         while (sb.Length > 0 && " ./-,".Contains(sb[sb.Length - 1]))
                             sb.Length--;
 
                         // skip one separator on the right
                         if (i < chars.Length && " ./-,".Contains(chars[i]))
                             i++;
+#pragma warning restore CA1307 // '...' has a method overload that takes a 'StringComparison' parameter. Replace this call ... for clarity of intent.
+
                     }
                     else
                     {
@@ -643,7 +661,7 @@ namespace Tlumach.Base
                 .Replace("0.###E0", "E3")
                 .Replace("¤", "C")
                 .Replace("%", "P");
-#pragma warning restore CA1307
+#pragma warning restore CA1307 // Specify StringComparison for clarity
 #pragma warning restore SA1025 // Code should not contain multiple whitespace in a row
         }
 
@@ -763,4 +781,5 @@ namespace Tlumach.Base
             }
         }
     }
+#pragma warning restore CA1305 // The behavior of '...' could vary based on the current user's locale settings. Replace this call ...
 }
