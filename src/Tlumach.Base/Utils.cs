@@ -783,7 +783,7 @@ namespace Tlumach.Base
 
         public static bool IsIdentifier(string? value)
         {
-            if (string.IsNullOrWhiteSpace(value))
+            if (value is null || value.Length == 0)
                 return false;
 
             if (!(char.IsLetter(value[0]) || value[0] == '_'))
@@ -792,6 +792,23 @@ namespace Tlumach.Base
             for (int i = 1; i < value.Length; i++)
             {
                 if (!(char.IsLetterOrDigit(value[i]) || value[i] == '_'))
+                    return false;
+            }
+
+            return true;
+        }
+
+        public static bool IsIdentifierWithDots(string? value)
+        {
+            if (value is null || value.Length == 0)
+                return false;
+
+            if (!(char.IsLetter(value[0]) || value[0] == '_'))
+                return false;
+
+            for (int i = 1; i < value.Length; i++)
+            {
+                if (!(char.IsLetterOrDigit(value[i]) || value[i] == '_' || (value[i] == '.' && i < value.Length - 1)))
                     return false;
             }
 

@@ -6,9 +6,9 @@
 
 [![NuGet](https://img.shields.io/nuget/v/AlliedBits.Tlumach.svg)](https://www.nuget.org/packages/AlliedBits.Tlumach) [![downloads](https://img.shields.io/nuget/dt/AlliedBits.Tlumach)](https://www.nuget.org/packages/AlliedBits.Tlumach)
 
-Tlumach.NET is a flexible library that provides translation and localization support to all kinds of .NET applications, from WinForms and console ones to Razor and Blazor, XAML, MAUI, and Avalonia.
+Tlumach.NET is a flexible library that provides translation and localization support to all kinds of .NET applications: from desktop WinForms, WPF, WinUI, and console to mobile MAUI and Avalonia to server Razor and Blazor.
 
-The goal of the library is to support different formats of translation files and to support different languages and locales concurrently (within even one thread).
+The goal of the library is to support different formats of translation files and to support different languages and locales concurrently (even within one thread).
 
 ## Features
 

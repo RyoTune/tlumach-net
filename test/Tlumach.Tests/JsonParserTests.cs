@@ -64,7 +64,7 @@ namespace Tlumach.Tests
             JsonParser? parser = FileFormats.GetParser(".json") as JsonParser;
             Assert.NotNull(parser);
             TranslationConfiguration? config;
-            TranslationTree? tree = parser.LoadTranslationStructure(Path.Combine(TestFilesPath, "ValidConfig.jsoncfg"), out config);
+            TranslationTree? tree = parser.LoadTranslationStructure(Path.Combine(TestFilesPath, "ValidConfig.jsoncfg"), TestFilesPath, out config);
             Assert.NotNull(tree);
             Assert.NotNull(config);
             Assert.Equal("Strings.json", config.DefaultFile);
@@ -78,7 +78,7 @@ namespace Tlumach.Tests
             JsonParser? parser = FileFormats.GetParser(".json") as JsonParser;
             Assert.NotNull(parser);
             TranslationConfiguration? config;
-            TranslationTree? tree = parser.LoadTranslationStructure(Path.Combine(TestFilesPath, "ValidConfigWithGroups.jsoncfg"), out config);
+            TranslationTree? tree = parser.LoadTranslationStructure(Path.Combine(TestFilesPath, "ValidConfigWithGroups.jsoncfg"), TestFilesPath, out config);
             Assert.NotNull(tree);
             Assert.NotNull(config);
             Assert.Equal("StringsWithGroups.json", config.DefaultFile);
@@ -97,7 +97,7 @@ namespace Tlumach.Tests
             JsonParser? parser = FileFormats.GetParser(".json") as JsonParser;
             Assert.NotNull(parser);
             TranslationConfiguration? config;
-            Assert.Throws<ParserLoadException>(() => parser.LoadTranslationStructure(Path.Combine(TestFilesPath, "ValidConfigUnknownExt.jsoncfg"), out config));
+            Assert.Throws<ParserLoadException>(() => parser.LoadTranslationStructure(Path.Combine(TestFilesPath, "ValidConfigUnknownExt.jsoncfg"), TestFilesPath, out config));
         }
 
         [Fact]

@@ -134,14 +134,23 @@ namespace Tlumach.Base
         /// Parses the specified configuration file, then loads the keys from the specified default translation file and builds a tree of keys.
         /// </summary>
         /// <param name="configFile">the configuration file to read.</param>
+        /// <param name="baseDirectory">an optional directory to language files if <seealso cref="configFile"/> does not contain a directory.</param>
         /// <param name="configuration">the loaded configuration or <see langword="null"/> if the method does not succeed.</param>
         /// <returns>The constructed <seealso cref="TranslationTree"/> upon success or <see langword="null"/> otherwise.</returns>
         /// <exception cref="ParserLoadException">Gets thrown when loading of a configuration file or a default translation file fails.</exception>
         /// <exception cref="TextFileParseException">Gets thrown when parsing of a default translation file fails.</exception>
-        public TranslationTree? LoadTranslationStructure(string configFile, out TranslationConfiguration? configuration)
+        public TranslationTree? LoadTranslationStructure(string configFile, string? baseDirectory, out TranslationConfiguration? configuration)
         {
             if (configFile is null)
                 throw new ArgumentNullException(nameof(configFile));
+
+            if (!Path.IsPathRooted(configFile))
+            {
+                string? dir = baseDirectory;
+
+                if (!string.IsNullOrEmpty(dir))
+                    configFile = Path.Combine(dir, configFile);
+            }
 
             // First, load the configuration
             string? configContent;
@@ -168,16 +177,19 @@ namespace Tlumach.Base
             catch (GenericParserException ex)
             {
                 if (ex.InnerException is not null)
-                    throw new ParserFileException(configFile, $"Parsing of the configuration file '{configFile}' has failed with an error: {ex.Message}", ex.InnerException);
+                    throw new ParserConfigException(configFile, $"Parsing of the configuration file '{configFile}' has failed with an error: {ex.Message}", ex.InnerException);
                 else
-                    throw new ParserFileException(configFile, $"Parsing of the configuration file '{configFile}' has failed with an error: {ex.Message}");
+                    throw new ParserConfigException(configFile, $"Parsing of the configuration file '{configFile}' has failed with an error: {ex.Message}");
             }
 
             // Retrieve the name of the default translation file
             string defaultFile = configuration.DefaultFile;
             if (!Path.IsPathRooted(defaultFile))
             {
-                string? dir = Path.GetDirectoryName(configFile);
+                string? dir = baseDirectory;
+                if (string.IsNullOrEmpty(dir))
+                    dir = Path.GetDirectoryName(configFile);
+
                 if (!string.IsNullOrEmpty(dir))
                     defaultFile = Path.Combine(dir, defaultFile);
             }
@@ -237,7 +249,7 @@ namespace Tlumach.Base
         /// <param name="configuration">the loaded configuration.</param>
         /// <returns><see langword="true"/> if the config file is recognized and <see langword="false"/> otherwise</returns>
         public abstract bool IsValidConfigFile(string fileContent, out TranslationConfiguration? configuration);
-*/
+        */
 
         /// <summary>
         /// Loads configuration from the file.
@@ -313,7 +325,7 @@ namespace Tlumach.Base
                 }
             }
 
-            if (!string.IsNullOrEmpty(configuration.Namespace) && !Utils.IsIdentifier(configuration.Namespace))
+            if (!string.IsNullOrEmpty(configuration.Namespace) && !Utils.IsIdentifierWithDots(configuration.Namespace))
                 throw new GenericParserException($"The provided namespace name '{configuration.Namespace}' is not a valid identifier suitable for a namespace name.");
 
             if (!string.IsNullOrEmpty(configuration.ClassName) && !Utils.IsIdentifier(configuration.ClassName))

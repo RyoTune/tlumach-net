@@ -1,0 +1,9 @@
+{
+    "defaultFile": "StringsWithGroups.arb",
+    "generatedNamespace": "Tlumach.Tests.Generator",
+    "translations": {
+        "de-AT": "StringsWithGroupsExplicit_de-AT.arb",
+        "*" : "StringsWithGroupsExplicitOther.arb"
+    }
+
+}

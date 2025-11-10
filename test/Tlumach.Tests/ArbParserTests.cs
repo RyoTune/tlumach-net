@@ -56,7 +56,7 @@ namespace Tlumach.Tests
             ArbParser? parser = FileFormats.GetParser(".arb") as ArbParser;
             Assert.NotNull(parser);
             TranslationConfiguration? config;
-            TranslationTree? tree = parser.LoadTranslationStructure(Path.Combine(TestFilesPath, "ValidConfig.arbcfg"), out config);
+            TranslationTree? tree = parser.LoadTranslationStructure(Path.Combine(TestFilesPath, "ValidConfig.arbcfg"), TestFilesPath, out config);
             Assert.NotNull(tree);
             Assert.NotNull(config);
             Assert.Equal("Strings.arb", config.DefaultFile);
@@ -70,7 +70,7 @@ namespace Tlumach.Tests
             ArbParser? parser = FileFormats.GetParser(".arb") as ArbParser;
             Assert.NotNull(parser);
             TranslationConfiguration? config;
-            TranslationTree? tree = parser.LoadTranslationStructure(Path.Combine(TestFilesPath, "ValidConfigWithGroups.arbcfg"), out config);
+            TranslationTree? tree = parser.LoadTranslationStructure(Path.Combine(TestFilesPath, "ValidConfigWithGroups.arbcfg"), TestFilesPath, out config);
             Assert.NotNull(tree);
             Assert.NotNull(config);
             Assert.Equal("StringsWithGroups.arb", config.DefaultFile);
@@ -89,7 +89,7 @@ namespace Tlumach.Tests
             ArbParser? parser = FileFormats.GetParser(".arb") as ArbParser;
             Assert.NotNull(parser);
             TranslationConfiguration? config;
-            Assert.Throws<ParserLoadException>(() => parser.LoadTranslationStructure(Path.Combine(TestFilesPath, "ValidConfigUnknownExt.arbcfg"), out config));
+            Assert.Throws<ParserLoadException>(() => parser.LoadTranslationStructure(Path.Combine(TestFilesPath, "ValidConfigUnknownExt.arbcfg"), TestFilesPath, out config));
         }
 
         [Fact]

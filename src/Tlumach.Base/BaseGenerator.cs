@@ -52,6 +52,10 @@ namespace Tlumach.Base
             if (configFile is null)
                 throw new ArgumentNullException(nameof(configFile));
 
+            string? dirName = Path.GetDirectoryName(configFile);
+
+            // if (dirName)
+
             TranslationConfiguration? configuration;
 
             // The config parser will parse configuration and will find the correct parser for the files referenced by the configuration
@@ -59,7 +63,7 @@ namespace Tlumach.Base
             if (parser is null)
                 return null;
 
-            TranslationTree? translationTree = parser.LoadTranslationStructure(configFile, out configuration);
+            TranslationTree? translationTree = parser.LoadTranslationStructure(configFile, projectDir, out configuration);
 
             if (configuration is null)
                 throw new ParserLoadException(configFile, $"Failed to load the configuration from '{configFile}'");
@@ -67,11 +71,12 @@ namespace Tlumach.Base
             if (translationTree is null)
                 throw new ParserLoadException(configFile, $"Failed to load the default language file referenced by '{configFile}'");
 
+            // We have these checks here because a parser's ValidateConfiguration method accepts empty values (they are ok in runtime or when generators are not used).
             if (string.IsNullOrEmpty(configuration.Namespace))
-                throw new ParserConfigException(configFile, $"The configuration file '{configFile}' does not contain the namespace for the class to be generated, which must be specified in the '{TranslationConfiguration.KEY_GENERATED_NAMESPACE}' setting");
+                throw new ParserConfigException(configFile, $"The configuration file '{configFile}' does not contain a namespace for the class to be generated, which must be specified in the '{TranslationConfiguration.KEY_GENERATED_NAMESPACE}' setting");
 
             if (string.IsNullOrEmpty(configuration.ClassName))
-                throw new ParserConfigException(configFile, $"The configuration file '{configFile}' does not contain the name of the class to be generated, which must be specified in the '{TranslationConfiguration.KEY_GENERATED_CLASS}' setting");
+                throw new ParserConfigException(configFile, $"The configuration file '{configFile}' does not contain a name of the class to be generated, which must be specified in the '{TranslationConfiguration.KEY_GENERATED_CLASS}' setting");
 
             StringBuilder builder = new();
 
