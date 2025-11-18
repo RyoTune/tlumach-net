@@ -16,6 +16,10 @@
 //
 // </copyright>
 
+#if DEBUG
+using System.Diagnostics;
+#endif
+
 using Microsoft.CodeAnalysis;
 
 using Tlumach.Base;
@@ -53,10 +57,20 @@ namespace Tlumach.Generator
             ArbParser.Use();
             IniParser.Use();
             TomlParser.Use();
+            CsvParser.Use();
+            TsvParser.Use();
+            ResxParser.Use();
         }
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
+#if DEBUG
+            if (!Debugger.IsAttached)
+            {
+                Debugger.Launch(); // or Debugger.Break();
+            }
+#endif
+
             InitializeParsers();
 
             IncrementalValueProvider<Dictionary<string, string>> generatedUsingNamespaceProvider = context.AnalyzerConfigOptionsProvider

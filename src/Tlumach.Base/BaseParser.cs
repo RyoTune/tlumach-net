@@ -244,7 +244,10 @@ namespace Tlumach.Base
             string? defaultContent;
             try
             {
-                defaultContent = File.ReadAllText(defaultFile, Encoding.UTF8);
+                using Stream stream = new FileStream(defaultFile, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using StreamReader reader = new StreamReader(stream, Encoding.UTF8, true);
+                defaultContent = reader.ReadToEnd();
+                //defaultContent = File.ReadAllText(defaultFile, Encoding.UTF8);
             }
             catch (Exception ex)
             {

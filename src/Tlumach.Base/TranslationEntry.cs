@@ -310,7 +310,7 @@ namespace Tlumach.Base
             if (getParamValueFunc == null)
                 throw new ArgumentNullException(nameof(getParamValueFunc));
 
-            culture ??= CultureInfo.CurrentCulture;
+            culture ??= CultureInfo.InvariantCulture;
 
             bool shouldUnescape;
             string inputText;

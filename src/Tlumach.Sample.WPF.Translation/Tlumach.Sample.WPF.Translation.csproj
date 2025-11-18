@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <TlumachGeneratorExtraParsers>ArbParser,IniParser,JsonParser,ResxParser,TomlParser,TsvParser</TlumachGeneratorExtraParsers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="sample-AT.toml" />
+    <None Remove="sample.arb" />
+    <None Remove="Sample.cfg" />
+    <None Remove="sample_de.toml" />
+    <None Remove="sample_hr.json" />
+    <None Remove="sample_sk.ini" />
+    <None Remove="sample_uk.tsv" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="Sample.cfg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="sample-AT.toml" />
+    <EmbeddedResource Include="sample.arb" />
+    <EmbeddedResource Include="sample_de.toml" />
+    <EmbeddedResource Include="sample_hr.json" />
+    <EmbeddedResource Include="sample_sk.ini" />
+    <EmbeddedResource Include="sample_uk.tsv" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tlumach.Base\Tlumach.Base.csproj" />
+    <ProjectReference Include="..\Tlumach.Generator\Tlumach.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"  />
+    <ProjectReference Include="..\Tlumach\Tlumach.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\Generated</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
+
+</Project>

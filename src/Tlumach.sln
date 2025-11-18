@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36616.10
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11205.157 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Base", "Tlumach.Base\Tlumach.Base.csproj", "{C23F5B00-B433-413A-A8B1-5E04218CE810}"
 EndProject
@@ -20,6 +20,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.WinUI", "Tlumach.WinUI\Tlumach.WinUI.csproj", "{99EBF04B-9EA7-46EE-A641-C2CF434B5E15}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.UWP", "Tlumach.UWP\Tlumach.UWP.csproj", "{18CB1C58-3011-4472-91ED-6389779E4B49}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Sample.Translation", "Tlumach.Sample.Translation\Tlumach.Sample.Translation.csproj", "{8EF98A27-9936-4622-B7FD-CCAF7E92BE7B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,10 @@ Global
 		{18CB1C58-3011-4472-91ED-6389779E4B49}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{18CB1C58-3011-4472-91ED-6389779E4B49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{18CB1C58-3011-4472-91ED-6389779E4B49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EF98A27-9936-4622-B7FD-CCAF7E92BE7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EF98A27-9936-4622-B7FD-CCAF7E92BE7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EF98A27-9936-4622-B7FD-CCAF7E92BE7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EF98A27-9936-4622-B7FD-CCAF7E92BE7B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -16,7 +16,6 @@
 //
 // </copyright>
 
-using System.Security.Cryptography;
 using System.Text;
 
 namespace Tlumach.Base
@@ -28,8 +27,8 @@ namespace Tlumach.Base
     /// </summary>
     public class BaseGenerator
     {
-        protected static string OPTION_USING_NAMESPACE = "UsingNamespace";
-        protected static string OPTION_EXTRA_PARSERS = "ExtraParsers";
+        protected const string OPTION_USING_NAMESPACE = "UsingNamespace";
+        protected const string OPTION_EXTRA_PARSERS = "ExtraParsers";
 
         private static string OwnName(string keyName)
         {

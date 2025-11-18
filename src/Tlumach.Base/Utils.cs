@@ -459,7 +459,7 @@ namespace Tlumach.Base
 
             string pattern = placeholder?.Format ?? string.Empty;
 
-            culture ??= CultureInfo.CurrentCulture;
+            culture ??= CultureInfo.InvariantCulture;
 
             if (value is DateTime dt)
             {

@@ -1,29 +1,56 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<LangVersion>latest</LangVersion>
-		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-		<IsRoslynComponent>true</IsRoslynComponent>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        <IsRoslynComponent>true</IsRoslynComponent>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\Tlumach.Base\Tlumach.Base.csproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.*">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.*" />
+    </ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.*">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.*" />
-	</ItemGroup>
+    <ItemGroup Condition="$(TargetFramework.Contains('netstandard2.0'))">
+        <PackageReference Include="System.Memory" Version="4.6.3" />
+        <PackageReference Include="System.Text.Json" Version="10.0.0" />
+    </ItemGroup>
 
+    <ItemGroup>
+      <AdditionalFiles Include="../Shared/stylecop.json" />
+    </ItemGroup>
 
-	<ItemGroup>
-	  <AdditionalFiles Include="../Shared/stylecop.json" />
-	</ItemGroup>
+    <ItemGroup>
+      <Compile Include="..\Tlumach.Base\ArbParser.cs" Link="ArbParser.cs" />
+      <Compile Include="..\Tlumach.Base\BaseGenerator.cs" Link="BaseGenerator.cs" />
+      <Compile Include="..\Tlumach.Base\BaseJsonParser.cs" Link="BaseJsonParser.cs" />
+      <Compile Include="..\Tlumach.Base\BaseKeyValueParser.cs" Link="BaseKeyValueParser.cs" />
+      <Compile Include="..\Tlumach.Base\BaseParser.cs" Link="BaseParser.cs" />
+      <Compile Include="..\Tlumach.Base\BaseTableParser.cs" Link="BaseTableParser.cs" />
+      <Compile Include="..\Tlumach.Base\BaseXMLParser.cs" Link="BaseXMLParser.cs" />
+      <Compile Include="..\Tlumach.Base\CsvParser.cs" Link="CsvParser.cs" />
+      <Compile Include="..\Tlumach.Base\Exceptions.cs" Link="Exceptions.cs" />
+      <Compile Include="..\Tlumach.Base\FileFormats.cs" Link="FileFormats.cs" />
+      <Compile Include="..\Tlumach.Base\IcuFragment.cs" Link="IcuFragment.cs" />
+      <Compile Include="..\Tlumach.Base\IniParser.cs" Link="IniParser.cs" />
+      <Compile Include="..\Tlumach.Base\JsonParser.cs" Link="JsonParser.cs" />
+      <Compile Include="..\Tlumach.Base\Placeholder.cs" Link="Placeholder.cs" />
+      <Compile Include="..\Tlumach.Base\ResxParser.cs" Link="ResxParser.cs" />
+      <Compile Include="..\Tlumach.Base\TextFormat.cs" Link="TextFormat.cs" />
+      <Compile Include="..\Tlumach.Base\TomlParser.cs" Link="TomlParser.cs" />
+      <Compile Include="..\Tlumach.Base\Translation.cs" Link="Translation.cs" />
+      <Compile Include="..\Tlumach.Base\TranslationConfiguration.cs" Link="TranslationConfiguration.cs" />
+      <Compile Include="..\Tlumach.Base\TranslationEntry.cs" Link="TranslationEntry.cs" />
+      <Compile Include="..\Tlumach.Base\TranslationTree.cs" Link="TranslationTree.cs" />
+      <Compile Include="..\Tlumach.Base\TranslationTreeNode.cs" Link="TranslationTreeNode.cs" />
+      <Compile Include="..\Tlumach.Base\TsvParser.cs" Link="TsvParser.cs" />
+      <Compile Include="..\Tlumach.Base\Utils.cs" Link="Utils.cs" />
+    </ItemGroup>
 
 </Project>
