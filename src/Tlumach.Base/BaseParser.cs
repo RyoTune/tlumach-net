@@ -397,7 +397,7 @@ namespace Tlumach.Base
             {
                 try
                 {
-                    var _ = new CultureInfo(configuration.DefaultFileLocale);
+                    _ = new CultureInfo(configuration.DefaultFileLocale);
                 }
                 catch
                 {

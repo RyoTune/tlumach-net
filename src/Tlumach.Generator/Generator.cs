@@ -16,9 +16,7 @@
 //
 // </copyright>
 
-#if DEBUG
 using System.Diagnostics;
-#endif
 
 using Microsoft.CodeAnalysis;
 
@@ -30,7 +28,7 @@ namespace Tlumach.Generator
     /// Generates source code files with translation units from all configuration files found in the project.
     /// </summary>
     [Generator]
-    public class Generator : BaseGenerator, IIncrementalGenerator
+    public sealed class Generator : BaseGenerator, IIncrementalGenerator
     {
         internal static class Diags
         {
@@ -64,55 +62,44 @@ namespace Tlumach.Generator
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-#if DEBUG
-            if (!Debugger.IsAttached)
-            {
-                Debugger.Launch(); // or Debugger.Break();
-            }
-#endif
-
             InitializeParsers();
 
-            IncrementalValueProvider<Dictionary<string, string>> generatedUsingNamespaceProvider = context.AnalyzerConfigOptionsProvider
-                .Select((p, _) =>
+            IncrementalValueProvider<Dictionary<string, string>> optionsProvider = context.AnalyzerConfigOptionsProvider
+                .Select(static (provider, _) =>
                 {
                     Dictionary<string, string> result = new Dictionary<string, string>();
                     string? value;
 
                     // Keys are case-insensitive; the conventional key is build_property.<Name>
-                    p.GlobalOptions.TryGetValue("build_property.TlumachGenerator" + OPTION_USING_NAMESPACE, out value);
+                    provider.GlobalOptions.TryGetValue("build_property.TlumachGenerator" + OPTION_USING_NAMESPACE, out value);
                     if (value?.Length > 0)
                         result.Add(OPTION_USING_NAMESPACE, value);
-                    p.GlobalOptions.TryGetValue("build_property.TlumachGenerator" + OPTION_EXTRA_PARSERS, out value);
+                    provider.GlobalOptions.TryGetValue("build_property.TlumachGenerator" + OPTION_EXTRA_PARSERS, out value);
                     if (value?.Length > 0)
                         result.Add(OPTION_EXTRA_PARSERS, value);
+                    provider.GlobalOptions.TryGetValue("build_property.projectdir", out value);
+                    if (value?.Length > 0)
+                        result.Add("projectdir", value);
 
                     return result;
                 });
 
-            IncrementalValueProvider<string> projectDirProvider = context.AnalyzerConfigOptionsProvider
-               .Select((provider, cancellationToken) =>
-               {
-                   // Try to get the value from MSBuild properties.
-                   provider.GlobalOptions.TryGetValue("build_property.projectdir", out var projectDir);
-                   return projectDir ?? string.Empty;
-               });
-
             // Scan the project directory for translation configuration files and put down their list
             IncrementalValuesProvider<AdditionalText> translationFiles = context.AdditionalTextsProvider.Where(IsTranslationConfigurationFile);
 
-            var combinedProvider = translationFiles.Combine(projectDirProvider).Combine(generatedUsingNamespaceProvider);
+            var combinedProvider = translationFiles.Combine(optionsProvider);
 
             context.RegisterSourceOutput(combinedProvider, static (spc, source) =>
             {
-                AdditionalText text = source.Left.Left;
-                string projectDir = source.Left.Right;
-                Dictionary<string, string> options = source.Right;
-
-                var fileNameOnly = Path.GetFileNameWithoutExtension(text.Path);
+                AdditionalText text = source.Left;
                 try
                 {
-                    var content = GenerateClass(text, projectDir, options);
+                    Dictionary<string, string> options = source.Right;
+                    string projectDir = string.Empty;
+                    options.TryGetValue("projectdir", out projectDir);
+
+                    var fileNameOnly = Path.GetFileNameWithoutExtension(text.Path);
+                    var content = GenerateClass(text.Path, projectDir, options);
 
                     if (content is not null)
                         spc.AddSource($"{fileNameOnly}.g.cs", content);
@@ -170,14 +157,9 @@ namespace Tlumach.Generator
                 return false;
 
             string? filename = candidateFile.Path;
-            BaseParser? parser = FileFormats.GetParser(Path.GetExtension(filename.ToLowerInvariant()));
+            BaseParser? parser = FileFormats.GetConfigParser(Path.GetExtension(filename.ToLowerInvariant()));
 
             return parser is not null;
-        }
-
-        protected static string? GenerateClass(AdditionalText configFile, string projectDir, Dictionary<string, string> options)
-        {
-            return GenerateClass(configFile.Path, projectDir, options);
         }
     }
 }

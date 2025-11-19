@@ -10,7 +10,16 @@ A: Yes, this is automatically supported by the library _given that_ the applicat
 
 **Q: Can I have support for {put_a_name_here} translation format?**
 
-A: Yes, check how existing parsers are implemented and how they register themselves, then write your own. If you use Generator, remember to add a call to Use to the Generator.InitializeParsers() method or add the "TlumatchGeneratorExtraParsers" property to the project with translations (the generator will pick the value of this property). The property may contain one or more parser class names separated by a semicolon, comma, or space (or all of them together).
+A: Yes, check how existing parsers are implemented and how they register themselves, then write your own. If you use Generator, remember to add a call to Use to the Generator.InitializeParsers() method or add the "TlumachGeneratorExtraParsers" property to the project with translations (the generator will pick the value of this property). The property may contain one or more parser class names separated by a semicolon, comma, or space (or all of them together).
+
+The property is added as follows:
+
+  <PropertyGroup>
+    <TlumachGeneratorExtraParsers>ArbParser,IniParser,JsonParser,ResxParser,TomlParser,TsvParser</TlumachGeneratorExtraParsers>
+  </PropertyGroup>
+   <ItemGroup>
+        <CompilerVisibleProperty Include="TlumachGeneratorExtraParsers" />
+    </ItemGroup>
 
 Feel free to offer your implementation for inclusion to the library - we will gladly accept the submission given that it meets minimal quality requirements such as commented code and the existence of unit tests.
 

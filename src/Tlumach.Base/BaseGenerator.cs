@@ -103,7 +103,7 @@ namespace Tlumach.Base
                 extraParsers = string.Empty;
             foreach (string extraParser in extraParsers.Split(',', ';', ' '))
             {
-                if (extraParser.Length > 0)
+                if (extraParser.Length > 0 && !parserClassNames.Contains(extraParser))
                     parserClassNames.Add(extraParser);
             }
 

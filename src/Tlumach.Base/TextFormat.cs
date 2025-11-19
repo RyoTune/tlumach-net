@@ -1,4 +1,4 @@
-// <copyright file="TemplateStringEscaping.cs" company="Allied Bits Ltd.">
+// <copyright file="TextFormat.cs" company="Allied Bits Ltd.">
 //
 // Copyright 2025 Allied Bits Ltd.
 //
