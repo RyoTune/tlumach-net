@@ -57,3 +57,7 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+#CodeRush working folder
+.cr/
+

@@ -20,6 +20,7 @@ using System.Globalization;
 
 namespace Tlumach.Base
 {
+#pragma warning disable MA0048
 #pragma warning disable CA1032 // Implement standard exception constructors
     public class TlumachException : Exception
     {

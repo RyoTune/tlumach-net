@@ -1,3 +1,4 @@
+#pragma warning disable SA1636
 // <copyright file="Translation.cs" company="Allied Bits Ltd.">
 //
 // Copyright 2025 Allied Bits Ltd.

@@ -10,7 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Tlumach.Base\Tlumach.Base.csproj" />
-    <ProjectReference Include="..\Tlumach.Generator\Tlumach.Generator.csproj" />
     <ProjectReference Include="..\Tlumach.Sample.WPF.Translation\Tlumach.Sample.WPF.Translation.csproj" />
     <ProjectReference Include="..\Tlumach\Tlumach.csproj" />
   </ItemGroup>

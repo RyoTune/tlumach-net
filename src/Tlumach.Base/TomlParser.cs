@@ -71,7 +71,7 @@ namespace Tlumach.Base
 
         private static BaseParser Factory() => new TomlParser();
 
-        protected override bool IsValidKeyChar(string content, int offset)
+        protected internal override bool IsValidKeyChar(string content, int offset)
         {
             if (!_keyIsQuoted)
             {
@@ -297,7 +297,7 @@ namespace Tlumach.Base
 
         protected override bool IsValidSectionNameChar(string content, int offset) => base.IsValidKeyChar(content, offset);
 
-        protected override bool IsEscapedEOLInValue(string content, int offset)
+        protected internal override bool IsEscapedEOLInValue(string content, int offset)
         {
             return
                 _lastStartOfValue == StringMarker.MultilineBasic &&

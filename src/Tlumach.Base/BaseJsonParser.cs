@@ -78,7 +78,6 @@ namespace Tlumach.Base
                 // If the configuration contains the Translations section, parse it
                 if (configObj.TryGetProperty(TranslationConfiguration.KEY_SECTION_TRANSLATIONS, out jsonValue) && jsonValue.ValueKind == JsonValueKind.Object)
                 {
-
                     // Enumerate properties
                     foreach (JsonProperty prop in jsonValue.EnumerateObject())
                     {
@@ -105,7 +104,7 @@ namespace Tlumach.Base
             }
             catch (JsonException ex)
             {
-                int pos = GetAbsolutePosition(fileContent, (int)(ex.LineNumber ?? 0) + 1, (int) (ex.BytePositionInLine ?? 0) + 1);
+                int pos = GetAbsolutePosition(fileContent, (int)(ex.LineNumber ?? 0) + 1, (int)(ex.BytePositionInLine ?? 0) + 1);
                 throw new TextParseException(ex.Message, pos, pos, (int)(ex.LineNumber ?? 0) + 1, (int)(ex.BytePositionInLine ?? 0) + 1);
             }
             catch (Exception ex)

@@ -222,9 +222,11 @@ namespace Tlumach.Base
 
         private sealed class NumberOptions
         {
-            public string Style = "number";            // "number" | "integer" | "percent" | "currency" | "custom" | "compact-short"
-            public string? CurrencyIso;                // e.g., "USD"
-            public string? CustomDotNetFormat;         // e.g., "#,0.##"
+#pragma warning disable SA1401
+            internal string Style = "number";            // "number" | "integer" | "percent" | "currency" | "custom" | "compact-short"
+            internal string? CurrencyIso;                // e.g., "USD"
+            internal string? CustomDotNetFormat;         // e.g., "#,0.##"
+#pragma warning restore SA1401
         }
 
         private static NumberOptions ReadNumberOptions(Reader r)
@@ -241,6 +243,7 @@ namespace Tlumach.Base
 
             // If the next token starts a branch, there are no options (we don't use branch text for number)
             r.SkipWs();
+
             if (r.Peek() == '{' || r.Peek() == '\0')
                 return opts;
 
@@ -250,11 +253,13 @@ namespace Tlumach.Base
             {
                 // ICU skeleton-ish
                 var ident = r.ReadIdentifier(out _).ToLowerInvariant(); // e.g., "compact-short"
+
                 if (ident == "compact-short")
                 {
                     opts.Style = "compact-short";
                     return opts;
                 }
+
                 throw new FormatException($"number: unsupported skeleton '::{ident}'.");
             }
 
@@ -305,8 +310,6 @@ namespace Tlumach.Base
 
         private static string FormatNumber(decimal value, NumberOptions opts, CultureInfo culture)
         {
-            var nf = culture.NumberFormat;
-
             switch (opts.Style)
             {
                 case "custom":

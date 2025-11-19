@@ -438,7 +438,9 @@ namespace Tlumach.Base
         /// <param name="quotedFields">Specifies whether cells are expected to be enclosed in quotes.</param>
         /// <exception cref="ArgumentNullException">Thrown if `content` or `buffer` is null. </exception>
         /// <exception cref="TextParseException">Thrown when parsing ends with unclosed quotes (when they are used).</exception>
+#pragma warning disable MA0048
         protected static void ReadDelimitedLine(string content, int offset, int lineNumber, List<string> buffer, out int posAfterEnd, char separator, bool quotedFields)
+#pragma warning restore MA0048
         {
 #pragma warning disable CA1510 // Use 'ArgumentNullException.ThrowIfNull' instead of explicitly throwing a new exception instance
 #pragma warning disable MA0015

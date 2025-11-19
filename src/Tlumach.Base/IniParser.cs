@@ -87,7 +87,7 @@ namespace Tlumach.Base
             return false;
         }
 
-        protected override bool IsValidKeyChar(string content, int offset)
+        protected internal override bool IsValidKeyChar(string content, int offset)
         {
             if (content[offset] == '*' && offset == _startOfKey)
                 return true;

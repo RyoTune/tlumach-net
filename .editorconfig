@@ -376,13 +376,13 @@ dotnet_diagnostic.SA1631.severity = none
 
 dotnet_diagnostic.SA1632.severity = none
 
-dotnet_diagnostic.SA1633.severity = warning
+dotnet_diagnostic.SA1633.severity = none # The file header is missing or not located at the top of the file.
 
 dotnet_diagnostic.SA1634.severity = warning
 
 dotnet_diagnostic.SA1635.severity = warning
 
-dotnet_diagnostic.SA1636.severity = warning
+dotnet_diagnostic.SA1636.severity = suggestion
 
 dotnet_diagnostic.SA1637.severity = warning
 

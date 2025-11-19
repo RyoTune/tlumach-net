@@ -515,7 +515,7 @@ namespace Tlumach.Base
         /// <returns>The text inside the markers.</returns>
         protected abstract (string? escaped, string unescaped) UnwrapValue(string value);
 
-        protected virtual bool IsValidKeyChar(string content, int offset)
+        protected internal virtual bool IsValidKeyChar(string content, int offset)
         {
             char ch = content[offset];
             return char.IsLetterOrDigit(ch) ||
@@ -526,7 +526,7 @@ namespace Tlumach.Base
 
         protected virtual bool IsValidSectionNameChar(string content, int offset) => IsValidKeyChar(content, offset);
 
-        protected virtual bool IsEscapedEOLInValue(string content, int offset) => false;
+        protected internal virtual bool IsEscapedEOLInValue(string content, int offset) => false;
 
         protected abstract bool AcceptUnquotedEmptyValues();
 
@@ -550,7 +550,6 @@ namespace Tlumach.Base
             {
                 if (line.Value is null /*&& line.Key[0] == '^'*/)
                 {
-
                     currentGroup = line.Key; // .Substring(1);
                     node = result.MakeNode(currentGroup);
                     if (node == null) // this should not normally happen - MakeNode returns null when the name is invalid, and we control names during parsing.
