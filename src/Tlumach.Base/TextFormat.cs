@@ -16,7 +16,11 @@
 //
 // </copyright>
 
+#if GENERATOR
+namespace Tlumach.Generator
+#else
 namespace Tlumach.Base
+#endif
 {
     /// <summary>
     /// Specifies how the library should deal with translation entries which may support placeholders or reserved characters.

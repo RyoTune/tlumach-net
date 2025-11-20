@@ -27,6 +27,11 @@ namespace Tlumach.Tests
             ArbParser.Use();
         }
 
+        public ArbParserTests()
+        {
+            ArbParser.TextProcessingMode = TextFormat.Arb;
+        }
+
         [Fact]
         public void ShouldLoadSimpleValidConfig()
         {
@@ -259,6 +264,7 @@ namespace Tlumach.Tests
         [Fact]
         public void ShouldGetKeyExistingLocaleFileInResourceWithoutPath()
         {
+            var names = Assembly.GetExecutingAssembly().GetManifestResourceNames();
             var manager = new TranslationManager(Assembly.GetExecutingAssembly(), "TestData\\Arb/ValidConfigWithTranslations.arbcfg");
             manager.LoadFromDisk = false;
             Assert.Equal("StringsWithTranslations.arb", manager.DefaultConfiguration?.DefaultFile);

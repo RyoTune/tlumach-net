@@ -95,7 +95,7 @@ public class TemplatedTranslationUnit : BaseTranslationUnit
 
     /// <summary>
     /// Processes the template translation entry by substituting the parameters with actual values and returns the final text.
-    /// <para>If the TextProcessingMode of the parser is <seealso cref="TextFormat.DotNet"/>, <seealso cref="TextFormat.Arb"/>, or <seealso cref="TextFormat.ArbNoEscaping"/>, this overload will work for named parameters. It will work for indexed parameters if the parameters in the `parameters` dictionary use indexes for keys.</para>
+    /// <para>If <see cref="TranslationConfiguration.TextProcessingMode"/> is <seealso cref="TextFormat.DotNet"/>, <seealso cref="TextFormat.Arb"/>, or <seealso cref="TextFormat.ArbNoEscaping"/>, this overload will work for named parameters. It will work for indexed parameters if the parameters in the `parameters` dictionary use indexes for keys.</para>
     /// </summary>
     /// <param name="parameters">A dictionary that contains parameter names as keys and actual values to substitute as values.</param>
     /// <returns>The requested text or an empty string.</returns>
@@ -107,7 +107,7 @@ public class TemplatedTranslationUnit : BaseTranslationUnit
 
     /// <summary>
     /// Processes the template translation entry by substituting the parameters with actual values and returns the final text.
-    /// <para>If the TextProcessingMode of the parser is <seealso cref="TextFormat.DotNet"/>, <seealso cref="TextFormat.Arb"/>, or <seealso cref="TextFormat.ArbNoEscaping"/>, this overload will work for named parameters. It will work for indexed parameters if the parameters in the `parameters` dictionary use indexes for keys.</para>
+    /// <para>If <see cref="TranslationConfiguration.TextProcessingMode"/>  is <seealso cref="TextFormat.DotNet"/>, <seealso cref="TextFormat.Arb"/>, or <seealso cref="TextFormat.ArbNoEscaping"/>, this overload will work for named parameters. It will work for indexed parameters if the parameters in the `parameters` dictionary use indexes for keys.</para>
     /// </summary>
     /// <param name="culture">The culture/locale for which the text is needed.</param>
     /// <param name="parameters">A dictionary that contains parameter names as keys and actual values to substitute as values.</param>
@@ -120,7 +120,7 @@ public class TemplatedTranslationUnit : BaseTranslationUnit
 
     /// <summary>
     /// Processes the template translation entry by substituting the parameters with actual values and returns the final text.
-    /// <para>If the TextProcessingMode of the parser is <seealso cref="TextFormat.DotNet"/>, <seealso cref="TextFormat.Arb"/>, or <seealso cref="TextFormat.ArbNoEscaping"/>, this overload will work for both named and indexed parameters.</para>
+    /// <para>If <see cref="TranslationConfiguration.TextProcessingMode"/>  is <seealso cref="TextFormat.DotNet"/>, <seealso cref="TextFormat.Arb"/>, or <seealso cref="TextFormat.ArbNoEscaping"/>, this overload will work for both named and indexed parameters.</para>
     /// </summary>
     /// <param name="parameters">A dictionary that contains parameter names as keys and actual values to substitute as values.</param>
     /// <returns>The requested text or an empty string.</returns>
@@ -132,7 +132,7 @@ public class TemplatedTranslationUnit : BaseTranslationUnit
 
     /// <summary>
     /// Processes the template translation entry by substituting the parameters with actual values and returns the final text.
-    /// <para>If the TextProcessingMode of the parser is <seealso cref="TextFormat.DotNet"/>, <seealso cref="TextFormat.Arb"/>, or <seealso cref="TextFormat.ArbNoEscaping"/>, this overload will work for both named and indexed parameters.</para>
+    /// <para>If <see cref="TranslationConfiguration.TextProcessingMode"/>  is <seealso cref="TextFormat.DotNet"/>, <seealso cref="TextFormat.Arb"/>, or <seealso cref="TextFormat.ArbNoEscaping"/>, this overload will work for both named and indexed parameters.</para>
     /// </summary>
     /// <param name="culture">The culture/locale for which the text is needed.</param>
     /// <param name="parameters">a dictionary that contains parameter names as keys and actual values to substitute as values.</param>
@@ -145,7 +145,7 @@ public class TemplatedTranslationUnit : BaseTranslationUnit
 
     /// <summary>
     /// Processes the template translation entry by substituting the parameters with actual values and returns the final text.
-    /// <para>If the TextProcessingMode of the parser is <seealso cref="TextFormat.DotNet"/>, <seealso cref="TextFormat.Arb"/>, or <seealso cref="TextFormat.ArbNoEscaping"/>, this overload will work for indexed parameters but not for named ones.</para>
+    /// <para>If <see cref="TranslationConfiguration.TextProcessingMode"/>  is <seealso cref="TextFormat.DotNet"/>, <seealso cref="TextFormat.Arb"/>, or <seealso cref="TextFormat.ArbNoEscaping"/>, this overload will work for indexed parameters but not for named ones.</para>
     /// </summary>
     /// <param name="culture">The culture/locale for which the text is needed.</param>
     /// <param name="parameters">a dictionary that contains parameter names as keys and actual values to substitute as values.</param>
@@ -158,7 +158,7 @@ public class TemplatedTranslationUnit : BaseTranslationUnit
 
     /// <summary>
     /// Processes the template translation entry by substituting the parameters with actual values and returns the final text.
-    /// <para>If the TextProcessingMode of the parser is <seealso cref="TextFormat.DotNet"/>, <seealso cref="TextFormat.Arb"/>, or <seealso cref="TextFormat.ArbNoEscaping"/>, this overload will work for named parameters but not for indexed ones.</para>
+    /// <para>If <see cref="TranslationConfiguration.TextProcessingMode"/>  is <seealso cref="TextFormat.DotNet"/>, <seealso cref="TextFormat.Arb"/>, or <seealso cref="TextFormat.ArbNoEscaping"/>, this overload will work for named parameters but not for indexed ones.</para>
     /// </summary>
     /// <param name="parameters">An object, whose properties are used to provide values for parameters in the template. The names of the template's parameters are matched with the object property names in a case-insensitive manner.</param>
     /// <returns>The requested text or an empty string.</returns>
@@ -170,7 +170,7 @@ public class TemplatedTranslationUnit : BaseTranslationUnit
 
     /// <summary>
     /// Processes the template translation entry by substituting the parameters with actual values and returns the final text.
-    /// <para>If the TextProcessingMode of the parser is <seealso cref="TextFormat.DotNet"/>, <seealso cref="TextFormat.Arb"/>, or <seealso cref="TextFormat.ArbNoEscaping"/>, this overload will work for named parameters but not for indexed ones.</para>
+    /// <para>If <see cref="TranslationConfiguration.TextProcessingMode"/>  is <seealso cref="TextFormat.DotNet"/>, <seealso cref="TextFormat.Arb"/>, or <seealso cref="TextFormat.ArbNoEscaping"/>, this overload will work for named parameters but not for indexed ones.</para>
     /// </summary>
     /// <param name="culture">The culture/locale for which the text is needed.</param>
     /// <param name="parameters">An object, whose properties are used to provide values for parameters in the template. The names of the template's parameters are matched with the object property names in a case-insensitive manner.</param>

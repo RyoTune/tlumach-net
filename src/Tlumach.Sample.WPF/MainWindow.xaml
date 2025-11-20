@@ -18,8 +18,8 @@
         <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Bottom" HorizontalAlignment="Center">Hello</TextBlock>
         <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" HorizontalAlignment="Center">Welcome</TextBlock>
         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
-        <ComboBox Name="LanguageSelector" Selected="LanguageSelector_Selected">
-            </ComboBox>
+            <ComboBox Name="LanguageSelector" SelectionChanged="LanguageSelector_SelectionChanged" />
+            <TextBlock Name="CopyrightLabel"/>
         </StackPanel>
     </Grid>
 </Window>

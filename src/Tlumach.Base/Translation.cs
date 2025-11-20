@@ -19,7 +19,11 @@
 
 using System.Reflection;
 
+#if GENERATOR
+namespace Tlumach.Generator
+#else
 namespace Tlumach.Base
+#endif
 {
     /// <summary>
     /// Contains translation entries that belong to one locale.

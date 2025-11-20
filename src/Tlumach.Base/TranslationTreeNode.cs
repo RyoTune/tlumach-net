@@ -16,7 +16,11 @@
 //
 // </copyright>
 
+#if GENERATOR
+namespace Tlumach.Generator
+#else
 namespace Tlumach.Base
+#endif
 {
     public class TranslationTreeLeaf
     {

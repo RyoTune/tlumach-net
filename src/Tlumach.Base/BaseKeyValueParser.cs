@@ -21,7 +21,11 @@ using System.Globalization;
 using System.Reflection;
 using System.Text;
 
+#if GENERATOR
+namespace Tlumach.Generator
+#else
 namespace Tlumach.Base
+#endif
 {
     /// <summary>
     /// The base parser for key-value configuration and translation files (ini and toml).

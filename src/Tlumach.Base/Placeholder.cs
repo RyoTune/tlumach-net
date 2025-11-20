@@ -16,7 +16,11 @@
 //
 // </copyright>
 
+#if GENERATOR
+namespace Tlumach.Generator
+#else
 namespace Tlumach.Base
+#endif
 {
     /// <summary>
     /// Represents a single placeholder within a templated entry.

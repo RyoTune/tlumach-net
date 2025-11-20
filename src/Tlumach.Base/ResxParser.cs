@@ -19,7 +19,11 @@
 using System.Xml;
 using System.Xml.Linq;
 
+#if GENERATOR
+namespace Tlumach.Generator
+#else
 namespace Tlumach.Base
+#endif
 {
     public class ResxParser : BaseXMLParser
     {

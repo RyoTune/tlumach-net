@@ -20,7 +20,11 @@ using System.Collections.Specialized;
 using System.Globalization;
 using System.Text;
 
+#if GENERATOR
+namespace Tlumach.Generator
+#else
 namespace Tlumach.Base
+#endif
 {
 #pragma warning disable CA1510 // Use 'ArgumentNullException.ThrowIfNull' instead of explicitly throwing a new exception instance
 

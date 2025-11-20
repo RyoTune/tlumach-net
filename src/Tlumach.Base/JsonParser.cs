@@ -21,7 +21,11 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 
+#if GENERATOR
+namespace Tlumach.Generator
+#else
 namespace Tlumach.Base
+#endif
 {
     /// <summary>
     /// The parser for simpler JSON translation files.

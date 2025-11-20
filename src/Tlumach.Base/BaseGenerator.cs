@@ -18,7 +18,11 @@
 
 using System.Text;
 
+#if GENERATOR
+namespace Tlumach.Generator
+#else
 namespace Tlumach.Base
+#endif
 {
 #pragma warning disable CA1510 // Use 'ArgumentNullException.ThrowIfNull' instead of explicitly throwing a new exception instance
 
@@ -125,7 +129,7 @@ namespace Tlumach.Base
                 builder.AppendLine("        private static string? _defaultFileLocale = null;");
             builder.AppendLine();
             builder.Append("        private static TranslationConfiguration _translationConfiguration = new TranslationConfiguration(typeof(").Append(configuration.ClassName).Append(").Assembly, \"").Append(configuration.DefaultFile).Append("\", _defaultFileLocale, ").Append(configuration.GetEscapeModeFullName()).AppendLine(");\n");
-
+            builder.AppendLine("        public static TranslationConfiguration Configuration => _translationConfiguration;");
             builder.AppendLine("        ///<summary>");
             builder.AppendLine("        ///Use this instance to change the default culture or to access translations without using <seealso cref=\"TranslationUnit\"/> instances");
             builder.AppendLine("        ///</summary>");

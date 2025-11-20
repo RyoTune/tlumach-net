@@ -23,7 +23,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.UWP", "Tlumach.UWP\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Sample.Translation", "Tlumach.Sample.Translation\Tlumach.Sample.Translation.csproj", "{8EF98A27-9936-4622-B7FD-CCAF7E92BE7B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.GeneratorTests", "Tlumach.GeneratorTests\Tlumach.GeneratorTests.csproj", "{33B30A1F-B317-48AF-A1B1-7907C5E6F21A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.GeneratorTests", "..\test\Tlumach.GeneratorTests\Tlumach.GeneratorTests.csproj", "{33B30A1F-B317-48AF-A1B1-7907C5E6F21A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

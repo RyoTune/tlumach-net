@@ -18,7 +18,11 @@
 
 using System.Reflection;
 
+#if GENERATOR
+namespace Tlumach.Generator
+#else
 namespace Tlumach.Base
+#endif
 {
     /// <summary>
     /// Contains the configuration built when parsing source files and passed to the translation manager by the translation unit.

@@ -20,7 +20,9 @@ using System.Diagnostics;
 
 using Microsoft.CodeAnalysis;
 
+#if !GENERATOR
 using Tlumach.Base;
+#endif
 
 namespace Tlumach.Generator
 {

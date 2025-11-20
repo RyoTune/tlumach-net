@@ -10,6 +10,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using Tlumach.Base;
+
 namespace Tlumach.Sample.WPF
 {
     /// <summary>
@@ -19,19 +21,19 @@ namespace Tlumach.Sample.WPF
     {
         class LanguageItem
         {
-            public string Locale { get; }
-
-            public string LocaleName { get; }
+            public CultureInfo Culture { get;  }
 
             public override string ToString()
             {
-                return LocaleName;
+                if (Culture == CultureInfo.InvariantCulture)
+                    return "(default)";
+                else
+                    return $"{Culture.EnglishName} ({Culture.NativeName})";
             }
 
-            public LanguageItem(string locale, string localeName)
+            public LanguageItem(CultureInfo culture)
             {
-                Locale = locale;
-                LocaleName = localeName;
+                Culture = culture;
             }
         }
 
@@ -52,12 +54,12 @@ namespace Tlumach.Sample.WPF
 
             // Neither of the above methods include the "default" translation to the list. It is expected that you know what your default translation is.
             ComboBoxItem item = new ComboBoxItem();
-            item.Content = new LanguageItem(string.Empty, "(default)");
+            item.Content = new LanguageItem(CultureInfo.InvariantCulture);
             LanguageSelector.Items.Add(item);
 
             // This item has no translation so it is added explicitly. This is because we _know_ that our default translation is English, but we want to have "English" listed explicitly too.
             item = new ComboBoxItem();
-            item.Content = new LanguageItem("en", "English");
+            item.Content = new LanguageItem(new CultureInfo("en"));
             LanguageSelector.Items.Add(item);
 
             // Add the names of locales to the dropdown
@@ -65,9 +67,8 @@ namespace Tlumach.Sample.WPF
             {
                 try
                 {
-                    CultureInfo culture = new CultureInfo(locale);
                     item = new ComboBoxItem();
-                    item.Content = new LanguageItem(locale, $"{culture.EnglishName} ({culture.NativeName})");
+                    item.Content = new LanguageItem(new CultureInfo(locale));
                     LanguageSelector.Items.Add(item);
                 }
                 catch(CultureNotFoundException ex)
@@ -77,11 +78,25 @@ namespace Tlumach.Sample.WPF
             }
 
             LanguageSelector.SelectedIndex = 0; // default locale
+
+            Strings.TranslationManager.OnCultureChanged += (sender, e) => UpdateCopyright(e.Culture);
         }
 
-        private void LanguageSelector_Selected(object sender, RoutedEventArgs e)
+        private void UpdateCopyright(CultureInfo culture)
         {
-            // todo:
+            // This is an illustration of using the templated item. The copyright text itself is not translated, but the placeholder is passed.
+#pragma warning disable MA0011
+#pragma warning disable CA1304
+            CopyrightLabel.Text = Strings.Copyright.GetValue(new { Year = DateTime.Now.Year });
+#pragma warning restore CA1304
+#pragma warning restore MA0011
+        }
+
+        private void LanguageSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            LanguageItem? selected = (LanguageSelector.SelectedItem as ComboBoxItem)?.Content as LanguageItem;
+            if (selected is not null)
+                Strings.TranslationManager.CurrentCulture = selected.Culture;
         }
     }
 }

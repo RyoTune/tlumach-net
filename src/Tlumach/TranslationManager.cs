@@ -200,7 +200,9 @@ namespace Tlumach
             CultureInfo? neutral = null;
 
             if (culture.IsNeutralCulture)
+            {
                 neutral = culture;
+            }
             else
             {
                 string cultureName = culture.Name;
@@ -236,25 +238,6 @@ namespace Tlumach
         }
 
         /// <summary>
-        /// Lists culture names listed in the configuration file, if one was used.
-        /// </summary>
-        /// <returns>The list of culture names (every name is contained in uppercase).</returns>
-        public IList<string> ListCulturesInConfiguration()
-        {
-            List<string> result = [];
-            if (_defaultConfig is null)
-                return result;
-
-            foreach (var item in _defaultConfig.Translations.Keys)
-            {
-                if (!TranslationConfiguration.KEY_TRANSLATION_OTHER.Equals(item, StringComparison.Ordinal))
-                    result.Add(item);
-            }
-
-            return result;
-        }
-
-        /// <summary>
         /// From the list of available language files obtained using <see cref="ListTranslationFiles()"/>, retrieve culture information (needed for language names and to switch application language).
         /// </summary>
         /// <param name="fileNames">The list of names obtained from <see cref="ListTranslationFiles()"/>.</param>
@@ -263,6 +246,7 @@ namespace Tlumach
         {
             if (fileNames is null)
                 throw new ArgumentNullException(nameof(fileNames));
+
             IList<CultureInfo> result = [];
             string cultureName;
             CultureInfo cultureInfo;
@@ -270,10 +254,18 @@ namespace Tlumach
             string fileExt;
             foreach (var filename in fileNames)
             {
-                idx = filename.LastIndexOf('_');
+                fileExt = Path.GetExtension(filename);
+#pragma warning disable CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
+                BaseParser? parser = FileFormats.GetParser(fileExt.ToLowerInvariant(), true);
+#pragma warning restore CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
+                char localeSeparator = '_';
+
+                if (parser is not null)
+                    localeSeparator = parser.GetLocaleSeparatorChar();
+
+                idx = filename.LastIndexOf(localeSeparator);
                 if (idx >= 0 && idx < filename.Length - 1)
                 {
-                    fileExt = Path.GetExtension(filename);
                     cultureName = filename.Substring(idx + 1, filename.Length - (idx + 1) - fileExt.Length);
                     try
                     {
@@ -283,12 +275,9 @@ namespace Tlumach
                         // The mapping to default regions is hardcoded into .NET for all neutral cultures.
                         cultureInfo = new CultureInfo(cultureName);
                         if (cultureInfo.IsNeutralCulture)
-                        {
                             cultureInfo = CultureInfo.CreateSpecificCulture(cultureName);
-                        }
 
                         result.Add(cultureInfo);
-                        continue;
                     }
                     catch (CultureNotFoundException)
                     {
@@ -363,6 +352,26 @@ namespace Tlumach
         }
 
         /// <summary>
+        /// Lists culture names listed in the configuration file, if one was used.
+        /// </summary>
+        /// <returns>The list of culture names (every name is contained in uppercase).</returns>
+        public IList<string> ListCulturesInConfiguration()
+        {
+            List<string> result = [];
+            if (_defaultConfig is null)
+                return result;
+
+            foreach (var item in _defaultConfig.Translations.Keys)
+            {
+                // We do not include "other" because we return only locale names, explicitly listed in the configuration.
+                if (!TranslationConfiguration.KEY_TRANSLATION_OTHER.Equals(item, StringComparison.Ordinal))
+                    result.Add(item);
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Retrieves the value based on the default configuration and culture.
         /// </summary>
         /// <param name="key">The key of the translation entry to retrieve.</param>
@@ -403,8 +412,10 @@ namespace Tlumach
             if (config is null)
                 throw new ArgumentNullException(nameof(config));
 
+#pragma warning disable MA0015 // config.DefaultFile is not a valid parameter name
             if (config.DefaultFile is null)
                 throw new ArgumentNullException("config.DefaultFile");
+#pragma warning restore MA0015
 
             if (culture is null)
                 throw new ArgumentNullException(nameof(culture));
@@ -589,6 +600,10 @@ namespace Tlumach
                 defaultFileName = defaultFileName.Substring(0, defaultFileName.Length - extension.Length);
             }
 
+            string fileNameMatch;
+            char localeSeparator;
+            BaseParser? parser;
+
             List<string> fileNames = [];
 
             if (LoadFromDisk)
@@ -602,12 +617,17 @@ namespace Tlumach
                 if (!string.IsNullOrEmpty(filePath))
                 {
                     // Enumerate all supported files, strip the extension, check if the file's base name matches "fileName", and add all matching filenames to the list
-                    string fileNameMatch1 = defaultFileName + "_";
-                    string fileNameMatch2 = defaultFileName + ".";
 
                     string name;
                     foreach (var extension in FileFormats.GetSupportedExtensions())
                     {
+                        parser = FileFormats.GetParser(extension, true);
+                        localeSeparator = '_';
+
+                        if (parser is not null)
+                            localeSeparator = parser.GetLocaleSeparatorChar();
+
+                        fileNameMatch = defaultFileName + localeSeparator;
 #if NET9_0_OR_GREATER
                         var diskFiles = Directory.EnumerateFiles(filePath, "*" + extension, new EnumerationOptions() { RecurseSubdirectories = false, IgnoreInaccessible = true, MatchType = MatchType.Simple });
 #else
@@ -616,8 +636,9 @@ namespace Tlumach
                         foreach (var diskFile in diskFiles)
                         {
                             name = Path.GetFileName(diskFile);
-                            if ((name.StartsWith(fileNameMatch1, StringComparison.OrdinalIgnoreCase) || name.StartsWith(fileNameMatch2, StringComparison.OrdinalIgnoreCase)) &&
-                                (name.Length == defaultFileName.Length + 5))
+
+                            // The expected name includes the base name + separator + at least two characters for a language name
+                            if (name.StartsWith(fileNameMatch, StringComparison.OrdinalIgnoreCase) && (name.Length >= defaultFileName.Length + 2))
                                 fileNames.Add(name);
                         }
                     }
@@ -632,7 +653,7 @@ namespace Tlumach
                 string baseName;
                 int idx, idxDot, idxUs;
 
-                string fileNameMatch = "." + defaultFileName;
+                fileNameMatch = "." + defaultFileName;
 
                 var resourceNames = assembly.GetManifestResourceNames();
 #pragma warning disable CA1862 // Prefer the string comparison method overload of '...' that takes a 'StringComparison' enum value to perform a case-insensitive comparison
@@ -642,44 +663,45 @@ namespace Tlumach
 
                 foreach (var resourcePath in resourcePaths)
                 {
-                    // we enumerate language-specific files like "strings_de-AT",
-                    // and we have to match the generic name, such as "strings", with the name of the resource.
-                    // But then, we add a specific name to the list so that we can turn it to the CultureInfo object
-#pragma warning disable CA1310 // Specify StringComparison for correctness
-#pragma warning disable MA0074 // Specify StringComparison for correctness
-                    idxUs = resourcePath.LastIndexOf('_');
-                    idxDot = resourcePath.LastIndexOf('.');
-#pragma warning restore MA0074 // Specify StringComparison for correctness
-#pragma warning restore CA1310 // Specify StringComparison for correctness
-
-                    // Here, we are guessing which of the separators to use
-                    if (idxDot != -1 && idxUs != -1)
+                    foreach (var extension in FileFormats.GetSupportedExtensions())
                     {
-                        if (idxDot == resourcePath.Length - 6)
-                            idx = idxDot;
-                        else
-                        if (idxUs == resourcePath.Length - 6)
-                            idx = idxUs;
-                        else
-                        if (idxUs < idxDot)
-                            idx = idxDot;
-                        else
-                            idx = idxUs;
-                    }
-                    else
-                    if (idxDot != -1)
-                        idx = idxDot;
-                    else
-                        idx = idxUs;
+                        // skip resources with unmatching extensions
+                        if (!extension.Equals(Path.GetExtension(resourcePath), StringComparison.OrdinalIgnoreCase))
+                            continue;
 
-                    if (idx > 0)
-                    {
-                        baseName = resourcePath.Substring(0, idx);
-                        if (baseName.EndsWith(fileNameMatch, StringComparison.OrdinalIgnoreCase))
+                        parser = FileFormats.GetParser(extension, true);
+                        localeSeparator = '_';
+
+                        if (parser is not null)
+                            localeSeparator = parser.GetLocaleSeparatorChar();
+
+                        // we enumerate language-specific files like "Strings_de-AT",
+                        // and we have to match the generic name, such as "strings", with the name of the resource.
+                        // But then, we add a specific name to the list so that we can turn it to the CultureInfo object
+
+                        // Assuming e.g., Tlumach.Tests.Strings.arb to be the default translation file name,
+                        // from Tlumach.Tests.Strings_en.arb, we first get
+                        // Tlumach.Tests.Strings_en
+                        baseName = resourcePath.Substring(0, resourcePath.Length - extension.Length);
+
+                        // ...then find the '_' separator
+                        idx = baseName.LastIndexOf(localeSeparator);
+
+                        if (idx > 0)
                         {
-                            idx = baseName.LastIndexOf(fileNameMatch, StringComparison.OrdinalIgnoreCase);
-                            if (idx < resourcePath.Length - 1)
-                                fileNames.Add(resourcePath.Substring(idx + 1));
+                            // ... then obtain "Tlumach.Tests.Strings"
+                            baseName = baseName.Substring(0, idx);
+
+                            // ... check if the name ends with ".Strings"
+                            if (baseName.EndsWith(fileNameMatch, StringComparison.OrdinalIgnoreCase))
+                            {
+                                //...take the position of ".Strings"
+                                idx = baseName.LastIndexOf(fileNameMatch, StringComparison.OrdinalIgnoreCase);
+
+                                // ... and from Tlumach.Tests.Strings_en.arb, take the name "Strings_en.arb"
+                                if (idx < resourcePath.Length - 1)
+                                    fileNames.Add(resourcePath.Substring(idx + 1));
+                            }
                         }
                     }
                 }

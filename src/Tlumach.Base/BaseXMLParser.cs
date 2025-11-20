@@ -21,12 +21,16 @@ using System.Reflection;
 using System.Xml;
 using System.Xml.Linq;
 
+#if GENERATOR
+namespace Tlumach.Generator
+#else
 namespace Tlumach.Base
+#endif
 {
     public abstract class BaseXMLParser : BaseParser
     {
         // "xml" namespace is special: must be explicitly referenced
-        protected const string CXmlNamespace = "http://www.w3.org/XML/1998/namespace";
+        protected static readonly XNamespace CXmlNamespace = "http://www.w3.org/XML/1998/namespace";
 
         public override Translation? LoadTranslation(string translationText, CultureInfo? culture)
         {

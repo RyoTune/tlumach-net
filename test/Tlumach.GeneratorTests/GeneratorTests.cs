@@ -8,21 +8,21 @@ using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-using Tlumach.Base;
+using Tlumach.Generator;
 
 namespace Tlumach.Tests
 {
     public class GeneratorTests
     {
-        const string TestFilesPath = "..\\..\\..\\TestData\\Generator";
+        private const string TestFilesPath = "..\\..\\..\\TestData\\Generator";
 
-        internal class TestGenerator : Tlumach.Base.BaseGenerator
+        internal class TestGenerator : Tlumach.Generator.BaseGenerator
         {
             internal static string? GenerateClass(string path, string projectDir, string usingNamespace)
             {
                 Dictionary<string, string> options = new();
                 options.Add("UsingNamespace", usingNamespace);
-                return Tlumach.Base.BaseGenerator.GenerateClass(path, projectDir,  options);
+                return Tlumach.Generator.BaseGenerator.GenerateClass(path, projectDir,  options);
             }
         }
 

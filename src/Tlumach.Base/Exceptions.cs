@@ -18,7 +18,11 @@
 
 using System.Globalization;
 
+#if GENERATOR
+namespace Tlumach.Generator
+#else
 namespace Tlumach.Base
+#endif
 {
 #pragma warning disable MA0048
 #pragma warning disable CA1032 // Implement standard exception constructors

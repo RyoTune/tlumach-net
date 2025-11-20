@@ -20,7 +20,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+#if GENERATOR
+namespace Tlumach.Generator
+#else
 namespace Tlumach.Base
+#endif
 {
     /// <summary>
     /// Contains translation entries that belong to one locale as a tree - this .

@@ -40,6 +40,7 @@ ScaffoldingReadMe.txt
 # Visual Studio artifacts
 *.user
 *.cache
+.vs/
 
 # Others
 ~$*

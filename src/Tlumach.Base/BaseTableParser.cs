@@ -20,7 +20,11 @@ using System.Data.Common;
 using System.Globalization;
 using System.Reflection;
 
+#if GENERATOR
+namespace Tlumach.Generator
+#else
 namespace Tlumach.Base
+#endif
 {
     /// <summary>
     ///  The base class for CSV and TSV parsers.

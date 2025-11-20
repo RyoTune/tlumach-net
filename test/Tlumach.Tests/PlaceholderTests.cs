@@ -20,6 +20,11 @@ namespace Tlumach.Tests
             JsonParser.Use();
         }
 
+        public PlaceholderTests()
+        {
+            ArbParser.TextProcessingMode = TextFormat.Arb;
+        }
+
         [Theory]
         [InlineData(0)]
         [InlineData(1)]

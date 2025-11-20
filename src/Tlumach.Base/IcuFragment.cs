@@ -23,7 +23,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
+#if GENERATOR
+namespace Tlumach.Generator
+#else
 namespace Tlumach.Base
+#endif
 {
     /// <summary>
     /// The parser to handle ICU-compatible placeholders in templated strings.

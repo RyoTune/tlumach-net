@@ -18,7 +18,11 @@
 
 using System;
 
+#if GENERATOR
+namespace Tlumach.Generator
+#else
 namespace Tlumach.Base
+#endif
 {
     /// <summary>
     /// The parser for simple ini-style translation files.

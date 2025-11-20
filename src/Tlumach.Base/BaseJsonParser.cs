@@ -25,12 +25,11 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-#if USE_NEWTONSOFT
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-#endif
-
+#if GENERATOR
+namespace Tlumach.Generator
+#else
 namespace Tlumach.Base
+#endif
 {
     /// <summary>
     /// The base parser for JSON-formatted configuration and translation files.

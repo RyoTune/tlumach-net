@@ -20,7 +20,11 @@ using System.Globalization;
 using System.Reflection;
 using System.Text;
 
+#if GENERATOR
+namespace Tlumach.Generator
+#else
 namespace Tlumach.Base
+#endif
 {
 #pragma warning disable CA1510 // Use 'ArgumentNullException.ThrowIfNull' instead of explicitly throwing a new exception instance
 #pragma warning disable CA1305 // The behavior of '...' could vary based on the current user's locale settings. Replace this call ...
