@@ -778,7 +778,7 @@ namespace Tlumach
                 translationContent = InternalLoadFileContent(config.Assembly, configRef, config.DirectoryHint, ref usedFileName);
             }
 
-            string? fileExtension = Path.GetExtension(config.DefaultFile);
+            string? fileExtension = Path.GetExtension((usedFileName is null) ? config.DefaultFile : usedFileName);
 
             BaseParser? parser = FileFormats.GetParser(fileExtension);
             if (parser is null)
@@ -1015,6 +1015,18 @@ namespace Tlumach
 
             // Nothing was found, return an empty entry.
             return TranslationEntry.Empty;
+        }
+
+        /// <summary>
+        /// This method should be called when a change of the system culture is detected, so that IF the default culture of the TranslationManager is set to <seealso cref="CultureInfo.CurrentCulture"/>, the manager can notify listeners about the change.
+        /// </summary>
+        public void SystemCultureUpdated()
+        {
+            if (_culture == CultureInfo.CurrentCulture || _culture == CultureInfo.CurrentUICulture)
+            {
+                // Notify listeners about the change
+                OnCultureChanged?.Invoke(this, new CultureChangedEventArgs(_culture));
+            }
         }
     }
 }

@@ -238,7 +238,7 @@ namespace Tlumach.Base
         public string ProcessTemplatedValue(CultureInfo culture, TextFormat textProcessingMode, OrderedDictionary parameters)
         {
             return InternalProcessTemplatedValue(
-                (key, _) =>
+                (key, index) =>
                 {
                     // This will cover the case of named parameters, and if the parameters are requested by index, the caller can provide numbers as string keys.
                     if (parameters.Contains(key))
@@ -269,6 +269,12 @@ namespace Tlumach.Base
                         }
                     }
 
+                    if (index >= 0 && index < parameters.Count)
+                    {
+                        object? value = parameters[index];
+                        return value is null ? "null" : value;
+                    }
+
                     return null;
                 },
                 culture,
@@ -278,14 +284,29 @@ namespace Tlumach.Base
         public string ProcessTemplatedValue(CultureInfo culture, TextFormat textProcessingMode, object parameters)
         {
             return InternalProcessTemplatedValue(
-                (key, _) =>
+                (key, index) =>
                 {
-                    if (Utils.TryGetPropertyValue(parameters, key, out object? value))
+                    object? value = null;
+
+                    if (Utils.TryGetPropertyValue(parameters, key, out value))
+                        return value is null ? "null" : value;
+
+                    if (index >= 0)
                     {
+                        if (parameters is object[] arr)
+                        {
+                            if (index < arr.Length)
+                            {
+                                value = arr[index];
+                                return value is null ? "null" : value;
+                            }
+                        }
+
+                        value = parameters;
                         return value is null ? "null" : value;
                     }
-                    else
-                        return null;
+
+                    return null;
                 },
                 culture,
                 textProcessingMode);

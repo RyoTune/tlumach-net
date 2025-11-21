@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.WinUI", "Tlumach.Wi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.UWP", "Tlumach.UWP\Tlumach.UWP.csproj", "{18CB1C58-3011-4472-91ED-6389779E4B49}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Sample.Translation", "Tlumach.Sample.Translation\Tlumach.Sample.Translation.csproj", "{8EF98A27-9936-4622-B7FD-CCAF7E92BE7B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Sample.Translation", "..\samples\Tlumach.Sample.Translation\Tlumach.Sample.Translation.csproj", "{8EF98A27-9936-4622-B7FD-CCAF7E92BE7B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.GeneratorTests", "..\test\Tlumach.GeneratorTests\Tlumach.GeneratorTests.csproj", "{33B30A1F-B317-48AF-A1B1-7907C5E6F21A}"
 EndProject

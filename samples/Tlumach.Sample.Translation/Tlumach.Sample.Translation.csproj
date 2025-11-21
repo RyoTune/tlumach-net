@@ -11,16 +11,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="sample-AT.toml" />
-        <None Remove="sample.arb" />
-        <None Remove="Sample.cfg" />
-        <None Remove="sample_de.toml" />
-        <None Remove="sample_hr.json" />
-        <None Remove="sample_sk.ini" />
-        <None Remove="sample_uk.tsv" />
-    </ItemGroup>
-
-    <ItemGroup>
         <AdditionalFiles Include="Sample.cfg" />
     </ItemGroup>
 
@@ -31,17 +21,25 @@
         <EmbeddedResource Include="sample_hr.json" />
         <EmbeddedResource Include="sample_sk.ini" />
         <EmbeddedResource Include="sample_uk.tsv" />
+        <!-- The duplicate extension is needed because .NET gets crazy when it sees the ".resx" extension and eliminates it -->
+        <EmbeddedResource Update="sample_pl.resx.resx">
+            <Type>Non-Resx</Type>
+        </EmbeddedResource>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Tlumach.Base\Tlumach.Base.csproj" />
-        <ProjectReference Include="..\Tlumach.Generator\Tlumach.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-        <ProjectReference Include="..\Tlumach\Tlumach.csproj" />
+        <ProjectReference Include="..\..\src\Tlumach.Base\Tlumach.Base.csproj" />
+        <ProjectReference Include="..\..\src\Tlumach.Generator\Tlumach.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\..\src\Tlumach\Tlumach.csproj" />
     </ItemGroup>
+
+    <!--
+    Uncomment this if you want to take a peek into the generated source code.
 
     <PropertyGroup>
         <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
         <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\Generated</CompilerGeneratedFilesOutputPath>
     </PropertyGroup>
+    -->
 
 </Project>

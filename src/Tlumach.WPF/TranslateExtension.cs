@@ -53,61 +53,161 @@ namespace Tlumach.WPF
             });
         }
 
-        // Local listener to host the incoming Unit binding
-        private sealed class BindingListener : DependencyObject
+        public TranslateExtension(object unit)
         {
-            public static readonly DependencyProperty ValueProperty =
-                DependencyProperty.Register(
-                    nameof(Value),
-                    typeof(object),
-                    typeof(BindingListener),
-                    new PropertyMetadata(defaultValue: null, OnChanged));
+            _dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
 
-            public object? Value
+            _core = new XamlTranslateCore(a =>
             {
-                get => GetValue(ValueProperty);
-                set => SetValue(ValueProperty, value);
-            }
-
-#pragma warning disable MA0046 // The delegate must have 2 parameters
-            public event Action<object?>? Changed;
-#pragma warning restore MA0046 // The delegate must have 2 parameters
-
-            private static void OnChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-                => ((BindingListener)d).Changed?.Invoke(e.NewValue);
+                if (_dispatcher.CheckAccess())
+                    a();
+                else
+#pragma warning disable MA0134 // Observe result of async code
+                    _dispatcher.BeginInvoke(a);
+#pragma warning restore MA0134 // Observe result of async code
+            });
+            Unit = unit;
         }
 
         private BindingListener? _listener;
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            // If Unit is a binding, attach it to our listener so we get live updates.
+            // 1) Resolve Unit (static or bound)
             if (Unit is BindingBase unitBinding)
             {
                 _listener ??= new BindingListener();
-                _listener.Changed -= OnUnitChanged; // avoid duplicates
+                _listener.Changed -= OnUnitChanged;
                 _listener.Changed += OnUnitChanged;
+                _listener.Attach(unitBinding);
 
-                BindingOperations.SetBinding(_listener, BindingListener.ValueProperty, unitBinding);
-
-                // Initialize core.Unit from current listener value
                 _core.Unit = _listener.Value as TranslationUnit;
             }
             else
             {
-                // literal TranslationUnit (or null)
                 _core.Unit = Unit as TranslationUnit;
             }
 
-            // Return a binding to the live Value of the core
-            return new Binding(nameof(XamlTranslateCore.Value))
+            // 2) Create binding from target property to _core.Value
+            var binding = new Binding(nameof(XamlTranslateCore.Value))
             {
                 Source = _core,
                 Mode = BindingMode.OneWay,
             };
+
+            // 3) RETURN the binding’s ProvideValue result, NOT the Binding itself
+            return binding.ProvideValue(serviceProvider);
+
+            /*
+             * var target = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
+            var targetObject = target?.TargetObject as DependencyObject;
+            var targetProperty = target?.TargetProperty as DependencyProperty;
+            if (targetObject is null || targetProperty is null)
+                return this; // for design-time or multi-usage case
+
+            */
+
+            /*
+            var pvt = (IProvideValueTarget?)serviceProvider.GetService(typeof(IProvideValueTarget));
+            if (pvt?.TargetObject is not DependencyObject target ||
+                pvt.TargetProperty is not DependencyProperty dp)
+            {
+                // Template / design-time case: just return some placeholder
+                return this; // for design-time or multi-usage case
+            }
+
+            var proxy = new TranslateProxy();
+
+            // Set Unit
+            if (Unit is BindingBase binding)
+            {
+                var listener = new BindingListener();
+                listener.Changed += OnUnitChanged;//v => _core.Unit = v as TranslationUnit;
+                listener.Attach(binding);
+            }
+            else
+            {
+                _core.Unit = Unit as TranslationUnit;
+            }
+
+            // Bind the target property directly to core.Value
+            BindingOperations.SetBinding(
+                target,
+                dp,
+                new Binding(nameof(XamlTranslateCore.Value))
+                {
+                    Source = _core,
+                    Mode = BindingMode.OneWay,
+                });
+
+            return _core.Value ?? string.Empty;
+            */
+            /*
+            // Bind target property to proxy.Value
+            BindingOperations.SetBinding(
+                targetObject,
+                targetProperty,
+                new Binding(nameof(TranslateProxy.Value)) { Source = proxy });
+
+            // Bind proxy.Value to _core.Value
+            BindingOperations.SetBinding(
+                proxy,
+                TranslateProxy.ValueProperty,
+                new Binding(nameof(XamlTranslateCore.Value)) { Source = _core });
+
+            return proxy.Value; // actual value is irrelevant; binding takes over
+            */
         }
 
         private void OnUnitChanged(object? value)
             => _core.Unit = value as TranslationUnit;
+    }
+
+    // Local listener to host the incoming Unit binding
+    internal sealed class BindingListener : DependencyObject
+    {
+        public static readonly DependencyProperty ValueProperty =
+            DependencyProperty.Register(
+                nameof(Value),
+                typeof(object),
+                typeof(BindingListener),
+                new PropertyMetadata(defaultValue: null, OnChanged));
+
+        public object? Value
+        {
+            get => GetValue(ValueProperty);
+            set => SetValue(ValueProperty, value);
+        }
+
+#pragma warning disable MA0046 // The delegate must have 2 parameters
+        public event Action<object?>? Changed;
+#pragma warning restore MA0046 // The delegate must have 2 parameters
+
+        private static void OnChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+            => ((BindingListener)d).Changed?.Invoke(e.NewValue);
+
+        /// <summary>
+        /// Attaches a binding to this listener’s Value property.
+        /// </summary>
+        public void Attach(BindingBase binding)
+        {
+            BindingOperations.SetBinding(this, ValueProperty, binding);
+        }
+    }
+
+    public sealed class TranslateProxy : DependencyObject
+    {
+        public static readonly DependencyProperty ValueProperty =
+            DependencyProperty.Register(
+                nameof(Value),
+                typeof(string),
+                typeof(TranslateProxy),
+                new PropertyMetadata(""));
+
+        public string Value
+        {
+            get => (string)GetValue(ValueProperty);
+            set => SetValue(ValueProperty, value);
+        }
     }
 }

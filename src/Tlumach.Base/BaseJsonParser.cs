@@ -59,6 +59,7 @@ namespace Tlumach.Base
                 string? defaultLocale = null;
                 string? generatedNamespace = null;
                 string? generatedClassName = null;
+                string? textProcessingModeStr = null;
 
                 if (configObj.TryGetProperty(TranslationConfiguration.KEY_DEFAULT_FILE, out jsonValue))
                     defaultFile = jsonValue.GetString()?.Trim();
@@ -69,7 +70,12 @@ namespace Tlumach.Base
                 if (configObj.TryGetProperty(TranslationConfiguration.KEY_GENERATED_CLASS, out jsonValue))
                     generatedClassName = jsonValue.GetString()?.Trim();
 
-                TranslationConfiguration result = new TranslationConfiguration(assembly, defaultFile ?? string.Empty, generatedNamespace, generatedClassName, defaultLocale, GetTextProcessingMode());
+                if (configObj.TryGetProperty(TranslationConfiguration.KEY_TEXT_PROCESSING_MODE, out jsonValue))
+                    textProcessingModeStr = jsonValue.GetString()?.Trim();
+
+                TextFormat textProcessingMode = DecodeTextProcessingMode(textProcessingModeStr) ?? GetTextProcessingMode();
+
+                TranslationConfiguration result = new TranslationConfiguration(assembly, defaultFile ?? string.Empty, generatedNamespace, generatedClassName, defaultLocale, textProcessingMode);
 
                 if (string.IsNullOrEmpty(defaultFile))
                     return result;

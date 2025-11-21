@@ -1,17 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.0.11205.157 d18.0
+VisualStudioVersion = 18.0.11205.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Sample.WPF", "Tlumach.Sample.WPF.csproj", "{960E31EF-6AFD-446C-9CA6-E90E1CE15DDA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Base", "..\Tlumach.Base\Tlumach.Base.csproj", "{0CAA885E-1DD0-D730-9251-CD2B31F3F860}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Base", "..\..\src\Tlumach.Base\Tlumach.Base.csproj", "{0CAA885E-1DD0-D730-9251-CD2B31F3F860}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach", "..\Tlumach\Tlumach.csproj", "{BA4C7EEF-28C4-4313-8529-ABCE6597B046}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach", "..\..\src\Tlumach\Tlumach.csproj", "{BA4C7EEF-28C4-4313-8529-ABCE6597B046}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Generator", "..\Tlumach.Generator\Tlumach.Generator.csproj", "{02214F6B-8846-C56B-50F5-1C28837E31A9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Generator", "..\..\src\Tlumach.Generator\Tlumach.Generator.csproj", "{02214F6B-8846-C56B-50F5-1C28837E31A9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Sample.WPF.Translation", "..\Tlumach.Sample.WPF.Translation\Tlumach.Sample.WPF.Translation.csproj", "{577CE000-D727-75A8-96B5-1B45C8ACD73C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Sample.Translation", "..\Tlumach.Sample.Translation\Tlumach.Sample.Translation.csproj", "{624A2B87-9006-0BB1-073A-590B430BD968}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.WPF", "..\..\src\Tlumach.WPF\Tlumach.WPF.csproj", "{030A4A78-6FDB-3051-08D9-F568181D9807}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +37,14 @@ Global
 		{02214F6B-8846-C56B-50F5-1C28837E31A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02214F6B-8846-C56B-50F5-1C28837E31A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{02214F6B-8846-C56B-50F5-1C28837E31A9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{577CE000-D727-75A8-96B5-1B45C8ACD73C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{577CE000-D727-75A8-96B5-1B45C8ACD73C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{577CE000-D727-75A8-96B5-1B45C8ACD73C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{577CE000-D727-75A8-96B5-1B45C8ACD73C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{624A2B87-9006-0BB1-073A-590B430BD968}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{624A2B87-9006-0BB1-073A-590B430BD968}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{624A2B87-9006-0BB1-073A-590B430BD968}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{624A2B87-9006-0BB1-073A-590B430BD968}.Release|Any CPU.Build.0 = Release|Any CPU
+		{030A4A78-6FDB-3051-08D9-F568181D9807}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{030A4A78-6FDB-3051-08D9-F568181D9807}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{030A4A78-6FDB-3051-08D9-F568181D9807}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{030A4A78-6FDB-3051-08D9-F568181D9807}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

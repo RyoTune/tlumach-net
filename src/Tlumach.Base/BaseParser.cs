@@ -452,5 +452,21 @@ namespace Tlumach.Base
             return index + (linePosition - 1);
         }
 #pragma warning restore CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
+
+        protected static TextFormat? DecodeTextProcessingMode(string? value)
+        {
+            if (value is null)
+                return null;
+
+            // Remove a prefix if someone has put it there
+            if (value.StartsWith("TextFormat.", StringComparison.OrdinalIgnoreCase))
+                value = value.Substring(12);
+
+            // Now try to convert the value into the enum
+            if (Enum.TryParse(value, ignoreCase: true, out TextFormat result))
+                return result;
+            else
+                return null;
+        }
     }
 }

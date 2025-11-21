@@ -71,8 +71,11 @@ namespace Tlumach.Base
                 string? defaultLocale = doc.Root.Element(TranslationConfiguration.KEY_DEFAULT_LOCALE)?.Value.Trim();
                 string? generatedNamespace = doc.Root.Element(TranslationConfiguration.KEY_GENERATED_NAMESPACE)?.Value.Trim();
                 string? generatedClassName = doc.Root.Element(TranslationConfiguration.KEY_GENERATED_CLASS)?.Value.Trim();
+                string? textProcessingModeStr = doc.Root.Element(TranslationConfiguration.KEY_TEXT_PROCESSING_MODE)?.Value.Trim();
 
-                TranslationConfiguration result = new TranslationConfiguration(assembly, defaultFile ?? string.Empty, generatedNamespace, generatedClassName, defaultLocale, GetTextProcessingMode());
+                TextFormat textProcessingMode = DecodeTextProcessingMode(textProcessingModeStr) ?? GetTextProcessingMode();
+
+                TranslationConfiguration result = new TranslationConfiguration(assembly, defaultFile ?? string.Empty, generatedNamespace, generatedClassName, defaultLocale, textProcessingMode);
 
                 if (string.IsNullOrEmpty(defaultFile))
                     return result;

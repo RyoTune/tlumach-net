@@ -56,9 +56,16 @@ namespace Tlumach
                     Subscribe(_translationManager);
 
                 // Set current value
-                Value = _unit?.CurrentValue ?? string.Empty;
+                // initial text
+                SetValueFromUnit(forceNotify: true);
+                //_postToUi(() => Value = _unit?.CurrentValue ?? string.Empty);
 
-                _postToUi(() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value))));
+                /*string toSet = _unit?.CurrentValue ?? string.Empty;
+                if (!string.Equals(_value, toSet, StringComparison.Ordinal))
+                {
+                    _value = toSet;
+                    _postToUi(() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value))));
+                }*/
             }
         }
 
@@ -78,8 +85,10 @@ namespace Tlumach
 
         private void OnCultureChanged(object? sender, CultureChangedEventArgs e)
         {
-            if (_unit is null) return;
-            _postToUi(() => Value = _unit.CurrentValue);
+            SetValueFromUnit(forceNotify: false);
+            /*if (_unit is null) return;
+            var s = _unit.CurrentValue;
+            _postToUi(() => Value = _unit.CurrentValue);*/
         }
 
         // Subscribe/Unsubscribe by name to avoid taking a hard reference on your manager type
@@ -91,6 +100,24 @@ namespace Tlumach
         private void Unsubscribe(TranslationManager mgr)
         {
             mgr.OnCultureChanged -= OnCultureChanged;
+        }
+
+        private void SetValueFromUnit(bool forceNotify)
+        {
+            var newText = _unit?.CurrentValue ?? string.Empty;
+
+            _postToUi(() =>
+            {
+                if (forceNotify)
+                {
+                    _value = newText;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
+                }
+                else
+                {
+                    Value = newText;
+                }
+            });
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

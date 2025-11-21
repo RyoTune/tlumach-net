@@ -52,6 +52,11 @@ namespace Tlumach.Base
         public const string KEY_GENERATED_CLASS = "generatedClass";
 
         /// <summary>
+        /// The name of the class that the generator puts to the generated source code.
+        /// </summary>
+        public const string KEY_TEXT_PROCESSING_MODE = "textProcessingMode";
+
+        /// <summary>
         /// The optional notation to specify the file, from which all translations not listed specifically are loaded. This values gets converted to "other" in the code but may be used for clarity in the configuration files.
         /// </summary>
         public const string KEY_TRANSLATION_ASTERISK = "*";

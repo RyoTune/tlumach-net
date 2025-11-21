@@ -3,6 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:tlumach="clr-namespace:Tlumach.WPF;assembly=Tlumach.WPF"
+        xmlns:translations="clr-namespace:Tlumach.Sample;assembly=Tlumach.Sample.Translation"
         xmlns:local="clr-namespace:Tlumach.Sample.WPF"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
@@ -15,8 +17,9 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Bottom" HorizontalAlignment="Center">Hello</TextBlock>
-        <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" HorizontalAlignment="Center">Welcome</TextBlock>
+        <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Bottom" HorizontalAlignment="Center" Text="{tlumach:Translate {x:Static translations:Strings.Hello}}"/>
+        <!--Text="{tlumach:Translate Unit={x:Static translations:Strings.Hello}}"-->
+        <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" HorizontalAlignment="Center" Text="{tlumach:Translate {x:Static translations:Strings.Welcome}}"/>
         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
             <ComboBox Name="LanguageSelector" SelectionChanged="LanguageSelector_SelectionChanged" />
             <TextBlock Name="CopyrightLabel"/>

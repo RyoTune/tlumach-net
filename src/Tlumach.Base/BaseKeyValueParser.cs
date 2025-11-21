@@ -136,7 +136,12 @@ namespace Tlumach.Base
             lines.TryGetValue(TranslationConfiguration.KEY_GENERATED_CLASS, out valueTuple);
             string? generatedClassName = valueTuple?.unescaped?.Trim();
 
-            TranslationConfiguration result = new TranslationConfiguration(assembly, defaultFile ?? string.Empty, generatedNamespace, generatedClassName, defaultLocale, GetTextProcessingMode());
+            lines.TryGetValue(TranslationConfiguration.KEY_TEXT_PROCESSING_MODE, out valueTuple);
+            string? textProcessingModeStr = valueTuple?.unescaped?.Trim();
+
+            TextFormat textProcessingMode = DecodeTextProcessingMode(textProcessingModeStr) ?? GetTextProcessingMode();
+
+            TranslationConfiguration result = new TranslationConfiguration(assembly, defaultFile ?? string.Empty, generatedNamespace, generatedClassName, defaultLocale, textProcessingMode);
 
             if (string.IsNullOrEmpty(defaultFile))
                 return result;
