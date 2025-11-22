@@ -651,7 +651,7 @@ namespace Tlumach
                 string resourceName = defaultFileName.Replace("/", ".").Replace(@"\", ".").ToUpperInvariant();
 
                 string baseName;
-                int idx, idxDot, idxUs;
+                int idx;
 
                 fileNameMatch = "." + defaultFileName;
 

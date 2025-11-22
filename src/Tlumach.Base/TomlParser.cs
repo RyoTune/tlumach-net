@@ -297,7 +297,6 @@ namespace Tlumach.Base
                     return (null, value);
             }
         }
-#pragma warning restore CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
 
         protected override bool IsValidSectionNameChar(string content, int offset) => base.IsValidKeyChar(content, offset);
 
@@ -309,6 +308,7 @@ namespace Tlumach.Base
                 (((offset < content.Length - 1) && content[offset + 1] == '\n') ||
                  ((offset < content.Length - 2) && content[offset + 1] == '\r' && content[offset + 2] == '\n'));
         }
+#pragma warning restore CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
 
         protected override bool AcceptUnquotedEmptyValues() => false;
     }

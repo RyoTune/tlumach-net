@@ -107,7 +107,7 @@ namespace Tlumach.Base
                 extraParsers = string.Empty;
             foreach (string extraParser in extraParsers.Split(',', ';', ' '))
             {
-                if (extraParser.Length > 0 && !parserClassNames.Contains(extraParser))
+                if (extraParser.Length > 0 && !parserClassNames.Contains(extraParser, StringComparer.OrdinalIgnoreCase))
                     parserClassNames.Add(extraParser);
             }
 
@@ -116,7 +116,7 @@ namespace Tlumach.Base
             builder.AppendLine("#nullable enable\n");
             builder.AppendLine("using System;\nusing System.Reflection;\n");
             builder.AppendLine("using Tlumach.Base;");
-            if (!(string.IsNullOrEmpty(usingNamespace) || usingNamespace.Equals("Tlumach", StringComparison.Ordinal)))
+            if (!string.IsNullOrEmpty(usingNamespace) && !usingNamespace.Equals("Tlumach", StringComparison.Ordinal))
                 builder.Append("using ").Append(usingNamespace).AppendLine(";");
             builder.AppendLine("using Tlumach;\n");
             builder.Append("namespace ").AppendLine(configuration.Namespace);
@@ -179,11 +179,13 @@ namespace Tlumach.Base
                 if (value.IsTemplated)
                     unitClassName = "TemplatedTranslationUnit";
                 else
+                {
                     unitClassName = "TranslationUnit";
 
-                if (@namespace.Length > 0)
-                {
-                    unitClassName = @namespace + "." + unitClassName;
+                    if (@namespace.Length > 0)
+                    {
+                        unitClassName = @namespace + "." + unitClassName;
+                    }
                 }
 
                 if (groupStart)

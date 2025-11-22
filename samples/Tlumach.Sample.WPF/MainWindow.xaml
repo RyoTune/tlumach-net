@@ -7,7 +7,7 @@
         xmlns:translations="clr-namespace:Tlumach.Sample;assembly=Tlumach.Sample.Translation"
         xmlns:local="clr-namespace:Tlumach.Sample.WPF"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="WPF sample for Tlumach" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
