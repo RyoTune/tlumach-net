@@ -88,11 +88,11 @@ namespace Tlumach.WinUI
                 BindingOperations.SetBinding(_listener, BindingListener.ValueProperty, unitBinding);
 
                 // Initialize core.Unit from current listener value
-                _core.Unit = _listener.Value as TranslationUnit;
+                _core.Unit = _listener.Value as Tlumach.TranslationUnit;
             }
             else
             {
-                _core.Unit = Unit as TranslationUnit;
+                _core.Unit = Unit as Tlumach.TranslationUnit;
             }
 
             // Return a live binding to Value
@@ -105,6 +105,6 @@ namespace Tlumach.WinUI
         }
 
         private void OnUnitChanged(object? value)
-            => _core.Unit = value as TranslationUnit;
+            => _core.Unit = value as Tlumach.TranslationUnit;
     }
 }
