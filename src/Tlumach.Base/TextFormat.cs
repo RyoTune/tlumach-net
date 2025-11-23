@@ -39,18 +39,19 @@ namespace Tlumach.Base
         BackslashEscaping,
 
         /// <summary>
-        /// Curly brackets are used to denote placeholders according to the rules defined for Arb files (those used in Dart language and Flutter framework) including the "use-escaping: true" setting.
+        /// Curly braces are used to denote placeholders according to the rules defined for Arb files (those used in Dart language and Flutter framework) including the "use-escaping: true" setting.
         /// </summary>
         Arb,
 
         /// <summary>
-        /// Curly brackets are used to denote placeholders according to the rules defined for Arb files (those used in Dart language and Flutter framework).
+        /// Curly braces are used to denote placeholders according to the rules defined for Arb files (those used in Dart language and Flutter framework).
         /// Unlike <seealso cref="Arb"/> mode, quote characters (') are not considered as escape symbols.
         /// </summary>
         ArbNoEscaping,
 
         /// <summary>
-        /// In addition to <seealso cref="BackslashEscaping"/> processing, curly brackets are used to denote placeholders according to the .NET rules used by String.Format().
+        /// Curly braces are used to denote placeholders according to the .NET rules used by String.Format().
+        /// Text is considered to be optionally escaped, and an attempt is made to un-escape it according to <seealso cref="BackslashEscaping"/> rules.
         /// </summary>
         DotNet,
     }

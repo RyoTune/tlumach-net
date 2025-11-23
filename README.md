@@ -8,7 +8,12 @@
 
 Tlumach.NET is a flexible library that provides translation and localization support to all kinds of .NET applications: from desktop WinForms, WPF, WinUI, and console to mobile MAUI and Avalonia to server Razor and Blazor.
 
+## Why Tlumach
+
 The goal of the library is to support different formats of translation files and to support different languages and locales concurrently (even within one thread).
+Also, Tlumach works with source files residing in resources or in disk files, which makes maintenance of translations easier than dealing with resource compilation and language DLLs.
+Finally, the application language can be switched without restarting the application.
+And if you are bound to .resx format, Tlumach supports .resx files in their source form (no compilation required).
 
 ## Features
 
@@ -26,7 +31,7 @@ The features of Tlumach include:
 * Support for multiple translation sets in one project. For example, you can keep server log strings in one file and client messages in another.
 * Each translation set can have a hierarchy of groups of translation entries, enabling easy management of translations (depending on the source format).
 * Automatic recognition and support for templated strings in Arb and .NET formats. This includes support for .NET- and Arb-style placeholders and support of main ICU features ("number", "select", and "plural" types) in Arb-style placeholders. (Note: placeholder style is independent of the file format, i.e., you can use Arb-style placeholders in a ResX or TOML translation file.)
-* The possibility to control the found translation entries or provide entries for missing keys via events (may be necessary if an application should use some phrases configured by a user rather than from translations).
+* The possibility to control the found translation entries or provide entries for missing keys via events (it may be necessary if an application should use some phrases configured by a user rather than from translations).
 
 ## Supported platforms and frameworks
 
@@ -39,7 +44,7 @@ The features of Tlumach include:
 ## Documentation
 
 Tlumach documentation can be conveniently read in the [Tlumach section of Allied Bits site](https://alliedbits.com/tlumach).
-The source files of the documentation are available in the [Tlumach repository](https://github.com/Allied-Bits-Ltd/tlumach), in the "docs" directory.
+The source files of the documentation are available in the [Tlumach repository on GitHub](https://github.com/Allied-Bits-Ltd/tlumach), in the "docs" directory.
 
 ## Help and support
 
@@ -47,6 +52,6 @@ For general discussions and suggestions, you are welcome to use the [Discussions
 
 If you need help with issues or want to report a bug, [please open an issue](https://github.com/Allied-Bits-Ltd/tlumach/issues/new/choose) and include the necessary details (including the relevant configuration and translation files) to help us better understand the problem. Providing this information will aid in resolving the issue effectively.
 
+## Getting started
 
-
-
+There are several ways to use Tlumach depending on what type of application you have. The included samples cover the use with XAML-based frameworks (most common scenario for desktop and mobile development), and they also show how a text and its translations can be accessed from code (useful in web applications and servers). For a formal guidance on getting started, please check the [Getting Started section](https://alliedbits.com/tlumach/articles/usage.md) of the documentation.

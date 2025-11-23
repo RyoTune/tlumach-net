@@ -3,6 +3,7 @@
     <PropertyGroup>
         <TargetFrameworks>net9.0;net10.0</TargetFrameworks>
         <LangVersion>8</LangVersion>
+		<!-- The properties specific to this project (not present in Tlumach.Sample.Translation) -->
         <TlumachGeneratorExtraParsers>ArbParser,IniParser,JsonParser,ResxParser,TomlParser,TsvParser</TlumachGeneratorExtraParsers>
         <TlumachGeneratorUsingNamespace>Tlumach.Avalonia</TlumachGeneratorUsingNamespace>
     </PropertyGroup>
@@ -30,6 +31,7 @@
     </ItemGroup>
 
     <ItemGroup>
+		<!-- The reference specific to this project (not present in Tlumach.Sample.Translation) -->
         <ProjectReference Include="..\..\src\Tlumach.Avalonia\Tlumach.Avalonia.csproj" />
         <ProjectReference Include="..\..\src\Tlumach.Base\Tlumach.Base.csproj" />
         <ProjectReference Include="..\..\src\Tlumach.Generator\Tlumach.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />

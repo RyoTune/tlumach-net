@@ -1,0 +1,9 @@
+TranslationManager
+Tlumach
+XAML-based
+XAML
+Avalonia
+WinUI
+Arb
+WinForms
+TranslationUnit

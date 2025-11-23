@@ -1,0 +1,82 @@
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "files": [
+            "**.csproj"
+          ],
+          "src": "../src",
+          "exclude": [
+            "**/Tlumach.WPF/**",
+            "**/Tlumach.WinUI/**",
+            "**/Tlumach.Avalonia/**",
+            "**/Tlumach.MAUI/**"
+          ]
+        }
+      ],
+      "dest": "api",
+      "properties": {
+        "TargetFramework": "net10.0"
+      },
+      "namespaceLayout":"nested",
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "api/*.yml",
+          "articles/**/*.md",
+          "articles/**/*.yml",
+          "Index.md",
+          "toc.yml"
+        ]
+      }
+    ],
+    "resource": [
+      {
+        "files": [
+          "media/**",
+          "Tlumach.png",
+          "favicon.ico"
+        ]
+      }
+    ],
+    "overwrite": [
+      {
+        "files": [
+          "api/**.md"
+        ]
+      }
+    ],
+    "dest": "_site",
+    "globalMetadata": {
+      "_appName":"Tlumach",
+      "_disableContribution": true,
+      "_enableSearch": true,
+      "_gitContribute": {
+        "branch": "master",
+        "apiSpecFolder":"api",
+        "repo": "https://github.com/Allied-Bits-ltd/Tlumach"
+      },
+      "_gitUrlPattern": "github",
+      "_disableSideFilter":true,
+      "_appLogoPath": "Tlumach.png"
+    },
+    "globalMetadataFiles": [],
+    "fileMetadataFiles": [],
+    "template": [
+      "default",
+      "modern",
+      "tlumach"
+    ],
+    "postProcessors": [ "ExtractSearchIndex" ],
+    "noLangKeyword": false,
+    "keepFileLink": true,
+    "cleanupCacheHistory": false,
+    "disableGitFeatures": false
+  }
+}

@@ -297,11 +297,20 @@ namespace Tlumach.Base
 
                     if (index >= 0)
                     {
-                        if (parameters is object[] arr)
+                        if (parameters is object[] objArr)
+                        {
+                            if (index < objArr.Length)
+                            {
+                                value = objArr[index];
+                                return value is null ? "null" : value;
+                            }
+                        }
+
+                        if (parameters is Array arr)
                         {
                             if (index < arr.Length)
                             {
-                                value = arr[index];
+                                value = arr.GetValue(index);
                                 return value is null ? "null" : value;
                             }
                         }
