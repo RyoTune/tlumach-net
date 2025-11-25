@@ -5,6 +5,6 @@
   <Project Path="../../src/Tlumach/Tlumach.csproj" />
   <Project Path="../Tlumach.Sample.Translation/Tlumach.Sample.Translation.csproj" />
   <Project Path="Tlumach.Sample.MAUI.csproj">
-    <Deploy Solution="Debug|*" />
+    <Deploy Solution="Release|*" />
   </Project>
 </Solution>
