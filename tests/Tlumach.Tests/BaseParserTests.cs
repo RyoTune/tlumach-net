@@ -24,6 +24,8 @@ using System.Threading.Tasks;
 
 using Tlumach.Base;
 
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
+
 namespace Tlumach.Tests
 {
     [Trait("Category", "Parser")]
