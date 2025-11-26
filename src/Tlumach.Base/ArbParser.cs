@@ -161,9 +161,11 @@ namespace Tlumach.Base
                 TranslationEntry? entry;
                 string key;
 
+                string? escapedValue = null;
                 string? value;
                 string? target = null;
                 string? reference = null;
+                bool isTemplated = false;
 
                 key = prop.Name.Trim();
 
@@ -200,6 +202,16 @@ namespace Tlumach.Base
                     value = null;
                 }
 
+                if (value is not null)
+                {
+                    isTemplated = IsTemplatedText(value);
+                    if (TextProcessingMode == TextFormat.BackslashEscaping || TextProcessingMode == TextFormat.DotNet)
+                    {
+                        escapedValue = value;
+                        value = Utils.UnescapeString(value);
+                    }
+                }
+
                 // Pick an existing entry ...
                 if (translation.TryGetValue(key, out entry))
                 {
@@ -208,17 +220,19 @@ namespace Tlumach.Base
                     if (!(entry.Text is null && entry.Reference is null))
                         throw new GenericParserException($"Duplicate key '{key}' specified in the translation file");
                     else
+                    {
                         entry.Text = value;
+                        entry.EscapedText = escapedValue;
+                    }
                 }
                 else
                 {
                     // ... or add a new one
-                    entry = new(key, value, escapedText: null, reference: null);
+                    entry = new(key, value, escapedText: escapedValue, reference: null);
                     translation.Add(key.ToUpperInvariant(), entry);
                 }
 
-                if (value is not null)
-                    entry.IsTemplated = IsTemplatedText(value);
+                entry.IsTemplated = isTemplated;
                 entry.Reference = reference;
                 entry.Target = target;
             }

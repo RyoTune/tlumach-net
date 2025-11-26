@@ -212,11 +212,16 @@ namespace Tlumach.Base
             TextParserState state = TextParserState.LookingForLineStart;
 
             // walk through the lines one by one
-            while (offset < content.Length)
+            while (offset <= content.Length)
             {
                 switch (state)
                 {
                     case TextParserState.LookingForLineStart:
+
+                        // this call safely breaks the loop
+                        if (offset == content.Length)
+                            break;
+
                         if (content[offset] == '\n')
                         {
                             currentLineNumber++;
@@ -255,6 +260,10 @@ namespace Tlumach.Base
                     case TextParserState.SkippingTillEOL:
                     case TextParserState.SkippingWSOnlyTillEOL:
 
+                        // this call safely breaks the loop
+                        if (offset == content.Length)
+                            break;
+
                         if (content[offset] == '\n') // detect EOL
                         {
                             state = TextParserState.LookingForLineStart;
@@ -271,6 +280,11 @@ namespace Tlumach.Base
                         break;
 
                     case TextParserState.CapturingKey:
+
+                        // this call safely breaks the loop
+                        if (offset == content.Length)
+                            break;
+
                         bool? keyEndCheck = IsEndOfKey(content, offset, out int posAfterKey);
                         if (keyEndCheck is null)
                         {
@@ -311,6 +325,11 @@ namespace Tlumach.Base
                         break;
 
                     case TextParserState.LookingForSeparator:
+
+                        // this call safely breaks the loop
+                        if (offset == content.Length)
+                            break;
+
                         if (content[offset] == '\r' || content[offset] == '\n') // detect EOL as it is not permitted
                         {
                             throw new TextParseException($"Line {currentLineNumber} does not contain a key/value pair", lineStartPos, offset, currentLineNumber, currentColumnNumber);
@@ -333,6 +352,10 @@ namespace Tlumach.Base
                         break;
 
                     case TextParserState.LookingForValueStart:
+
+                        // this call safely breaks the loop
+                        if (offset == content.Length)
+                            break;
 
                         if (content[offset] == '\n') // detect EOL - it is the end of an empty value
                         {
@@ -374,6 +397,10 @@ namespace Tlumach.Base
                         break;
 
                     case TextParserState.LookingForNextNonWhitespaceInValue:
+                        // this call safely breaks the loop
+                        if (offset == content.Length)
+                            break;
+
                         if (!char.IsWhiteSpace(content[offset]))
                         {
                             offset--;
@@ -387,10 +414,13 @@ namespace Tlumach.Base
                         if (valueBuilder is null)
                             throw new TextParseException("Internal exception occurred when parsing the translation. Please report this bug to the developers.", valueStartPos, offset, currentLineNumber, currentColumnNumber);
 
-                        if (IsEscapedEOLInValue(content, offset))
+                        if (offset < content.Length)
                         {
-                            state = TextParserState.LookingForNextNonWhitespaceInValue;
-                            break;
+                            if (IsEscapedEOLInValue(content, offset))
+                            {
+                                state = TextParserState.LookingForNextNonWhitespaceInValue;
+                                break;
+                            }
                         }
 
                         bool? valueEndCheck = IsEndOfValue(content, offset, out int posAfterValue);
@@ -458,6 +488,10 @@ namespace Tlumach.Base
                         break;
 
                     case TextParserState.CapturingSectionName:
+
+                        // this call safely breaks the loop
+                        if (offset == content.Length)
+                            break;
 
                         if (IsValidSectionNameChar(content, offset)) // acceptable characters
                         {
@@ -605,14 +639,13 @@ namespace Tlumach.Base
                     {
                         // an 'escaped' value is present only when it was explicitly returned by the TOML parser to indicate that the text is escaped and must be handled as such
                         value = line.Value.Value.escaped;
-                        leaf = new TranslationTreeLeaf(key, !IsReference(value) && IsTemplatedText(value));
                     }
                     else
                     {
                         value = line.Value.Value.unescaped;
-                        leaf = new TranslationTreeLeaf(key, !IsReference(value));
                     }
 
+                    leaf = new TranslationTreeLeaf(key, !IsReference(value) && IsTemplatedText(value));
                     node!.Keys.Add(key, leaf);
                 }
             }

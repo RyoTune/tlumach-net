@@ -185,11 +185,12 @@ namespace Tlumach.Base
                     throw new GenericParserException($"Duplicate key '{key}' specified");
 
                 string? value = prop.Value.GetString();
+                bool isTemplated = false;
 
                 if (value is null)
                     throw new GenericParserException($"The value of the key '{key}' is not a string");
 
-                parentNode.Keys.Add(key, new TranslationTreeLeaf(key, IsTemplatedText(value)));
+                parentNode.Keys.Add(key, new TranslationTreeLeaf(key, !IsReference(value) && IsTemplatedText(value)));
             }
 
             // Enumerate object properties, which will be groups

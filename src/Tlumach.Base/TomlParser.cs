@@ -190,6 +190,9 @@ namespace Tlumach.Base
             if (content is null)
                 return false;
 
+            if (offset == content.Length)
+                return null;
+
             if (_lastStartOfValue == StringMarker.MultilineLiteral)
             {
                 if (content[offset] == Utils.C_SINGLE_QUOTE && (offset <= content.Length - 3) && content[offset + 1] == Utils.C_SINGLE_QUOTE && content[offset + 2] == Utils.C_SINGLE_QUOTE)

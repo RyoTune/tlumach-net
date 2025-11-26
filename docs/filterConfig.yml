@@ -1,0 +1,4 @@
+apiRules:
+  - exclude:
+      uidRegex: ^Tlumach\.XamlTranslateCore$
+      type: Class

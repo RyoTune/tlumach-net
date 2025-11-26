@@ -20,6 +20,15 @@
     <ProjectReference Include="..\..\src\Tlumach\Tlumach.csproj" />
   </ItemGroup>
 
+    <ItemGroup>
+        <Content Include="Translations\Strings.cfg">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+        <Content Include="Translations\Strings.toml">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>

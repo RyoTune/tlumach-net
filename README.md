@@ -2,7 +2,7 @@
 
 # Tlumach
 
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Allied-Bits-ltd/Tlumach/build-test.yml "GitHub Actions Workflow Status")](https://img.shields.io/github/actions/workflow/status/Allied-Bits-ltd/Tlumach/build-test.yml)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Allied-Bits-ltd/tlumach-net/build-test.yml "GitHub Actions Workflow Status")](https://img.shields.io/github/actions/workflow/status/Allied-Bits-ltd/tlumach-net/build-test.yml)
 
 [![NuGet](https://img.shields.io/nuget/v/AlliedBits.Tlumach.svg)](https://www.nuget.org/packages/AlliedBits.Tlumach) [![downloads](https://img.shields.io/nuget/dt/AlliedBits.Tlumach)](https://www.nuget.org/packages/AlliedBits.Tlumach)
 
@@ -44,13 +44,13 @@ The features of Tlumach include:
 ## Documentation
 
 Tlumach documentation can be conveniently read in the [Tlumach section of Allied Bits site](https://alliedbits.com/tlumach).
-The source files of the documentation are available in the [Tlumach repository on GitHub](https://github.com/Allied-Bits-Ltd/tlumach), in the "docs" directory.
+The source files of the documentation are available in the [Tlumach repository on GitHub](https://github.com/Allied-Bits-Ltd/tlumach-net), in the "docs" directory.
 
 ## Help and support
 
-For general discussions and suggestions, you are welcome to use the [Discussions section](https://github.com/Allied-Bits-Ltd/tlumach/discussions).
+For general discussions and suggestions, you are welcome to use the [Discussions section](https://github.com/Allied-Bits-Ltd/tlumach-net/discussions).
 
-If you need help with issues or want to report a bug, [please open an issue](https://github.com/Allied-Bits-Ltd/tlumach/issues/new/choose) and include the necessary details (including the relevant configuration and translation files) to help us better understand the problem. Providing this information will aid in resolving the issue effectively.
+If you need help with issues or want to report a bug, [please open an issue](https://github.com/Allied-Bits-Ltd/tlumach-net/issues/new/choose) and include the necessary details (including the relevant configuration and translation files) to help us better understand the problem. Providing this information will aid in resolving the issue effectively.
 
 ## Getting started
 

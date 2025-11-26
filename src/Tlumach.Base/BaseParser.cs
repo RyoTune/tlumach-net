@@ -204,15 +204,6 @@ namespace Tlumach.Base
 
             // Retrieve the name of the default translation file
             string defaultFile = configuration.DefaultFile;
-            if (!Path.IsPathRooted(defaultFile))
-            {
-                string? dir = baseDirectory;
-                if (string.IsNullOrEmpty(dir))
-                    dir = Path.GetDirectoryName(configFile);
-
-                if (!string.IsNullOrEmpty(dir))
-                    defaultFile = Path.Combine(dir, defaultFile);
-            }
 
 #pragma warning disable CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
             string fileExt = Path.GetExtension(defaultFile)?.ToLowerInvariant() ?? string.Empty;
@@ -226,21 +217,27 @@ namespace Tlumach.Base
             if (parser is null)
                 throw new ParserLoadException(configFile, $"No parser found for the '{fileExt}' file extension that the default translation file '{defaultFile}' has");
 
+            /*if (!Path.IsPathRooted(defaultFile))
+            {
+                string? dir = baseDirectory;
+                if (string.IsNullOrEmpty(dir))
+                    dir = Path.GetDirectoryName(configFile);
+
+                if (!string.IsNullOrEmpty(dir))
+                    defaultFile = Path.Combine(dir, defaultFile);
+            }*/
+
             // Read the default translation file
             string? defaultContent;
-            try
-            {
-                using Stream stream = new FileStream(defaultFile, FileMode.Open, FileAccess.Read, FileShare.Read);
-                using StreamReader reader = new StreamReader(stream, Encoding.UTF8, true);
-                defaultContent = reader.ReadToEnd();
-                //defaultContent = File.ReadAllText(defaultFile, Encoding.UTF8);
-            }
-            catch (Exception ex)
-            {
-                throw new ParserLoadException(configFile, $"Loading of the default translation file '{defaultFile}' has failed", ex);
-            }
 
-            if (string.IsNullOrEmpty(defaultContent))
+            defaultContent = Utils.ReadFileFromDisk(defaultFile, Path.GetDirectoryName(configFile), baseDirectory);
+
+            if (defaultContent is null)
+                throw new ParserLoadException(configFile, $"Loading of the default translation file '{defaultFile}' has failed (tried with additional paths '{Path.GetDirectoryName(configFile)}' and '{baseDirectory}'");
+
+            defaultContent = defaultContent.Trim();
+
+            if (defaultContent.Length == 0)
                 throw new ParserLoadException(configFile, $"Default translation file '{defaultFile}' is empty");
 
             // Parse the default translation file and return the result

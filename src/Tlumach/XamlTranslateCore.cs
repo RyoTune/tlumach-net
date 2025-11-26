@@ -24,7 +24,7 @@ using System.Text;
 namespace Tlumach
 {
     /// <summary>
-    /// A base class for XAML TranslateExtension classes.
+    /// Internal class used in XAML integrations
     /// </summary>
     public class XamlTranslateCore : INotifyPropertyChanged
     {
@@ -56,16 +56,7 @@ namespace Tlumach
                     Subscribe(_translationManager);
 
                 // Set current value
-                // initial text
                 SetValueFromUnit(forceNotify: true);
-                //_postToUi(() => Value = _unit?.CurrentValue ?? string.Empty);
-
-                /*string toSet = _unit?.CurrentValue ?? string.Empty;
-                if (!string.Equals(_value, toSet, StringComparison.Ordinal))
-                {
-                    _value = toSet;
-                    _postToUi(() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value))));
-                }*/
             }
         }
 
@@ -86,9 +77,6 @@ namespace Tlumach
         private void OnCultureChanged(object? sender, CultureChangedEventArgs e)
         {
             SetValueFromUnit(forceNotify: false);
-            /*if (_unit is null) return;
-            var s = _unit.CurrentValue;
-            _postToUi(() => Value = _unit.CurrentValue);*/
         }
 
         // Subscribe/Unsubscribe by name to avoid taking a hard reference on your manager type

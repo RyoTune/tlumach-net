@@ -76,6 +76,48 @@ namespace Tlumach.Tests
         }
 
         [Fact]
+        public void ShouldGenerateClassInSubdirectory()
+        {
+            IniParser.Use();
+            TomlParser.Use();
+            string? result = TestGenerator.GenerateClass("Translations\\Strings.cfg", Path.GetFullPath("..\\..\\.."), "Tlumach");
+            Assert.NotNull(result);
+
+            var (ok, diags) = RoslynCompileHelper.CompileToAssembly(result);
+
+            if (!ok)
+            {
+                var msg = string.Join(
+                    Environment.NewLine,
+                    diags.Where(d => d.Severity >= Microsoft.CodeAnalysis.DiagnosticSeverity.Info)
+                         .Select(d => d.ToString()));
+                Assert.True(ok, "Compilation failed:" + Environment.NewLine + msg);
+            }
+        }
+
+        [Fact]
+        public void ShouldNotGenerateClassWithTemplatedUnits()
+        {
+            IniParser.Use();
+            TomlParser.Use();
+            string? result = TestGenerator.GenerateClass("FunctionStrings.cfg", TestFilesPath, "Tlumach");
+            Assert.NotNull(result);
+
+            Assert.False(result.Contains(nameof(TemplatedTranslationUnit)));
+
+            var (ok, diags) = RoslynCompileHelper.CompileToAssembly(result);
+
+            if (!ok)
+            {
+                var msg = string.Join(
+                    Environment.NewLine,
+                    diags.Where(d => d.Severity >= Microsoft.CodeAnalysis.DiagnosticSeverity.Info)
+                         .Select(d => d.ToString()));
+                Assert.True(ok, "Compilation failed:" + Environment.NewLine + msg);
+            }
+        }
+
+        [Fact]
         public void ShouldFailOnIncompleteConfig()
         {
             ArbParser.Use();

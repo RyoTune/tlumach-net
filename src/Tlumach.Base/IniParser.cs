@@ -119,7 +119,8 @@ namespace Tlumach.Base
         protected override bool? IsEndOfValue(string content, int offset, out int newPosition)
         {
             newPosition = offset;
-            return content[offset] == '\n';
+
+            return (offset == content.Length) || (content[offset] == '\n');
         }
 
         protected override (string? escaped, string unescaped) UnwrapValue(string value)

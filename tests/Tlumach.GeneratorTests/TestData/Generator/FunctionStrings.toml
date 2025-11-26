@@ -1,0 +1,7 @@
+category_arithmetic = 'Arithmetic'
+category_financial = 'Financial'
+category_general = 'General'
+category_scientific = 'Scientific'
+category_trigonometry = 'Trigonometry'
+category_conversion = 'Conversion'
+category_stat = 'Statistical'

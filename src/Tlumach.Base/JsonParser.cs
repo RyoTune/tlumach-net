@@ -90,8 +90,10 @@ namespace Tlumach.Base
                 TranslationEntry? entry;
                 string key;
 
+                string? escapedValue = null;
                 string? value;
                 string? reference = null;
+                bool isTemplated = false;
 
                 key = prop.Name.Trim();
 
@@ -111,16 +113,24 @@ namespace Tlumach.Base
                 {
                     throw new GenericParserException($"Duplicate key '{key}' specified in the translation file");
                 }
-                else
-                {
-                    // ... or add a new one
-                    entry = new(key, value, escapedText: null, reference: null);
-                    translation.Add(key.ToUpperInvariant(), entry);
-                }
+
+                // ... or add a new one
 
                 if (value is not null)
-                    entry.IsTemplated = IsTemplatedText(value);
-                entry.Reference = reference;
+                {
+                    isTemplated = IsTemplatedText(value);
+                    if (TextProcessingMode == TextFormat.BackslashEscaping || TextProcessingMode == TextFormat.DotNet)
+                    {
+                        escapedValue = value;
+                        value = Utils.UnescapeString(value);
+                    }
+                }
+
+                entry = new(key, value, escapedText: escapedValue, reference: reference);
+
+                translation.Add(key.ToUpperInvariant(), entry);
+
+                entry.IsTemplated = isTemplated;
             }
         }
 
