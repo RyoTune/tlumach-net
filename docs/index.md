@@ -3,7 +3,7 @@
 Tlumach.NET is a flexible library that provides translation and localization support to all kinds of .NET applications: from desktop WinForms, WPF, UWP, WinUI, and console to mobile MAUI and Avalonia to server Razor and Blazor.
 <br>
 
-To get started, please visit the [Getting Started section](https://alliedbits.com/tlumach/articles/index.md#GettingStarted) of the documentation.
+To get started, please visit the [Getting Started section](articles/index.md#GettingStarted) of the documentation.
 
 <br>
 
@@ -15,9 +15,9 @@ To get started, please visit the [Getting Started section](https://alliedbits.co
 
 ## Help and support
 
-For general discussions and suggestions, you are welcome to use the [Discussions section](https://github.com/Allied-Bits-Ltd/tlumach/discussions).
+For general discussions and suggestions, you are welcome to use the [Discussions section](https://github.com/Allied-Bits-Ltd/tlumach-net/discussions).
 
-If you need help with issues or want to report a bug, [please open an issue](https://github.com/Allied-Bits-Ltd/tlumach/issues/new/choose) and include the necessary details (including the relevant configuration and translation files) to help us better understand the problem. Providing this information will aid in resolving the issue effectively.
+If you need help with issues or want to report a bug, [please open an issue](https://github.com/Allied-Bits-Ltd/tlumach-net/issues/new/choose) and include the necessary details (including the relevant configuration and translation files) to help us better understand the problem. Providing this information will aid in resolving the issue effectively.
 
 ## Features
 
