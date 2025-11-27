@@ -365,13 +365,19 @@ namespace Tlumach.Base
                 inputText = Text!;
             }
 
+            int placeholderIndex = -1;
+
+            return InternalProcessTemplatedText(inputText, shouldUnescape, ref placeholderIndex, getParamValueFunc, culture, textProcessingMode);
+        }
+
+        string InternalProcessTemplatedText(string inputText, bool shouldUnescape, ref int placeholderIndex, Func<string, int, object?> getParamValueFunc, CultureInfo culture, TextFormat textProcessingMode)
+        {
             StringBuilder builder = new(inputText.Length);
             int charCode;
             char nextChar;
             int pointer = 0;
             bool inQuotes = false;
             int openBraceCount = 0;
-            int placeholderIndex = -1;
 
             while (pointer < inputText.Length)
             {
@@ -521,7 +527,7 @@ namespace Tlumach.Base
                             try
                             {
                                 // obtain the value to place instead of the placeholder
-                                string placeholderValue = GetPlaceholderValue(placeholderContent, ref placeholderIndex, getParamValueFunc, textProcessingMode, culture);
+                                string placeholderValue = GetPlaceholderValue(placeholderContent, shouldUnescape, ref placeholderIndex, getParamValueFunc, textProcessingMode, culture);
 
                                 // add the value to the string builder
                                 builder.Append(placeholderValue);
@@ -563,7 +569,7 @@ namespace Tlumach.Base
             return builder.ToString();
         }
 
-        private string GetPlaceholderValue(string placeholderContent, ref int placeholderIndex, Func<string, int, object?> getParamValueFunc, TextFormat textProcessingMode, CultureInfo culture)
+        private string GetPlaceholderValue(string placeholderContent, bool shouldUnescape, ref int placeholderIndex, Func<string, int, object?> getParamValueFunc, TextFormat textProcessingMode, CultureInfo culture)
         {
             string placeholderName;
             string tail;
@@ -717,18 +723,23 @@ namespace Tlumach.Base
                         return placeholderContent;
                 }
 
+                Func<string, int, (object?, int)> getPlaceholderValueFunc = (string content, int index) =>
+                    {
+                        return (InternalProcessTemplatedText(content, shouldUnescape, ref index, getParamValueFunc, culture, textProcessingMode), index);
+                    };
+
                 try
                 {
                     if (placeholderType is null)
                     {
-                        return Utils.FormatArbUnknownPlaceholder(ref placeholderIndex, value, getParamValueFunc, tail, culture);
+                        return Utils.FormatArbUnknownPlaceholder(ref placeholderIndex, value, getPlaceholderValueFunc, getParamValueFunc, tail, culture);
                     }
                     else
                     if (placeholderType.Equals("num", StringComparison.OrdinalIgnoreCase) || placeholderType.Equals("int", StringComparison.OrdinalIgnoreCase))
                     {
                         // format a number
                         if (!string.IsNullOrEmpty(placeholder!.Format))
-                            return Utils.FormatArbNumber(ref placeholderIndex, value, getParamValueFunc, placeholder, tail, culture);
+                            return Utils.FormatArbNumber(ref placeholderIndex, value, getPlaceholderValueFunc, getParamValueFunc, placeholder, tail, culture);
                     }
                     else
                     if (placeholderType.Equals("DateTime", StringComparison.OrdinalIgnoreCase))
@@ -739,7 +750,7 @@ namespace Tlumach.Base
                     else
                     {
                         // catch-all
-                        return Utils.FormatArbString(ref placeholderIndex, value, getParamValueFunc, tail, culture);
+                        return Utils.FormatArbString(ref placeholderIndex, value, getPlaceholderValueFunc, getParamValueFunc, tail, culture);
                     }
                 }
                 catch (TemplateParserException ex)

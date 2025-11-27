@@ -251,7 +251,7 @@ namespace Tlumach.Tests
                 _ => string.Empty
             };
 
-            Assert.Equal("Total: ¤1,234.50", final);
+            Assert.Equal($"Total: {CultureInfo.InvariantCulture.NumberFormat.CurrencySymbol}1,234.50", final);
         }
 
         [Theory]
@@ -309,5 +309,258 @@ namespace Tlumach.Tests
 
             Assert.Equal("Alex has 5 messages", final);
         }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void ShouldHandleSelectGenderNumberPlaceholderArb(int mode)
+        {
+            var parser = new ArbParser();
+            ArbParser.TextProcessingMode = TextFormat.Arb;
+
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{gender, select, male{He} female{She} other{They}} uploaded {count, number, integer} file(s).\"", "}"), CultureInfo.InvariantCulture);
+            Assert.NotNull(translation);
+            TranslationEntry? entry = translation["Result"];
+            Assert.NotNull(entry);
+            Assert.True(entry.IsTemplated);
+            string final;
+            final = mode switch
+            {
+                0 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new { gender = "female", count = 1 }),
+                1 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new object[] { "female", 1 }),
+                2 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new Dictionary<string, object?> { { "count", 1 }, { "gender", "female" } }),
+                3 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new OrderedDictionary { { "gender", "female" }, { "count", 1 } }),
+                _ => string.Empty
+            };
+
+            Assert.Equal("She uploaded 1 file(s).", final);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void ShouldHandleSelectNestedPluralPlaceholderArb(int mode)
+        {
+            var parser = new ArbParser();
+            ArbParser.TextProcessingMode = TextFormat.Arb;
+
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{gender, select, male{He} female{She} other{They}} {count, plural, one{uploaded 1 file} other{uploaded # files}}.\"", "}"), CultureInfo.InvariantCulture);
+            Assert.NotNull(translation);
+            TranslationEntry? entry = translation["Result"];
+            Assert.NotNull(entry);
+            Assert.True(entry.IsTemplated);
+            string final;
+            final = mode switch
+            {
+                0 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new { gender = "other", count = 3 }),
+                1 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new object[] { "other", 3 }),
+                2 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new Dictionary<string, object?> { { "count", 3 }, { "gender", "other" } }),
+                3 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new OrderedDictionary { { "gender", "other" }, { "count", 3 } }),
+                _ => string.Empty
+            };
+
+            Assert.Equal("They uploaded 3 files.", final);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void ShouldHandlePluralWithOffsetEmbeddedPlaceholderArb(int mode)
+        {
+            var parser = new ArbParser();
+            ArbParser.TextProcessingMode = TextFormat.Arb;
+
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{count, plural, offset:1 =0{Nobody tagged you} =1{{first} tagged you} one{{first} and one other tagged you} other{{first} and # others tagged you}}\"", "}"), CultureInfo.InvariantCulture);
+            Assert.NotNull(translation);
+            TranslationEntry? entry = translation["Result"];
+            Assert.NotNull(entry);
+            Assert.True(entry.IsTemplated);
+            string final;
+            final = mode switch
+            {
+                0 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new { count = 4, first = "Mia", }),
+                1 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new object[] { 4, "Mia" }),
+                2 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new Dictionary<string, object?> { { "count", 4 }, { "first", "Mia" } }),
+                3 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new OrderedDictionary { { "count", 4 }, { "first", "Mia" } }),
+                _ => string.Empty
+            };
+
+            Assert.Equal("Mia and 3 others tagged you", final);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void ShouldHandleSelectOrdinalPlaceholderArb(int mode)
+        {
+            var parser = new ArbParser();
+            ArbParser.TextProcessingMode = TextFormat.Arb;
+
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{place, selectordinal, one{#st} two{#nd} few{#rd} other{#th}} place\"", "}"), CultureInfo.InvariantCulture);
+            Assert.NotNull(translation);
+            TranslationEntry? entry = translation["Result"];
+            Assert.NotNull(entry);
+            Assert.True(entry.IsTemplated);
+            string final;
+            final = mode switch
+            {
+                0 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new { place = 23, }),
+                1 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new object[] { 23, "Mia" }),
+                2 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new Dictionary<string, object?> { { "place", 23 }, { "first", "Mia" } }),
+                3 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new OrderedDictionary { { "place", 23 }, { "first", "Mia" } }),
+                _ => string.Empty
+            };
+
+            Assert.Equal("23rd place", final);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void ShouldHandleSelectWithEmbeddedNumberFormattingPlaceholderArb(int mode)
+        {
+            var parser = new ArbParser();
+            ArbParser.TextProcessingMode = TextFormat.Arb;
+
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{tier, select, free{Free plan} pro{Pro plan — {storage, number, integer} GB} other{Custom}}\"", "}"), CultureInfo.InvariantCulture);
+            Assert.NotNull(translation);
+            TranslationEntry? entry = translation["Result"];
+            Assert.NotNull(entry);
+            Assert.True(entry.IsTemplated);
+            string final;
+            final = mode switch
+            {
+                0 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new { tier = "pro", storage = 512.9 }),
+                1 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new object[] { "pro", 512.9 }),
+                2 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new Dictionary<string, object?> { { "storage", 512.9 }, { "tier", "pro" } }),
+                3 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new OrderedDictionary { { "tier", "pro" }, { "storage", 512.9 } }),
+                _ => string.Empty
+            };
+
+            Assert.Equal("Pro plan — 513 GB", final);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void ShouldHandlePluralWithEmbeddedCurrencyPlaceholderArb(int mode)
+        {
+            var parser = new ArbParser();
+            ArbParser.TextProcessingMode = TextFormat.Arb;
+
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{count, plural, one{Subscription costs {price, number, currency} per user} other{Subscriptions cost {price, number, currency} per {count} users}}\"", "}"), CultureInfo.InvariantCulture);
+            Assert.NotNull(translation);
+            TranslationEntry? entry = translation["Result"];
+            Assert.NotNull(entry);
+            Assert.True(entry.IsTemplated);
+            string final;
+            final = mode switch
+            {
+                0 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new { count = 5, price = 12, }),
+                1 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new object[] { 5, 12, 5 }),
+                2 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new Dictionary<string, object?> { { "count", 5 }, { "price", 12 } }),
+                3 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new OrderedDictionary { { "count", 5 }, { "price", 12 } }),
+                _ => string.Empty
+            };
+
+            Assert.Equal($"Subscriptions cost {CultureInfo.InvariantCulture.NumberFormat.CurrencySymbol}12.00 per 5 users", final);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void ShouldHandleTwoPluralsPlaceholderArb(int mode)
+        {
+            var parser = new ArbParser();
+            ArbParser.TextProcessingMode = TextFormat.Arb;
+
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{apples, plural, one{# apple} other{# apples}} and {oranges, plural, one{# orange} other{# oranges}} in the basket.\"", "}"), CultureInfo.InvariantCulture);
+            Assert.NotNull(translation);
+            TranslationEntry? entry = translation["Result"];
+            Assert.NotNull(entry);
+            Assert.True(entry.IsTemplated);
+            string final;
+            final = mode switch
+            {
+                0 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new { apples = 1, oranges = 2, }),
+                1 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new object[] { 1, 2 }),
+                2 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new Dictionary<string, object?> { { "apples", 1 }, { "oranges", 2 } }),
+                3 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new OrderedDictionary { { "apples", 1 }, { "oranges", 2 } }),
+                _ => string.Empty
+            };
+
+            Assert.Equal($"1 apple and 2 oranges in the basket.", final);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void ShouldHandlePluralAndPercentPlaceholderArb(int mode)
+        {
+            var parser = new ArbParser();
+            ArbParser.TextProcessingMode = TextFormat.Arb;
+
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{count, plural, one{Completion: {pct, number, percent} on 1 task} other{Completion: {pct, number, percent} on # tasks}}\"", "}"), CultureInfo.InvariantCulture);
+            Assert.NotNull(translation);
+            TranslationEntry? entry = translation["Result"];
+            Assert.NotNull(entry);
+            Assert.True(entry.IsTemplated);
+            string final;
+            final = mode switch
+            {
+                0 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new { count = 8, pct = 0.8125, }),
+                1 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new object[] { 8, 0.8125 }),
+                2 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new Dictionary<string, object?> { { "count", 8 }, { "pct", 0.8125 } }),
+                3 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new OrderedDictionary { { "count", 8 }, { "pct", 0.8125 } }),
+                _ => string.Empty
+            };
+
+            Assert.Equal($"Completion: {0.8125.ToString("P", CultureInfo.InvariantCulture)} on 8 tasks", final);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void ShouldHandleAgreementViaPluralAndEmbeddedPlaceholderArb(int mode)
+        {
+            var parser = new ArbParser();
+            ArbParser.TextProcessingMode = TextFormat.Arb;
+
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{count, plural, one{{who} is online} other{{who} are online}}\"", "}"), CultureInfo.InvariantCulture);
+            Assert.NotNull(translation);
+            TranslationEntry? entry = translation["Result"];
+            Assert.NotNull(entry);
+            Assert.True(entry.IsTemplated);
+            string final;
+            final = mode switch
+            {
+                0 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new { count = 3, who = "Alice, Bob, and Kim", }),
+                1 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new object[] { 3, "Alice, Bob, and Kim" }),
+                2 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new Dictionary<string, object?> { { "count", 3 }, { "who", "Alice, Bob, and Kim" } }),
+                3 => entry.ProcessTemplatedValue(CultureInfo.InvariantCulture, TextFormat.Arb, new OrderedDictionary { { "count", 3 }, { "who", "Alice, Bob, and Kim" } }),
+                _ => string.Empty
+            };
+
+            Assert.Equal("Alice, Bob, and Kim are online", final);
+        }
+
     }
 }

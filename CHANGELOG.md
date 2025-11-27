@@ -3,6 +3,13 @@
 This document provides information about the changes and new features in Tlumach.
 
 ---
+Version: 1.0.2  
+Date: December 2, 2025
+
+- [NEW] Added "selectordinal" support (only for english, sorry) to the ICU fragment parser.
+- [FIX] Improvements in the handling of complex cases in ICU fragments.
+
+---
 Version: 1.0.1  
 Date: November 26, 2025
 

@@ -424,7 +424,7 @@ namespace Tlumach.Base
             }
         }
 
-        public static string FormatArbNumber(ref int placeholderIndex, object value, Func<string, int, object?> getParamValueFunc, Placeholder placeholder, string placeholderContentTail, CultureInfo culture)
+        public static string FormatArbNumber(ref int placeholderIndex, object value, Func<string, int, (object?, int)> getPlaceholderValueFunc, Func<string, int, object?> getParamValueFunc, Placeholder placeholder, string placeholderContentTail, CultureInfo culture)
         {
             string pattern = placeholder?.Format ?? string.Empty;
 
@@ -441,7 +441,7 @@ namespace Tlumach.Base
 
             if (!string.IsNullOrEmpty(placeholderContentTail))
             {
-                string? icuResult = IcuFragment.EvaluateNoName(placeholderContentTail, ref placeholderIndex, value, getParamValueFunc, culture);
+                string? icuResult = IcuFragment.EvaluateNoName(placeholderContentTail, ref placeholderIndex, value, getPlaceholderValueFunc, getParamValueFunc, culture);
 
                 if (icuResult is not null)
                     return icuResult;
@@ -538,7 +538,7 @@ namespace Tlumach.Base
             return string.Format(culture, "{0}", value);
         }
 
-        public static string FormatArbString(ref int placeholderIndex, object value, Func<string, int, object?> getParamValueFunc, string placeholderContentTail, CultureInfo culture)
+        public static string FormatArbString(ref int placeholderIndex, object value, Func<string, int, (object?, int)> getPlaceholderValueFunc, Func<string, int, object?> getParamValueFunc, string placeholderContentTail, CultureInfo culture)
         {
             if (placeholderContentTail is null)
                 throw new ArgumentNullException(nameof(placeholderContentTail));
@@ -550,7 +550,7 @@ namespace Tlumach.Base
 
             if (!string.IsNullOrEmpty(placeholderContentTail))
             {
-                string? icuResult = IcuFragment.Evaluate(placeholderContentTail, ref placeholderIndex, value, getParamValueFunc, culture);
+                string? icuResult = IcuFragment.EvaluateNoName(placeholderContentTail, ref placeholderIndex, value, getPlaceholderValueFunc, getParamValueFunc, culture);
 
                 if (icuResult is not null)
                     return icuResult;
@@ -559,11 +559,11 @@ namespace Tlumach.Base
             return string.Format(culture, "{0}", value);
         }
 
-        public static string FormatArbUnknownPlaceholder(ref int placeholderIndex, object value, Func<string, int, object?> getParamValueFunc, string placeholderContentTail, CultureInfo culture)
+        public static string FormatArbUnknownPlaceholder(ref int placeholderIndex, object value, Func<string, int, (object?, int)> getPlaceholderValueFunc, Func<string, int, object?> getParamValueFunc, string placeholderContentTail, CultureInfo culture)
         {
             if (!string.IsNullOrEmpty(placeholderContentTail))
             {
-                string? icuResult = IcuFragment.EvaluateNoName(placeholderContentTail, ref placeholderIndex, value, getParamValueFunc, culture);
+                string? icuResult = IcuFragment.EvaluateNoName(placeholderContentTail, ref placeholderIndex, value, getPlaceholderValueFunc, getParamValueFunc, culture);
 
                 if (icuResult is not null)
                     return icuResult;

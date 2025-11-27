@@ -45,7 +45,7 @@ namespace Tlumach.Base
         /// <param name="pluralCategory">An optional function that determines to what numeric category (zero, one, few, many, other) the value falls.</param>
         /// <returns>The resulting string or <see langword="null"/> on failure. If <see langword="null"/> is returned, the caller uses other means of formatting.</returns>
         /// <exception cref="TemplateParserException">Thrown if an error or an unsupported ICU feature is detected.</exception>
-        public static string? Evaluate(string content, ref int placeholderIndex, object value, Func<string, int, object?> getParamValueFunc, CultureInfo? culture = null, Func<decimal, CultureInfo?, string>? pluralCategory = null)
+        public static string? Evaluate(string content, ref int placeholderIndex, object value, Func<string, int, (object?, int)> getPlaceholderValueFunc, Func<string, int, object?> getParamValueFunc, CultureInfo? culture = null, Func<decimal, CultureInfo?, string>? pluralCategory = null)
         {
             content = content.Trim();
 
@@ -55,7 +55,7 @@ namespace Tlumach.Base
             if (simpleIdentifier)
                 return value.ToString() ?? string.Empty;
 
-            return EvaluateNoName(content.Substring(name.Length), ref placeholderIndex, value, getParamValueFunc, culture, pluralCategory);
+            return EvaluateNoName(content.Substring(name.Length), ref placeholderIndex, value, getPlaceholderValueFunc, getParamValueFunc, culture, pluralCategory);
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Tlumach.Base
         /// <param name="pluralCategory">An optional function that determines to what numeric category (zero, one, few, many, other) the value falls.</param>
         /// <returns>The resulting string or <see langword="null"/> on failure. If <see langword="null"/> is returned, the caller uses other means of formatting.</returns>
         /// <exception cref="TemplateParserException">thrown if an error or an unsupported ICU feature is detected.</exception>
-        internal static string? EvaluateNoName(string content, ref int placeholderIndex, object value, Func<string, int, object?> getParamValueFunc, CultureInfo? culture = null, Func<decimal, CultureInfo?, string>? pluralCategory = null)
+        internal static string? EvaluateNoName(string content, ref int placeholderIndex, object value, Func<string, int, (object?, int)> getPlaceholderValueFunc, Func<string, int, object?> getParamValueFunc, CultureInfo? culture = null, Func<decimal, CultureInfo?, string>? pluralCategory = null)
         {
             culture ??= CultureInfo.InvariantCulture;
             pluralCategory ??= SimplePluralCategory; // swap with a CLDR-aware resolver later
@@ -103,7 +103,21 @@ namespace Tlumach.Base
                 if (!options.TryGetValue(key, out var chosen) && !options.TryGetValue("other", out chosen))
                     throw new TemplateParserException("ICU select: missing 'other' branch");
 
-                return RenderText(chosen, ref placeholderIndex, getParamValueFunc);
+                return RenderPlaceholderText(chosen, ref placeholderIndex, getPlaceholderValueFunc/*getParamValueFunc*/);
+            }
+            else
+            if (kind == "selectordinal")
+            {
+                var options = ReadOptions(reader);
+                if (!TryGetNumeric(value, out var n))
+                    n = 0m;
+
+                var cat = OrdinalCategory(n, culture);
+                if (!options.TryGetValue(cat, out var chosen) &&
+                    !options.TryGetValue("other", out chosen))
+                    throw new FormatException("ICU selectordinal: missing 'other' branch.");
+
+                return RenderPlaceholderText(chosen.Replace("#", n.ToString(culture)), ref placeholderIndex, getPlaceholderValueFunc/*getParamValueFunc*/);
             }
             else
             if (kind == "plural")
@@ -139,13 +153,13 @@ namespace Tlumach.Base
 
                 // exact match first (=n)
                 if (options.TryGetValue("=" + n.ToString(CultureInfo.InvariantCulture), out var exact))
-                    return RenderPluralText(exact, n, offset, ref placeholderIndex, value, getParamValueFunc, culture);
+                    return RenderPluralText(exact, n, offset, ref placeholderIndex, value, getPlaceholderValueFunc, getParamValueFunc, culture);
 
                 var cat = pluralCategory(n, culture); // "one", "few", ...
                 if (!options.TryGetValue(cat, out var chosen) && !options.TryGetValue("other", out chosen))
                     throw new FormatException("ICU plural: missing 'other' branch");
 
-                return RenderPluralText(chosen, n, offset, ref placeholderIndex, value, getParamValueFunc, culture);
+                return RenderPluralText(chosen, n, offset, ref placeholderIndex, value, getPlaceholderValueFunc, getParamValueFunc, culture);
             }
             else
             if (kind == "number")
@@ -159,6 +173,20 @@ namespace Tlumach.Base
             {
                 throw new TemplateParserException($"ICU kind '{kind}' not supported (supported: select, plural)");
             }
+        }
+
+        // todo: expand the method with i18n support for choosing between one, two, few, and other
+        private static string OrdinalCategory(decimal n, CultureInfo culture)
+        {
+            // For now: English-like logic.
+            int i = (int)n;
+            int mod10 = i % 10;
+            int mod100 = i % 100;
+
+            if (mod10 == 1 && mod100 != 11) return "one"; // 1st, 21st
+            if (mod10 == 2 && mod100 != 12) return "two"; // 2nd, 22nd
+            if (mod10 == 3 && mod100 != 13) return "few"; // 3rd, 23rd
+            return "other";                               // 4th, 11th, 12th, 13th, etc.
         }
 
         // ---------- number ----------
@@ -354,19 +382,29 @@ namespace Tlumach.Base
         }
 
 #pragma warning disable CA1307 // '...' has a method overload that takes a 'StringComparison' parameter. Replace this call ... for clarity of intent.
-        private static string RenderPluralText(string template, decimal n, int offset, ref int placeholderIndex, object? value, Func<string, int, object?> getParamValueFunc, CultureInfo culture)
+        private static string RenderPluralText(string template, decimal n, int offset, ref int placeholderIndex, object? value, Func<string, int, (object?, int)> getPlaceholderValueFunc, Func<string, int, object?> getParamValueFunc, CultureInfo culture)
         {
             // Replace '#' with (n - offset) using culture
             var number = n - offset;
             var replaced = template.Replace("#", number.ToString(culture));
 
-            return RenderText(replaced, ref placeholderIndex, getParamValueFunc);
+            //return RenderValueText(replaced, ref placeholderIndex, getParamValueFunc);
+            return RenderPlaceholderText(replaced, ref placeholderIndex, getPlaceholderValueFunc);
         }
 #pragma warning restore CA1307 // '...' has a method overload that takes a 'StringComparison' parameter. Replace this call ... for clarity of intent.
 
+        private static string RenderPlaceholderText(string s, ref int placeholderIndex, Func<string, int, (object?, int)> getPlaceholderValueFunc)
+        {
+            //placeholderIndex++;
+
+            (object? val, placeholderIndex) = getPlaceholderValueFunc(s, placeholderIndex);
+
+            // Only support simple identifiers inside branch text
+            return val?.ToString() ?? string.Empty;
+        }
+
         // Very small {name} expander for nested simple placeholders inside branch text.
-        // Escaping/advanced ICU nesting is intentionally out of scope for this subset.
-        private static string RenderText(string s, ref int placeholderIndex, Func<string, int, object?> getParamValueFunc)
+        /*private static string RenderValueText(string s, ref int placeholderIndex, Func<string, int, object?> getParamValueFunc)
         {
             var sb = new StringBuilder();
             int i = 0;
@@ -420,7 +458,7 @@ namespace Tlumach.Base
             }
 
             return sb.ToString();
-        }
+        }*/
 
         private static Dictionary<string, string> ReadOptions(Reader r)
         {
