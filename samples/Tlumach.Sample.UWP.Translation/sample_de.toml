@@ -2,3 +2,4 @@
 
 Hello="Hallo"
 Welcome="Willkommen"
+CultureInfo="Die aktuelle UI-Kultur ist '{currentCulture}', die Systemkultur ist '{systemCulture}'"

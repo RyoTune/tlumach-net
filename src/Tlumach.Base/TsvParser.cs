@@ -43,6 +43,13 @@ namespace Tlumach.Base
             return !string.IsNullOrEmpty(fileExtension) && fileExtension.Equals(".tsv", StringComparison.OrdinalIgnoreCase);
         }
 
+        protected override TranslationTree? InternalLoadTranslationStructure(string content, TextFormat? textProcessingMode)
+        {
+            if (textProcessingMode is not null)
+                TsvParser.TextProcessingMode = textProcessingMode.Value;
+            return base.InternalLoadTranslationStructure(content, textProcessingMode);
+        }
+
         protected override void ReadCells(string content, int offset, int lineNumber, List<string> buffer, out int posAfterEnd)
         {
             ReadDelimitedLine(content, offset, lineNumber, buffer, out posAfterEnd, separator: '\t', quotedFields: ExpectQuotes);

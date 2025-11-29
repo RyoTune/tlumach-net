@@ -102,10 +102,10 @@ namespace Tlumach.Base
                     if (reference is null)
                     {
                         if (escapedValue is not null)
-                            entry.IsTemplated = IsTemplatedText(escapedValue); // an 'escaped' value is present only when it was explicitly returned by the TOML parser to indicate that the text is escaped and must be handled as such
+                            entry.ContainsPlaceholders = IsTemplatedText(escapedValue); // an 'escaped' value is present only when it was explicitly returned by the TOML parser to indicate that the text is escaped and must be handled as such
                         else
                         if (value is not null)
-                            entry.IsTemplated = IsTemplatedText(value);
+                            entry.ContainsPlaceholders = IsTemplatedText(value);
                     }
 
                     result.Add(key.ToUpperInvariant(), entry);
@@ -136,7 +136,7 @@ namespace Tlumach.Base
             lines.TryGetValue(TranslationConfiguration.KEY_GENERATED_CLASS, out valueTuple);
             string? generatedClassName = valueTuple?.unescaped?.Trim();
 
-            lines.TryGetValue(TranslationConfiguration.KEY_DELAYED_UNIT_CREATION, out valueTuple);
+            lines.TryGetValue(TranslationConfiguration.KEY_DELAYED_UNITS_CREATION, out valueTuple);
             string? delayedUnitCreationStr = valueTuple?.unescaped?.Trim();
 
             lines.TryGetValue(TranslationConfiguration.KEY_TEXT_PROCESSING_MODE, out valueTuple);
@@ -607,7 +607,7 @@ namespace Tlumach.Base
 
         protected abstract bool AcceptUnquotedEmptyValues();
 
-        protected override TranslationTree? InternalLoadTranslationStructure(string content)
+        protected override TranslationTree? InternalLoadTranslationStructure(string content, TextFormat? textProcessingMode)
         {
             string currentGroup = string.Empty;
 

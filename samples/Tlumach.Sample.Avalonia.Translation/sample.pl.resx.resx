@@ -123,4 +123,7 @@
   <data name="Welcome">
     <value> Witamy </value>
   </data>
+  <data name="CultureInfo">
+    <value> Obecna kultura interfejsu użytkownika to '{currentCulture}', kultura systemu to '{systemCulture}' </value>
+  </data>
 </root>

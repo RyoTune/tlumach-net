@@ -1,6 +1,6 @@
 # Generator
 
-Tlumach.NET includes an analyzer that loads the [translation set](glossary.md) and creates C# code for a static class. This static class contains an instance of <xref:Tlumach.TranslationManager>, an instance of <xref:Tlumach.Base.TranslationConfiguration>, and instances of <xref:Tlumach.TranslationUnit> and <xref:Tlumach.TemplatedTranslationUnit> classes.
+Tlumach.NET includes an analyzer that loads the [translation set](glossary.md) and creates C# code for a static class. This static class contains an instance of <xref:Tlumach.TranslationManager>, an instance of <xref:Tlumach.Base.TranslationConfiguration>, and instances of <xref:Tlumach.TranslationUnit> classes.
 
 ## When Generator is Needed
 

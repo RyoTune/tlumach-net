@@ -2,3 +2,4 @@ key	uk
 
 Hello	Привіт
 Welcome	Вітаємо
+CultureInfo	Поточна культура інтерфейсу - '{currentCulture}', системна культура - '{systemCulture}'

@@ -140,18 +140,23 @@ namespace Tlumach.Base
             // Collect optional parameters
             foreach (var prop in jsonObj.EnumerateObject().Where(static p => p.Value.ValueKind == JsonValueKind.Object && p.Name.Trim().Equals(ARB_KEY_OPTIONAL_PARAMETERS, StringComparison.OrdinalIgnoreCase)))
             {
+                foreach (var childProp in prop.Value.EnumerateObject().Where(static p => p.Value.ValueKind == JsonValueKind.String))
                 {
-                    foreach (var childProp in prop.Value.EnumerateObject().Where(static p => p.Value.ValueKind == JsonValueKind.String))
-                    {
-                        string key = childProp.Name.Trim();
-                        string value = childProp.Value.GetString() ?? string.Empty;
-                        placeholder.OptionalParameters[key] = value;
-                    }
+                    string key = childProp.Name.Trim();
+                    string value = childProp.Value.GetString() ?? string.Empty;
+                    placeholder.OptionalParameters[key] = value;
                 }
             }
 
             // Add new placeholder to the entry
             entry.AddPlaceholder(placeholder);
+        }
+
+        protected override TranslationTree? InternalLoadTranslationStructure(string content, TextFormat? textProcessingMode)
+        {
+            if (textProcessingMode is not null)
+                ArbParser.TextProcessingMode = textProcessingMode.Value;
+            return base.InternalLoadTranslationStructure(content, textProcessingMode);
         }
 
         private void InternalEnumerateStringPropertiesOfJSONObject(JsonElement jsonObj, Translation translation, string groupName)
@@ -232,7 +237,7 @@ namespace Tlumach.Base
                     translation.Add(key.ToUpperInvariant(), entry);
                 }
 
-                entry.IsTemplated = isTemplated;
+                entry.ContainsPlaceholders = isTemplated;
                 entry.Reference = reference;
                 entry.Target = target;
             }

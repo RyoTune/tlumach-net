@@ -71,7 +71,7 @@ namespace Tlumach.Base
             return !string.IsNullOrEmpty(fileExtension) && fileExtension.Equals(".resx", StringComparison.OrdinalIgnoreCase);
         }
 
-        protected override TranslationTree? InternalLoadTranslationStructure(string content)
+        protected override TranslationTree? InternalLoadTranslationStructure(string content, TextFormat? textProcessingMode)
         {
             try
             {
@@ -177,7 +177,7 @@ namespace Tlumach.Base
                     translation.Add(key.ToUpperInvariant(), entry);
 
                     if (value is not null)
-                        entry.IsTemplated = IsTemplatedText(value);
+                        entry.ContainsPlaceholders = IsTemplatedText(value);
                 }
             }
 

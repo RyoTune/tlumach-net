@@ -59,7 +59,7 @@ namespace Tlumach.Base
         /// <summary>
         /// When set to <see langword="true"/>, indicates that creation of generated translation units must be delayed until they are accessed.
         /// </summary>
-        public const string KEY_DELAYED_UNIT_CREATION = "delayedUnitCreation";
+        public const string KEY_DELAYED_UNITS_CREATION = "delayedUnitsCreation";
 
         /// <summary>
         /// The optional notation to specify the file, from which all translations not listed specifically are loaded. This values gets converted to "other" in the code but may be used for clarity in the configuration files.
@@ -122,12 +122,12 @@ namespace Tlumach.Base
         /// <summary>
         /// Gets the text processing mode used for parsing (it will be used for processing templates too).
         /// </summary>
-        public TextFormat TextProcessingMode { get; }
+        public TextFormat? TextProcessingMode { get; }
 
         /// <summary>
         /// Gets the indicator used by the generator to generate the code that delays creation of generated translation units until they are accessed.
         /// </summary>
-        public bool DelayedUnitCreation { get;  }
+        public bool DelayedUnitsCreation { get;  }
 
         /// <summary>
         /// Gets the list of individual translation items covered by the configuration.
@@ -202,7 +202,7 @@ namespace Tlumach.Base
             Namespace = @namespace;
             ClassName = className;
             TextProcessingMode = textProcessingMode;
-            DelayedUnitCreation = delayedUnitCreation;
+            DelayedUnitsCreation = delayedUnitCreation;
         }
 
         private TranslationConfiguration()

@@ -43,6 +43,13 @@ namespace Tlumach.Base
             return !string.IsNullOrEmpty(fileExtension) && fileExtension.Equals(".csv", StringComparison.OrdinalIgnoreCase);
         }
 
+        protected override TranslationTree? InternalLoadTranslationStructure(string content, TextFormat? textProcessingMode)
+        {
+            if (textProcessingMode is not null)
+                CsvParser.TextProcessingMode = textProcessingMode.Value;
+            return base.InternalLoadTranslationStructure(content, textProcessingMode);
+        }
+
         protected override void ReadCells(string content, int offset, int lineNumber, List<string> buffer, out int posAfterEnd)
         {
             ReadDelimitedLine(content, offset, lineNumber, buffer, out posAfterEnd, separator: SeparatorChar, quotedFields: true);

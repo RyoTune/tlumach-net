@@ -3,11 +3,14 @@
 This document provides information about the changes and new features in Tlumach.
 
 ---
-Version: 1.0.2  
-Date: December 2, 2025
+Version: 1.1.0  
+Date: November 30, 2025
 
-- [NEW] Added support for "selectordinal" (only for English, sorry), "date", "time", and "datetime" placeholder kinds to the ICU fragment parser.
+- [IMPORTANT] The TranslationEntry.`IsTemplated` property has been renamed to `ContainsPlaceholders`.
+- [NEW] Now, you can bind XAML controls to translation units with placeholders. This requires that the application provides values for such units. Please, refer to the documentation for the details.
+- [NEW] Added support for "selectordinal" (only for English, att the moment), "date", "time", and "datetime" placeholder kinds to the ICU fragment parser.
 - [FIX] Improvements in the handling of complex cases in placeholders.
+- [FIX] The `textProcessingMode` value from a configuration file was used in code generation but not during the initial analysis of the default translation file.
 
 ---
 Version: 1.0.1  

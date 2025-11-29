@@ -27,8 +27,8 @@ namespace Tlumach.WinUI
     {
         private string? _currentValue;
 
-        public TranslationUnit(TranslationManager translationManager, TranslationConfiguration translationConfiguration, string key)
-            : base(translationManager, translationConfiguration, key)
+        public TranslationUnit(TranslationManager translationManager, TranslationConfiguration translationConfiguration, string key, bool containsPlaceholders)
+            : base(translationManager, translationConfiguration, key, containsPlaceholders)
         {
             // Subscribe for culture changes
             TranslationManager.OnCultureChanged += TranslationManager_OnCultureChanged;
@@ -41,7 +41,7 @@ namespace Tlumach.WinUI
                 if (_currentValue is null)
                 {
                     // Initial text
-                    _currentValue = InternalGetValueAsText(TranslationManager.CurrentCulture);
+                    _currentValue = GetValue(TranslationManager.CurrentCulture);
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentValue)));
                 }
 
@@ -58,10 +58,18 @@ namespace Tlumach.WinUI
             }
         }
 
+        /// <summary>
+        /// Notifies XAML bindings that they need to request a new value and update the controls.
+        /// </summary>
+        public override void NotifyPlaceholdersUpdated()
+        {
+            CurrentValue = GetValue(TranslationManager.CurrentCulture);
+        }
+
         private void TranslationManager_OnCultureChanged(object? sender, CultureChangedEventArgs args)
         {
             // Re-translate and notify
-            CurrentValue = InternalGetValueAsText(args.Culture);
+            CurrentValue = GetValue(args.Culture);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

@@ -53,6 +53,8 @@ namespace Tlumach.Base
             // The role of this method is just to exist so that calling it executes a static constructor of this class.
         }
 
+        private static BaseParser Factory() => new IniParser();
+
         protected override TextFormat GetTextProcessingMode()
         {
             return TextProcessingMode;
@@ -61,6 +63,13 @@ namespace Tlumach.Base
         public override bool CanHandleExtension(string fileExtension)
         {
             return ".ini".Equals(fileExtension, StringComparison.OrdinalIgnoreCase);
+        }
+
+        protected override TranslationTree? InternalLoadTranslationStructure(string content, TextFormat? textProcessingMode)
+        {
+            if (textProcessingMode is not null)
+                IniParser.TextProcessingMode = textProcessingMode.Value;
+            return base.InternalLoadTranslationStructure(content, textProcessingMode);
         }
 
         protected override bool IsStartOfKey(string content, int offset)
@@ -112,8 +121,6 @@ namespace Tlumach.Base
             posAfterStart = offset + 1;
             return true; // In ini files, everything is a value (all non-values, such as EOL and space, are handled by TextParser)
         }
-
-        private static BaseParser Factory() => new IniParser();
 
 #pragma warning disable CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
         protected override bool? IsEndOfValue(string content, int offset, out int newPosition)

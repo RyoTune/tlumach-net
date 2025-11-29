@@ -71,7 +71,7 @@ namespace Tlumach.Base
                 if (configObj.TryGetProperty(TranslationConfiguration.KEY_GENERATED_CLASS, out jsonValue))
                     generatedClassName = jsonValue.GetString()?.Trim();
 
-                if (configObj.TryGetProperty(TranslationConfiguration.KEY_DELAYED_UNIT_CREATION, out jsonValue))
+                if (configObj.TryGetProperty(TranslationConfiguration.KEY_DELAYED_UNITS_CREATION, out jsonValue))
                     delayedUnitCreationStr = jsonValue.GetString()?.Trim();
 
                 if (configObj.TryGetProperty(TranslationConfiguration.KEY_TEXT_PROCESSING_MODE, out jsonValue))
@@ -144,7 +144,7 @@ namespace Tlumach.Base
 
         protected abstract Translation InternalLoadTranslationEntriesFromJSON(JsonElement jsonObj, Translation? translation, string groupName);
 
-        protected override TranslationTree? InternalLoadTranslationStructure(string content)
+        protected override TranslationTree? InternalLoadTranslationStructure(string content, TextFormat? textProcessingMode)
         {
             try
             {
@@ -185,7 +185,6 @@ namespace Tlumach.Base
                     throw new GenericParserException($"Duplicate key '{key}' specified");
 
                 string? value = prop.Value.GetString();
-                bool isTemplated = false;
 
                 if (value is null)
                     throw new GenericParserException($"The value of the key '{key}' is not a string");

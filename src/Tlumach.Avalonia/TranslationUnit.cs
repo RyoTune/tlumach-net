@@ -32,10 +32,10 @@ namespace Tlumach.Avalonia
 
         public string CurrentValue => _value.Value;
 
-        public TranslationUnit(TranslationManager translationManager, TranslationConfiguration translationConfiguration, string key)
-            : base(translationManager, translationConfiguration, key)
+        public TranslationUnit(TranslationManager translationManager, TranslationConfiguration translationConfiguration, string key, bool containsPlaceholders)
+            : base(translationManager, translationConfiguration, key, containsPlaceholders)
         {
-            string value = InternalGetValueAsText(TranslationManager.CurrentCulture);
+            string value = GetValue(TranslationManager.CurrentCulture);
             _value = new BehaviorSubject<string>(value);
             TranslationManager.OnCultureChanged += TranslationManager_OnCultureChanged;
         }
@@ -56,10 +56,19 @@ namespace Tlumach.Avalonia
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Notifies XAML bindings that they need to request a new value and update the controls.
+        /// </summary>
+        public override void NotifyPlaceholdersUpdated()
+        {
+            // Update listeners with the new string value
+            _value.OnNext(GetValue(TranslationManager.CurrentCulture));
+        }
+
         private void TranslationManager_OnCultureChanged(object? sender, CultureChangedEventArgs args)
         {
             // Update listeners with the string value obtained for the new culture
-            _value.OnNext(InternalGetValueAsText(args.Culture));
+            _value.OnNext(GetValue(args.Culture));
         }
     }
 }

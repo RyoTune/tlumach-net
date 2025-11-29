@@ -25,7 +25,7 @@ namespace Tlumach.MAUI
     using System;
 
     using Microsoft.Maui.Controls;
-    
+
     [ContentProperty(nameof(Unit))]
     [AcceptEmptyServiceProvider]
     public sealed class Translate : BindableObject, IMarkupExtension<BindingBase>
@@ -60,91 +60,4 @@ namespace Tlumach.MAUI
         object IMarkupExtension.ProvideValue(IServiceProvider serviceProvider)
             => ProvideValue(serviceProvider);
     }
-
-    /*
-
-    [ContentProperty(nameof(Unit))]
-    [AcceptEmptyServiceProvider]
-    public sealed class Translate : BindableObject, IMarkupExtension<BindingBase>
-    {
-        public static readonly BindableProperty UnitProperty =
-            BindableProperty.Create(nameof(Unit), typeof(TranslationUnit), typeof(Translate), null, propertyChanged: OnUnitChanged);
-
-        public TranslationUnit Unit
-        {
-            get => (TranslationUnit)GetValue(UnitProperty);
-            set => SetValue(UnitProperty, value);
-        }
-
-        public static readonly BindableProperty ValueProperty =
-            BindableProperty.Create(nameof(Value), typeof(string), typeof(Translate), string.Empty);
-
-        private static event EventHandler<CultureChangedEventArgs>? OnCultureChanged;
-
-        public string Value
-        {
-            get => (string)GetValue(ValueProperty);
-            set => SetValue(ValueProperty, value);
-        }
-
-        // Constructor
-        public Translate()
-        {
-            // Subscribe to the external service culture change event.
-            // This subscription should be here to ensure it happens for every instance.
-            OnCultureChanged += Class_OnCultureChanged;
-        }
-
-        // The callback for when the Unit property changes
-        private static void OnUnitChanged(BindableObject bindable, object oldValue, object newValue)
-        {
-            TranslationUnit? currentUnit = oldValue as TranslationUnit;
-            TranslationUnit? newUnit = newValue as TranslationUnit;
-            if (currentUnit != newValue)
-            {
-                // Subscribe to the external service culture change event.
-                // This subscription should be here to ensure it happens for every instance.
-                if (currentUnit?.TranslationManager is not null)
-                    currentUnit.TranslationManager.OnCultureChanged -= TranslationProvider_OnCultureChanged;
-                if (newUnit?.TranslationManager is not null)
-                    newUnit.TranslationManager.OnCultureChanged += TranslationProvider_OnCultureChanged;
-            }
-
-            if (bindable is Translate extension && newUnit is not null)
-            {
-                // Initialize the Value property with the current translated string.
-                extension.Value = newUnit.CurrentValue;
-            }
-        }
-
-        BindingBase IMarkupExtension<BindingBase>.ProvideValue(IServiceProvider serviceProvider)
-        {
-            return new Binding(nameof(Value), source: this);
-        }
-
-        object IMarkupExtension.ProvideValue(IServiceProvider serviceProvider)
-        {
-            return new Binding(nameof(Value), source: this);
-        }
-
-        // Event handler for the external service
-        private static void TranslationProvider_OnCultureChanged(object? sender, CultureChangedEventArgs args)
-        {
-#pragma warning disable S4220
-            OnCultureChanged?.Invoke(sender, args);
-#pragma warning restore S4220
-        }
-
-        private void Class_OnCultureChanged(object? sender, CultureChangedEventArgs args)
-        {
-            // Update the Value property on the UI thread.
-            // This is the key to triggering the binding update.
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                if (Unit != null)
-                    Value = Unit.CurrentValue;
-            });
-        }
-    }
-    */
 }

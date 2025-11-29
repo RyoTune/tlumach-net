@@ -123,7 +123,7 @@ namespace Tlumach.Base
                 }
 
                 if (reference is null && value is not null)
-                    entry.IsTemplated = IsTemplatedText((escapedValue is not null) ? escapedValue : value);
+                    entry.ContainsPlaceholders = IsTemplatedText((escapedValue is not null) ? escapedValue : value);
 
                 if (descriptionColumn != -1)
                     entry.Description = columns[descriptionColumn].Values[i];
@@ -148,7 +148,7 @@ namespace Tlumach.Base
             throw new NotSupportedException("Table parsers don't have own configuration format but use simple INI format supported by IniParser");
         }
 
-        protected override TranslationTree? InternalLoadTranslationStructure(string content)
+        protected override TranslationTree? InternalLoadTranslationStructure(string content, TextFormat? textProcessingMode)
         {
             string key, value;
             bool valuesPresent;

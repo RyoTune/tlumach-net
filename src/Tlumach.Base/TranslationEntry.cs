@@ -80,9 +80,9 @@ namespace Tlumach.Base
         }
 
         /// <summary>
-        /// Indicates that the text is a template. When it is, use the <see cref="ProcessTemplatedValue"/> method to format the template.
+        /// Indicates that the text is a template and contains placeholders. When it is, use the <see cref="ProcessTemplatedValue"/> method to format the template.
         /// </summary>
-        public bool IsTemplated { get; set; }
+        public bool ContainsPlaceholders { get; set; }
 
         /// <summary>
         /// Gets or sets an optional reference to an external file with the translation value.
@@ -173,6 +173,11 @@ namespace Tlumach.Base
         {
             Placeholders ??= [];
             Placeholders.Add(placeholder);
+        }
+
+        public string ProcessTemplatedValue(CultureInfo culture, TextFormat textProcessingMode, Func<string, int, object?> getParamValueFunc)
+        {
+            return InternalProcessTemplatedValue(getParamValueFunc, culture, textProcessingMode);
         }
 
         public string ProcessTemplatedValue(CultureInfo culture, TextFormat textProcessingMode, params object?[] parameters)
@@ -706,7 +711,7 @@ namespace Tlumach.Base
                         if (placeholderType.Equals("DateTime", StringComparison.OrdinalIgnoreCase))
                         {
 #if NET9_0_OR_GREATER
-                            if (value is not DateTime && (value is not DateOnly) && (value is not TimeOnly))
+                            if (value is not DateTime && (value is not DateOnly) && (value is not TimeOnly) && (value is not DateTimeOffset))
                             {
 #else
                             if (value is not DateTime)
@@ -725,23 +730,20 @@ namespace Tlumach.Base
                         return placeholderContent;
                 }
 
-                Func<string, int, (object?, int)> getPlaceholderValueFunc = (string content, int index) =>
-                    {
-                        return (InternalProcessTemplatedText(content, shouldUnescape, ref index, getParamValueFunc, culture, textProcessingMode), index);
-                    };
+                Func<string, int, (object?, int)> getPlaceholderValueFunc = (string content, int index) => (InternalProcessTemplatedText(content, shouldUnescape, ref index, getParamValueFunc, culture, textProcessingMode), index);
 
                 try
                 {
                     if (placeholderType is null)
                     {
-                        return Utils.FormatArbUnknownPlaceholder(ref placeholderIndex, value, getPlaceholderValueFunc, getParamValueFunc, tail, culture);
+                        return Utils.FormatArbUnknownPlaceholder(ref placeholderIndex, value, getPlaceholderValueFunc, /*getParamValueFunc, */tail, culture);
                     }
                     else
                     if (placeholderType.Equals("num", StringComparison.OrdinalIgnoreCase) || placeholderType.Equals("int", StringComparison.OrdinalIgnoreCase))
                     {
                         // format a number
                         if (!string.IsNullOrEmpty(placeholder!.Format))
-                            return Utils.FormatArbNumber(ref placeholderIndex, value, getPlaceholderValueFunc, getParamValueFunc, placeholder, tail, culture);
+                            return Utils.FormatArbNumber(ref placeholderIndex, value, getPlaceholderValueFunc, /*getParamValueFunc, */placeholder, tail, culture);
                     }
                     else
                     if (placeholderType.Equals("DateTime", StringComparison.OrdinalIgnoreCase))
@@ -752,7 +754,7 @@ namespace Tlumach.Base
                     else
                     {
                         // catch-all
-                        return Utils.FormatArbString(ref placeholderIndex, value, getPlaceholderValueFunc, getParamValueFunc, tail, culture);
+                        return Utils.FormatArbString(ref placeholderIndex, value, getPlaceholderValueFunc, /*getParamValueFunc, */tail, culture);
                     }
                 }
                 catch (TemplateParserException ex)

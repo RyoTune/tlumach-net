@@ -103,7 +103,30 @@ namespace Tlumach.Tests
             string? result = TestGenerator.GenerateClass("FunctionStrings.cfg", TestFilesPath, "Tlumach");
             Assert.NotNull(result);
 
-            Assert.False(result.Contains(nameof(TemplatedTranslationUnit)));
+            Assert.Equal(-1, result.IndexOf(", true);"));
+
+            var (ok, diags) = RoslynCompileHelper.CompileToAssembly(result);
+
+            if (!ok)
+            {
+                var msg = string.Join(
+                    Environment.NewLine,
+                    diags.Where(d => d.Severity >= Microsoft.CodeAnalysis.DiagnosticSeverity.Info)
+                         .Select(d => d.ToString()));
+                Assert.True(ok, "Compilation failed:" + Environment.NewLine + msg);
+            }
+        }
+
+        [Fact]
+        public void ShouldGenerateClassWithTemplatedUnits()
+        {
+            IniParser.Use();
+            ArbParser.Use();
+
+            string? result = TestGenerator.GenerateClass("ExtraParams.cfg", TestFilesPath, "Tlumach");
+            Assert.NotNull(result);
+
+            Assert.Equal(-1, result.IndexOf(", false);"));
 
             var (ok, diags) = RoslynCompileHelper.CompileToAssembly(result);
 

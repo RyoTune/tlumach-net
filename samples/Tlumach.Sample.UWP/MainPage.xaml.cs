@@ -93,13 +93,35 @@ namespace Tlumach.Sample.UWP
             // Update the control that contains templated text - such controls cannot be bound for dynamic updates
             UpdateCopyright(CultureInfo.InvariantCulture);
 
+            RefreshCultureInfoTranslationUnit();
+
             // We track the change of a culture to update controls which are updated from code rather than bound for dynamic updates
-            Strings.TranslationManager.OnCultureChanged += (sender, e) => UpdateCopyright(e.Culture);
+            Strings.TranslationManager.OnCultureChanged += (sender, e) =>
+            {
+                UpdateCopyright(e.Culture);
+                RefreshCultureInfoTranslationUnit();
+            };
 
             _localeChangeHook = new LocaleChangeHook();
 
             // Register ourselves for system locale change
             _localeChangeHook.SystemLocaleChanged += LocaleChangeHook_SystemLocaleChanged;
+        }
+
+        // Refresh the CultureInfo translation unit, which is bound to a XAML control but contains placeholders.
+        private static void RefreshCultureInfoTranslationUnit()
+        {
+            Strings.CultureInfo.ForgetPlaceholderValue("systemCulture");
+            Strings.CultureInfo.ForgetPlaceholderValue("currentCulture");
+            Strings.CultureInfo.CachePlaceholderValue("systemCulture", CultureInfo.CurrentCulture.Name);
+
+            // we use the invariant culture to tell Tlumach that it should use a default translation file.
+            if (Strings.TranslationManager.CurrentCulture == CultureInfo.InvariantCulture)
+                Strings.CultureInfo.CachePlaceholderValue("currentCulture", "(default)");
+            else
+                Strings.CultureInfo.CachePlaceholderValue("currentCulture", Strings.TranslationManager.CurrentCulture.Name);
+
+            Strings.CultureInfo.NotifyPlaceholdersUpdated();
         }
 
         private static void LocaleChangeHook_SystemLocaleChanged(object? sender, EventArgs e)
@@ -112,6 +134,8 @@ namespace Tlumach.Sample.UWP
             // The user has changed regional settings / locale
             CultureInfo.CurrentCulture.ClearCachedData();
             CultureInfo.CurrentUICulture.ClearCachedData();
+
+            RefreshCultureInfoTranslationUnit();
 
             // Notifies the translation manager about the change of current locale / culture.
             // If TranslationManager decides that the texts need to change, it will fire the event, to which translation units listen and react.

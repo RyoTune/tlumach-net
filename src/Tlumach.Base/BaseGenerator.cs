@@ -106,7 +106,7 @@ namespace Tlumach.Base
             if (options.TryGetValue(OPTION_DELAYED_UNITS, out delayedUnitsStr))
                 delayedUnits = "true".Equals(delayedUnitsStr, StringComparison.OrdinalIgnoreCase);
 
-            if (configuration.DelayedUnitCreation)
+            if (configuration.DelayedUnitsCreation)
                 delayedUnits = true;
 
             // Collect the required parsers
@@ -195,21 +195,15 @@ namespace Tlumach.Base
             foreach (var key in node.Keys.OrderBy(x => x.Key, StringComparer.OrdinalIgnoreCase))
             {
                 value = key.Value;
-                if (value.IsTemplated)
-                {
-                    unitClassName = "TemplatedTranslationUnit";
-                }
-                else
-                {
-                    unitClassName = "TranslationUnit";
 
-                    if (@namespace.Length > 0)
-                    {
-                        unitClassName = @namespace + "." + unitClassName;
-                    }
+                unitClassName = "TranslationUnit";
+
+                if (@namespace.Length > 0)
+                {
+                    unitClassName = @namespace + "." + unitClassName;
                 }
 
-                builder.Append(indent).Append(OwnName(value.Key)).Append(" = new ").Append(unitClassName).Append("(TranslationManager, _translationConfiguration, \"").Append(namePrefix + value.Key).AppendLine("\");");
+                builder.Append(indent).Append(OwnName(value.Key)).Append(" = new ").Append(unitClassName).Append("(TranslationManager, _translationConfiguration, \"").Append(namePrefix + value.Key).Append("\", ").Append(value.IsTemplated ? "true" : "false").AppendLine(");");
             }
         }
 
@@ -232,18 +226,12 @@ namespace Tlumach.Base
             foreach (var key in node.Keys.OrderBy(x => x.Key, StringComparer.OrdinalIgnoreCase))
             {
                 value = key.Value;
-                if (value.IsTemplated)
-                {
-                    unitClassName = "TemplatedTranslationUnit";
-                }
-                else
-                {
-                    unitClassName = "TranslationUnit";
 
-                    if (@namespace.Length > 0)
-                    {
-                        unitClassName = @namespace + "." + unitClassName;
-                    }
+                unitClassName = "TranslationUnit";
+
+                if (@namespace.Length > 0)
+                {
+                    unitClassName = @namespace + "." + unitClassName;
                 }
 
                 if (groupStart)
@@ -258,7 +246,7 @@ namespace Tlumach.Base
                     builder.Append(indent).AppendLine("    get");
                     builder.Append(indent).AppendLine("    {");
                     builder.Append(indent).Append("        if (_").Append(OwnName(value.Key)).AppendLine(" is null)");
-                    builder.Append(indent).Append("            _").Append(OwnName(value.Key)).Append(" = new ").Append(unitClassName).Append("(TranslationManager, _translationConfiguration, \"").Append(namePrefix + value.Key).AppendLine("\");");
+                    builder.Append(indent).Append("            _").Append(OwnName(value.Key)).Append(" = new ").Append(unitClassName).Append("(TranslationManager, _translationConfiguration, \"").Append(namePrefix + value.Key).Append("\", ").Append(value.IsTemplated ? "true" : "false").AppendLine(");");
                     builder.Append(indent).Append("        return _").Append(OwnName(value.Key)).AppendLine(";");
                     builder.Append(indent).AppendLine("    }");
                     builder.Append(indent).AppendLine("}");

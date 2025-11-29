@@ -46,18 +46,29 @@ namespace Tlumach
 
                 // Unsubscribe old
                 if (_translationManager is not null)
-                    Unsubscribe(_translationManager);
+                    _translationManager.OnCultureChanged += OnCultureChanged;
+
+                if (_unit is not null)
+                    _unit.OnChange -= TranslationUnit_OnChange;
 
                 _unit = value;
+
+                if (_unit is not null)
+                    _unit.OnChange += TranslationUnit_OnChange;
 
                 // Subscribe new
                 _translationManager = _unit?.TranslationManager;
                 if (_translationManager is not null)
-                    Subscribe(_translationManager);
+                    _translationManager.OnCultureChanged += OnCultureChanged;
 
                 // Set current value
                 SetValueFromUnit(forceNotify: true);
             }
+        }
+
+        private void TranslationUnit_OnChange(object? sender, EventArgs e)
+        {
+            SetValueFromUnit(forceNotify: true);
         }
 
         private string _value = string.Empty;
@@ -77,17 +88,6 @@ namespace Tlumach
         private void OnCultureChanged(object? sender, CultureChangedEventArgs e)
         {
             SetValueFromUnit(forceNotify: false);
-        }
-
-        // Subscribe/Unsubscribe by name to avoid taking a hard reference on your manager type
-        private void Subscribe(TranslationManager mgr)
-        {
-            mgr.OnCultureChanged += OnCultureChanged;
-        }
-
-        private void Unsubscribe(TranslationManager mgr)
-        {
-            mgr.OnCultureChanged -= OnCultureChanged;
         }
 
         private void SetValueFromUnit(bool forceNotify)

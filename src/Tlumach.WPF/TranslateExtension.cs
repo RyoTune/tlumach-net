@@ -97,66 +97,6 @@ namespace Tlumach.WPF
 
             // 3) RETURN the binding’s ProvideValue result, NOT the Binding itself
             return binding.ProvideValue(serviceProvider);
-
-            /*
-             * var target = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
-            var targetObject = target?.TargetObject as DependencyObject;
-            var targetProperty = target?.TargetProperty as DependencyProperty;
-            if (targetObject is null || targetProperty is null)
-                return this; // for design-time or multi-usage case
-
-            */
-
-            /*
-            var pvt = (IProvideValueTarget?)serviceProvider.GetService(typeof(IProvideValueTarget));
-            if (pvt?.TargetObject is not DependencyObject target ||
-                pvt.TargetProperty is not DependencyProperty dp)
-            {
-                // Template / design-time case: just return some placeholder
-                return this; // for design-time or multi-usage case
-            }
-
-            var proxy = new TranslateProxy();
-
-            // Set Unit
-            if (Unit is BindingBase binding)
-            {
-                var listener = new BindingListener();
-                listener.Changed += OnUnitChanged;//v => _core.Unit = v as TranslationUnit;
-                listener.Attach(binding);
-            }
-            else
-            {
-                _core.Unit = Unit as TranslationUnit;
-            }
-
-            // Bind the target property directly to core.Value
-            BindingOperations.SetBinding(
-                target,
-                dp,
-                new Binding(nameof(XamlTranslateCore.Value))
-                {
-                    Source = _core,
-                    Mode = BindingMode.OneWay,
-                });
-
-            return _core.Value ?? string.Empty;
-            */
-            /*
-            // Bind target property to proxy.Value
-            BindingOperations.SetBinding(
-                targetObject,
-                targetProperty,
-                new Binding(nameof(TranslateProxy.Value)) { Source = proxy });
-
-            // Bind proxy.Value to _core.Value
-            BindingOperations.SetBinding(
-                proxy,
-                TranslateProxy.ValueProperty,
-                new Binding(nameof(XamlTranslateCore.Value)) { Source = _core });
-
-            return proxy.Value; // actual value is irrelevant; binding takes over
-            */
         }
 
         private void OnUnitChanged(object? value)
@@ -202,7 +142,7 @@ namespace Tlumach.WPF
                 nameof(Value),
                 typeof(string),
                 typeof(TranslateProxy),
-                new PropertyMetadata(""));
+                new PropertyMetadata(string.Empty));
 
         public string Value
         {

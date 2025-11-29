@@ -22,7 +22,9 @@
         <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" HorizontalAlignment="Center"  Text="{x:Bind tru:Strings.Welcome.CurrentValue, Mode=OneWay}" />
         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
             <ComboBox Name="LanguageSelector" SelectionChanged="LanguageSelector_SelectionChanged" />
-            <TextBlock Name="CopyrightLabel"/>
+            <TextBlock Name="CopyrightLabel" Margin="16,0,0,0" VerticalAlignment="Center" />
+            <TextBlock Text=" | "  VerticalAlignment="Center"/>
+            <TextBlock Text="{x:Bind tru:Strings.CultureInfo.CurrentValue, Mode=OneWay}" VerticalAlignment="Center"/>
         </StackPanel>
     </Grid>
 </Page>

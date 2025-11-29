@@ -75,6 +75,13 @@ namespace Tlumach.Base
 
         private static BaseParser Factory() => new TomlParser();
 
+        protected override TranslationTree? InternalLoadTranslationStructure(string content, TextFormat? textProcessingMode)
+        {
+            if (textProcessingMode is not null)
+                TomlParser.TextProcessingMode = textProcessingMode.Value;
+            return base.InternalLoadTranslationStructure(content, textProcessingMode);
+        }
+
         protected internal override bool IsValidKeyChar(string content, int offset)
         {
             if (!_keyIsQuoted)

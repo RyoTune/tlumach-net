@@ -112,7 +112,7 @@ string helloValue = hello.CurrentValue;
 
 **Translations of string**
 
-To retrieve the value for a different culture (e.g., in a server application), use the <xref:Tlumach.TranslationUnit.GetValue(System.Globalization.CultureInfo)> method:
+To retrieve the value for a different culture (e.g., in a server application), use the <xref:Tlumach.BaseTranslationUnit.GetValue(System.Globalization.CultureInfo)> method:
 
 ```c#
 using Tlumach.Sample;

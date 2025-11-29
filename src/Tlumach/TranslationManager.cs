@@ -446,6 +446,8 @@ namespace Tlumach
             if (key is null)
                 throw new ArgumentNullException(nameof(key));
 
+            TextFormat textProcessingMode = config.TextProcessingMode ?? TextFormat.None;
+
             TranslationEntry? result = null;
             string keyUpper = key.ToUpperInvariant();
 
@@ -462,7 +464,7 @@ namespace Tlumach
                     return args.Entry;
 
                 if (args.Text is not null || args.EscapedText is not null)
-                    return EntryFromEventArgs(args, config.TextProcessingMode);
+                    return EntryFromEventArgs(args, textProcessingMode);
             }
 
             // If requesting text for a non-default culture, deal with the culture-specific translation
@@ -501,7 +503,7 @@ namespace Tlumach
 
                 if (result is not null)
                 {
-                    return FireTranslationValueFound(culture, key, result, translation?.OriginalAssembly, translation?.OriginalFile, config.TextProcessingMode);
+                    return FireTranslationValueFound(culture, key, result, translation?.OriginalAssembly, translation?.OriginalFile, textProcessingMode);
                 }
             }
 
@@ -541,10 +543,10 @@ namespace Tlumach
                 // if a basic-locale translation exists, cache the value from the default translation in the basic-culture one so that in the future, no attempt to load or go to the default translation is needed
                 basicCultureLocalTranslation?.Add(keyUpper, result);
 
-                return FireTranslationValueFound(culture, key, result, _defaultTranslation.OriginalAssembly, _defaultTranslation.OriginalFile, config.TextProcessingMode);
+                return FireTranslationValueFound(culture, key, result, _defaultTranslation.OriginalAssembly, _defaultTranslation.OriginalFile, textProcessingMode);
             }
 
-            return FireTranslationValueNotFound(culture, key, config.TextProcessingMode);
+            return FireTranslationValueNotFound(culture, key, textProcessingMode);
         }
 
         private TranslationEntry? TryGetEntryFromCulture(string keyUpper, string key, string cultureNameUpper, TranslationConfiguration config, CultureInfo culture, bool isBasicCulture, ref Translation? cultureLocalTranslation)
@@ -595,7 +597,7 @@ namespace Tlumach
                 && result is not null
                 && TranslationEntryAcceptable(result, translation.OriginalAssembly, translation.OriginalFile, config.DirectoryHint))
             {
-                return FireTranslationValueFound(culture, key, result, translation.OriginalAssembly, translation.OriginalFile, config.TextProcessingMode);
+                return FireTranslationValueFound(culture, key, result, translation.OriginalAssembly, translation.OriginalFile, config.TextProcessingMode ?? TextFormat.None);
             }
 
             return null;
@@ -738,10 +740,10 @@ namespace Tlumach
 
             TranslationEntry entry = new(args.Key, text, escapedText);
             if (escapedText is not null)
-                entry.IsTemplated = IsTemplatedText(escapedText, textProcessingMode);
+                entry.ContainsPlaceholders = IsTemplatedText(escapedText, textProcessingMode);
             else
             if (text is not null)
-                entry.IsTemplated = IsTemplatedText(text, textProcessingMode);
+                entry.ContainsPlaceholders = IsTemplatedText(text, textProcessingMode);
 
             return entry;
         }

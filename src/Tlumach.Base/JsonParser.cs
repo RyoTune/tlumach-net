@@ -67,6 +67,13 @@ namespace Tlumach.Base
             return !string.IsNullOrEmpty(fileExtension) && fileExtension.Equals(".json", StringComparison.OrdinalIgnoreCase);
         }
 
+        protected override TranslationTree? InternalLoadTranslationStructure(string content, TextFormat? textProcessingMode)
+        {
+            if (textProcessingMode is not null)
+                JsonParser.TextProcessingMode = textProcessingMode.Value;
+            return base.InternalLoadTranslationStructure(content, textProcessingMode);
+        }
+
 #pragma warning disable CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
         protected override Translation InternalLoadTranslationEntriesFromJSON(JsonElement jsonObj, Translation? translation, string groupName)
         {
@@ -130,7 +137,7 @@ namespace Tlumach.Base
 
                 translation.Add(key.ToUpperInvariant(), entry);
 
-                entry.IsTemplated = isTemplated;
+                entry.ContainsPlaceholders = isTemplated;
             }
         }
 

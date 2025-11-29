@@ -57,7 +57,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Hello"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -84,7 +84,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Hello"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -111,7 +111,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Hello"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -137,7 +137,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Hello"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -161,7 +161,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Hello"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -186,7 +186,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -213,7 +213,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -240,7 +240,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -268,7 +268,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -296,7 +296,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -324,7 +324,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -352,7 +352,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -380,7 +380,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -408,7 +408,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -436,7 +436,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -464,7 +464,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -492,7 +492,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -520,7 +520,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -548,7 +548,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -576,7 +576,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -604,7 +604,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -632,7 +632,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -660,7 +660,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -688,7 +688,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             final = mode switch
             {
@@ -715,7 +715,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             CultureInfo culture = new CultureInfo("en-US");
             final = mode switch
@@ -743,7 +743,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             CultureInfo culture = new CultureInfo("en-US");
             final = mode switch
@@ -771,7 +771,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             CultureInfo culture = new CultureInfo("en-US");
             final = mode switch
@@ -799,7 +799,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             CultureInfo culture = new CultureInfo("en-US");
             final = mode switch
@@ -827,7 +827,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             CultureInfo culture = new CultureInfo("en-US");
             final = mode switch
@@ -855,7 +855,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             CultureInfo culture = new CultureInfo("en-US");
             final = mode switch
@@ -884,7 +884,7 @@ namespace Tlumach.Tests
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
-            Assert.True(entry.IsTemplated);
+            Assert.True(entry.ContainsPlaceholders);
             string final;
             CultureInfo culture = new CultureInfo("en-US");
             final = mode switch

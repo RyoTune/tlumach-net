@@ -2,7 +2,9 @@
 
 Tlumach shines when it comes to supporting UIs. You can bind XAML controls of WPF, UWP, WinUI, MAUI, or Avalonia to [generated translation units](glossary.md), which gives you automatic syntax checks and automatic UI updates on language switching.
 
-The use of Tlumach with the mentioned frameworks is very similar in principles, but each framework requires slightly different syntax.
+The use of Tlumach with the mentioned frameworks is very similar in principles, but each framework requires slightly different syntax described below.
+
+**Note** on templated translation units: since version 1.1, you can bind XAML controls to these units, but you need to take extra steps to provide actual data for the placeholders in such units. Read the details in the [corresponding section of this documentation](strings.md#TemplatesInXAML).
 
 <a name="wpf"></a>
 ## WPF (Windows Presentation Foundation)

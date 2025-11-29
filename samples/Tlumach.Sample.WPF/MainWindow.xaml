@@ -21,7 +21,9 @@
         <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" HorizontalAlignment="Center" Text="{tlumach:Translate {x:Static translations:Strings.Welcome}}"/>
         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
             <ComboBox Name="LanguageSelector" SelectionChanged="LanguageSelector_SelectionChanged" />
-            <TextBlock Name="CopyrightLabel"/>
+            <TextBlock Name="CopyrightLabel" Margin="16,0,0,0" VerticalAlignment="Center" />
+            <TextBlock Text=" | "  VerticalAlignment="Center"/>
+            <TextBlock Text="{tlumach:Translate {x:Static translations:Strings.CultureInfo}}" VerticalAlignment="Center"/>
         </StackPanel>
     </Grid>
 </Window>

@@ -49,12 +49,12 @@ namespace Tlumach.Base
         /// <param name="content">The content to parse.</param>
         /// <param name="placeholderIndex">The index of the placeholder in the translated string.</param>
         /// <param name="value">The value of the variable for the given placeholder name.</param>
-        /// <param name="getParamValueFunc">The function that returns the value of the placeholder by its name or index. It is used for inner placeholders with no index, so the index passed to it is always -1.</param>
+        /// <param name="getPlaceholderValueFunc">The function that returns the value of the placeholder by its name or index.</param>
         /// <param name="culture">The culture to use in conversions.</param>
         /// <param name="pluralCategory">An optional function that determines to what numeric category (zero, one, few, many, other) the value falls.</param>
         /// <returns>The resulting string or <see langword="null"/> on failure. If <see langword="null"/> is returned, the caller uses other means of formatting.</returns>
         /// <exception cref="TemplateParserException">Thrown if an error or an unsupported ICU feature is detected.</exception>
-        public static string? Evaluate(string content, ref int placeholderIndex, object value, Func<string, int, (object?, int)> getPlaceholderValueFunc, Func<string, int, object?> getParamValueFunc, CultureInfo? culture = null, Func<decimal, CultureInfo?, string>? pluralCategory = null)
+        public static string? Evaluate(string content, ref int placeholderIndex, object value, Func<string, int, (object?, int)> getPlaceholderValueFunc, /*Func<string, int, object?> getParamValueFunc, */CultureInfo? culture = null, Func<decimal, CultureInfo?, string>? pluralCategory = null)
         {
             content = content.Trim();
 
@@ -64,7 +64,7 @@ namespace Tlumach.Base
             if (simpleIdentifier)
                 return value.ToString() ?? string.Empty;
 
-            return EvaluateNoName(content.Substring(name.Length), ref placeholderIndex, value, getPlaceholderValueFunc, getParamValueFunc, culture, pluralCategory);
+            return EvaluateNoName(content.Substring(name.Length), ref placeholderIndex, value, getPlaceholderValueFunc, /*getParamValueFunc, */culture, pluralCategory);
         }
 
         /// <summary>
@@ -73,12 +73,12 @@ namespace Tlumach.Base
         /// <param name="content">The tail to parse. The tail is everything after the placeholder name, which the caller deals with.</param>
         /// <param name="placeholderIndex">The index of the placeholder in the translated string.</param>
         /// <param name="value">The value of the variable for the given placeholder name.</param>
-        /// <param name="getParamValueFunc">The function that returns the value of the placeholder by its name or index. It is used for inner placeholders with no index, so the index passed to it is always -1.</param>
+        /// <param name="getPlaceholderValueFunc">The function that returns the value of the placeholder by its name or index.</param>
         /// <param name="culture">The culture to use in conversions.</param>
         /// <param name="pluralCategory">An optional function that determines to what numeric category (zero, one, few, many, other) the value falls.</param>
         /// <returns>The resulting string or <see langword="null"/> on failure. If <see langword="null"/> is returned, the caller uses other means of formatting.</returns>
         /// <exception cref="TemplateParserException">thrown if an error or an unsupported ICU feature is detected.</exception>
-        internal static string? EvaluateNoName(string content, ref int placeholderIndex, object value, Func<string, int, (object?, int)> getPlaceholderValueFunc, Func<string, int, object?> getParamValueFunc, CultureInfo? culture = null, Func<decimal, CultureInfo?, string>? pluralCategory = null)
+        internal static string? EvaluateNoName(string content, ref int placeholderIndex, object value, Func<string, int, (object?, int)> getPlaceholderValueFunc, /*Func<string, int, object?> getParamValueFunc, */CultureInfo? culture = null, Func<decimal, CultureInfo?, string>? pluralCategory = null)
         {
             culture ??= CultureInfo.InvariantCulture;
             pluralCategory ??= SimplePluralCategory; // swap with a CLDR-aware resolver later
@@ -100,11 +100,6 @@ namespace Tlumach.Base
 #pragma warning restore CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
 
             bool doReadOptions = reader.TryReadChar(',');
-
-            /*if (!reader.TryReadChar(','))
-            {
-                throw new TemplateParserException("ICU fragment: expected second comma");
-            }*/
 
             reader.SkipWs();
 
@@ -134,7 +129,7 @@ namespace Tlumach.Base
                     !options.TryGetValue("other", out chosen))
                     throw new FormatException("ICU selectordinal: missing 'other' branch.");
 
-                return RenderPlaceholderText(chosen.Replace("#", n.ToString(culture)), ref placeholderIndex, getPlaceholderValueFunc/*getParamValueFunc*/);
+                return RenderPlaceholderText(chosen.Replace("#", n.ToString(culture)), ref placeholderIndex, getPlaceholderValueFunc);
             }
             else
             if (kind == "plural")
@@ -173,13 +168,13 @@ namespace Tlumach.Base
 
                 // exact match first (=n)
                 if (options.TryGetValue("=" + n.ToString(CultureInfo.InvariantCulture), out var exact))
-                    return RenderPluralText(exact, n, offset, ref placeholderIndex, value, getPlaceholderValueFunc, getParamValueFunc, culture);
+                    return RenderPluralText(exact, n, offset, ref placeholderIndex, value, getPlaceholderValueFunc, /*getParamValueFunc, */culture);
 
                 var cat = pluralCategory(n, culture); // "one", "few", ...
                 if (!options.TryGetValue(cat, out var chosen) && !options.TryGetValue("other", out chosen))
                     throw new FormatException("ICU plural: missing 'other' branch");
 
-                return RenderPluralText(chosen, n, offset, ref placeholderIndex, value, getPlaceholderValueFunc, getParamValueFunc, culture);
+                return RenderPluralText(chosen, n, offset, ref placeholderIndex, value, getPlaceholderValueFunc, /*getParamValueFunc, */culture);
             }
             else
             if (kind == "number")
@@ -277,21 +272,23 @@ namespace Tlumach.Base
 
             if (r.TryReadIdentifier(out var identToken))
             {
+#pragma warning disable CA1308 // In method ..., replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
                 var style = identToken.ToLowerInvariant();
+#pragma warning restore CA1308 // In method ..., replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
                 switch (style)
                 {
                     case "short":
                         opts.Style = DateTimeStyleOption.Short;
-                        break;
+                        return opts;
                     case "medium":
                         opts.Style = DateTimeStyleOption.Medium;
-                        break;
+                        return opts;
                     case "long":
                         opts.Style = DateTimeStyleOption.Long;
-                        break;
+                        return opts;
                     case "full":
                         opts.Style = DateTimeStyleOption.Full;
-                        break;
+                        return opts;
                     default:
                         // Not a known style (e.g., "yyyy") → treat entire remainder as a custom pattern
                         r.Restore(startPos);
@@ -581,6 +578,8 @@ namespace Tlumach.Base
                 throw new FormatException($"time: ICU skeletons '::{ident}' are not supported.");
             }
 
+            int startPos = r.Position;
+
             if (r.Peek() == '\'')
             {
                 var fmt = r.ReadQuoted();
@@ -589,24 +588,41 @@ namespace Tlumach.Base
                 return opts;
             }
 
-            var style = r.ReadIdentifier(out _).ToLowerInvariant();
-            switch (style)
+            // Case 2: maybe a named style (short/medium/long/full)
+            if (r.TryReadIdentifier(out var identToken))
             {
-                case "short":
-                    opts.Style = DateTimeStyleOption.Short;
-                    break;
-                case "medium":
-                    opts.Style = DateTimeStyleOption.Medium;
-                    break;
-                case "long":
-                    opts.Style = DateTimeStyleOption.Long;
-                    break;
-                case "full":
-                    opts.Style = DateTimeStyleOption.Full;
-                    break;
-                default:
-                    throw new FormatException($"time: unsupported style '{style}'.");
+#pragma warning disable CA1308 // In method ..., replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
+                var style = identToken.ToLowerInvariant();
+#pragma warning restore CA1308 // In method ..., replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
+                switch (style)
+                {
+                    case "short":
+                        opts.Style = DateTimeStyleOption.Short;
+                        return opts;
+                    case "medium":
+                        opts.Style = DateTimeStyleOption.Medium;
+                        return opts;
+                    case "long":
+                        opts.Style = DateTimeStyleOption.Long;
+                        return opts;
+                    case "full":
+                        opts.Style = DateTimeStyleOption.Full;
+                        return opts;
+                    default:
+                        // Not a known style (e.g., "yyyy") → treat entire remainder as a custom pattern
+                        r.Restore(startPos);
+                        var patternFromIdent = r.ReadToEndOrBrace();
+                        opts.Style = DateTimeStyleOption.Custom;
+                        opts.CustomDotNetFormat = patternFromIdent.Trim();
+                        return opts;
+                }
             }
+
+            // Case 3: no identifier (e.g., starts with digit/symbol) → entire tail is pattern
+            r.Restore(startPos);
+            var pattern = r.ReadToEndOrBrace();
+            opts.Style = DateTimeStyleOption.Custom;
+            opts.CustomDotNetFormat = pattern.Trim();
 
             return opts;
         }
@@ -738,7 +754,9 @@ namespace Tlumach.Base
             if (r.TryReadLiteral("::"))
             {
                 // ICU skeleton-ish
+#pragma warning disable CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
                 var ident = r.ReadIdentifier(out _).ToLowerInvariant(); // e.g., "compact-short"
+#pragma warning restore CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
 
                 if (ident == "compact-short")
                 {
@@ -759,7 +777,9 @@ namespace Tlumach.Base
             }
 
             // Identifier styles
+#pragma warning disable CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
             var style = r.ReadIdentifier(out _).ToLowerInvariant();
+#pragma warning restore CA1308 // In method '...', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant'
             switch (style)
             {
                 case "number":
@@ -897,7 +917,7 @@ namespace Tlumach.Base
         }
 
 #pragma warning disable CA1307 // '...' has a method overload that takes a 'StringComparison' parameter. Replace this call ... for clarity of intent.
-        private static string RenderPluralText(string template, decimal n, int offset, ref int placeholderIndex, object? value, Func<string, int, (object?, int)> getPlaceholderValueFunc, Func<string, int, object?> getParamValueFunc, CultureInfo culture)
+        private static string RenderPluralText(string template, decimal n, int offset, ref int placeholderIndex, object? value, Func<string, int, (object?, int)> getPlaceholderValueFunc, /*Func<string, int, object?> getParamValueFunc, */CultureInfo culture)
         {
             // Replace '#' with (n - offset) using culture
             var number = n - offset;

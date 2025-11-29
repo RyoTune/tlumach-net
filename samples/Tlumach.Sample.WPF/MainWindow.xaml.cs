@@ -99,11 +99,33 @@ namespace Tlumach.Sample.WPF
             // Update the control that contains templated text - such controls cannot be bound for dynamic updates
             UpdateCopyright(CultureInfo.InvariantCulture);
 
+            RefreshCultureInfoTranslationUnit();
+
             // We track the change of a culture to update controls which are updated from code rather than bound for dynamic updates
-            Strings.TranslationManager.OnCultureChanged += (sender, e) => UpdateCopyright(e.Culture);
+            Strings.TranslationManager.OnCultureChanged += (sender, e) =>
+                {
+                    UpdateCopyright(e.Culture);
+                    RefreshCultureInfoTranslationUnit();
+                };
 
             // Register ourselves for system locale change
             SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+        }
+
+        // Refresh the CultureInfo translation unit, which is bound to a XAML control but contains placeholders.
+        private static void RefreshCultureInfoTranslationUnit()
+        {
+            Strings.CultureInfo.ForgetPlaceholderValue("systemCulture");
+            Strings.CultureInfo.ForgetPlaceholderValue("currentCulture");
+            Strings.CultureInfo.CachePlaceholderValue("systemCulture", CultureInfo.CurrentCulture.Name);
+
+            // we use the invariant culture to tell Tlumach that it should use a default translation file.
+            if (Strings.TranslationManager.CurrentCulture == CultureInfo.InvariantCulture)
+                Strings.CultureInfo.CachePlaceholderValue("currentCulture", "(default)");
+            else
+                Strings.CultureInfo.CachePlaceholderValue("currentCulture", Strings.TranslationManager.CurrentCulture.Name);
+
+            Strings.CultureInfo.NotifyPlaceholdersUpdated();
         }
 
         private static void UpdateUI()
@@ -112,8 +134,10 @@ namespace Tlumach.Sample.WPF
             CultureInfo.CurrentCulture.ClearCachedData();
             CultureInfo.CurrentUICulture.ClearCachedData();
 
-            // Notifies the translation manager about the change of current locale / culture. 
-            // If TranslationManager decides that the texts need to change, it will fire the event, to which translation units listen and react. 
+            RefreshCultureInfoTranslationUnit();
+
+            // Notifies the translation manager about the change of current locale / culture.
+            // If TranslationManager decides that the texts need to change, it will fire the event, to which translation units listen and react.
             Strings.TranslationManager.SystemCultureUpdated();
         }
 
@@ -121,7 +145,7 @@ namespace Tlumach.Sample.WPF
         {
             if (e.Category == UserPreferenceCategory.Locale)
             {
-                // We need to pass the burden of updating the translation manager to the UI thread 
+                // We need to pass the burden of updating the translation manager to the UI thread
                 // because the listeners of TranslationManager's OnCultureChanged event will update the UI, and this should be done in the main thread.
 
                 // Get the app dispatcher (or use any UI element's Dispatcher)
@@ -150,7 +174,7 @@ namespace Tlumach.Sample.WPF
 #pragma warning restore RCS1163 // Unused parameter
 #pragma warning disable S1172
         {
-            // This is an illustration of using the templated item. 
+            // This is an illustration of using the templated item.
             // The copyright text itself is not translated in our example (although it could be), yet the placeholder is passed.
 
 #pragma warning disable MA0011

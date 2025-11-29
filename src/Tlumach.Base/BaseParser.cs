@@ -158,8 +158,12 @@ namespace Tlumach.Base
         /// <exception cref="TextFileParseException">Gets thrown when parsing of a default translation file fails.</exception>
         public TranslationTree? LoadTranslationStructure(string configFile, string? baseDirectory, out TranslationConfiguration? configuration)
         {
+#pragma warning disable CA1510 // Use 'ArgumentNullException.ThrowIfNull' instead of explicitly throwing a new exception instance
+#pragma warning disable MA0015
             if (configFile is null)
                 throw new ArgumentNullException(nameof(configFile));
+#pragma warning restore MA0015
+#pragma warning restore CA1510 // Use 'ArgumentNullException.ThrowIfNull' instead of explicitly throwing a new exception instance
 
             /*if (!Path.IsPathRooted(configFile))
             {
@@ -243,7 +247,7 @@ namespace Tlumach.Base
             // Parse the default translation file and return the result
             try
             {
-                return parser.InternalLoadTranslationStructure(defaultContent);
+                return parser.InternalLoadTranslationStructure(defaultContent, configuration.TextProcessingMode);
             }
             catch (TextParseException ex)
             {
@@ -269,8 +273,12 @@ namespace Tlumach.Base
         /// <returns>The loaded configuration or <see langword="null"/> if loading failed.</returns>
         public TranslationConfiguration? ParseConfigurationFile(string configFile)
         {
+#pragma warning disable CA1510 // Use 'ArgumentNullException.ThrowIfNull' instead of explicitly throwing a new exception instance
+#pragma warning disable MA0015
             if (configFile is null)
                 throw new ArgumentNullException(nameof(configFile));
+#pragma warning restore MA0015
+#pragma warning restore CA1510 // Use 'ArgumentNullException.ThrowIfNull' instead of explicitly throwing a new exception instance
 
             string? fileContent = null;
 
@@ -307,11 +315,15 @@ namespace Tlumach.Base
         /// <returns>The loaded configuration or <see langword="null"/> if loading failed.</returns>
         public TranslationConfiguration? ParseConfigurationFile(Assembly assembly, string configFile)
         {
+#pragma warning disable CA1510 // Use 'ArgumentNullException.ThrowIfNull' instead of explicitly throwing a new exception instance
+#pragma warning disable MA0015
             if (assembly is null)
                 throw new ArgumentNullException(nameof(assembly));
 
             if (configFile is null)
                 throw new ArgumentNullException(nameof(configFile));
+#pragma warning restore MA0015
+#pragma warning restore CA1510 // Use 'ArgumentNullException.ThrowIfNull' instead of explicitly throwing a new exception instance
 
             string? fileContent = null;
 
@@ -363,14 +375,19 @@ namespace Tlumach.Base
         /// Loads the keys from the default translation file and builds a tree of keys.
         /// </summary>
         /// <param name="content">The content to parse.</param>
+        /// <param name="textProcessingMode">The mode of processing the text of the default file.</param>
         /// <returns>The constructed <seealso cref="TranslationTree"/> upon success or <see langword="null"/> otherwise. </returns>
         /// <exception cref="TextParseException">Gets thrown when parsing of a default translation file fails.</exception>
-        protected abstract TranslationTree? InternalLoadTranslationStructure(string content);
+        protected abstract TranslationTree? InternalLoadTranslationStructure(string content, TextFormat? textProcessingMode);
 
         protected virtual void ValidateConfiguration(TranslationConfiguration configuration)
         {
+#pragma warning disable CA1510 // Use 'ArgumentNullException.ThrowIfNull' instead of explicitly throwing a new exception instance
+#pragma warning disable MA0015
             if (configuration is null)
                 throw new ArgumentNullException(nameof(configuration));
+#pragma warning restore MA0015
+#pragma warning restore CA1510 // Use 'ArgumentNullException.ThrowIfNull' instead of explicitly throwing a new exception instance
 
             // check if the configuration contains a reference to the default file
             if (string.IsNullOrEmpty(configuration.DefaultFile))

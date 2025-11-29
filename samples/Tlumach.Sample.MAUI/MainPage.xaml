@@ -31,7 +31,10 @@
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
-            <Label x:Name="CopyrightLabel"/>
+            <Label x:Name="CopyrightLabel"   VerticalOptions="Center" VerticalTextAlignment="Center" />
+            <Label Text=" | "  VerticalOptions="Center" VerticalTextAlignment="Center" />
+            <Label Text="{tlumach:Translate {x:Static translations:Strings.CultureInfo}}" VerticalOptions="Center" VerticalTextAlignment="Center" />
+
         </HorizontalStackLayout>
     </Grid>
 
