@@ -111,7 +111,7 @@ namespace Tlumach.Base
                         if (result.RootNode.Keys.Keys.Contains(key, StringComparer.OrdinalIgnoreCase))
                             throw new GenericParserException($"Duplicate key '{key}' specified");
 
-                        result.RootNode.Keys.Add(key, new TranslationTreeLeaf(key, IsTemplatedText(value)));
+                        result.RootNode.Keys.Add(key, new TranslationTreeLeaf(key, IsTemplatedText(value, textProcessingMode)));
                     }
                 }
 
@@ -128,7 +128,7 @@ namespace Tlumach.Base
             }
         }
 
-        protected override Translation InternalLoadTranslationEntriesFromXML(XElement parentNode, Translation? translation, string groupName)
+        protected override Translation InternalLoadTranslationEntriesFromXML(XElement parentNode, Translation? translation, string groupName, TextFormat? textProcessingMode)
         {
 #pragma warning disable CA1510 // Use 'ArgumentNullException.ThrowIfNull' instead of explicitly throwing a new exception instance
             if (parentNode is null)
@@ -177,7 +177,7 @@ namespace Tlumach.Base
                     translation.Add(key.ToUpperInvariant(), entry);
 
                     if (value is not null)
-                        entry.ContainsPlaceholders = IsTemplatedText(value);
+                        entry.ContainsPlaceholders = IsTemplatedText(value, textProcessingMode);
                 }
             }
 

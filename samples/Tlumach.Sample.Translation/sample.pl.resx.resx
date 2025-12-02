@@ -120,6 +120,9 @@
   <data name="Hello" xml:space="preserve">
     <value>Cześć</value>
   </data>
+  <data name="HelloName" xml:space="preserve">
+    <value>Cześć, {name}</value>
+  </data>
   <data name="Welcome">
     <value> Witamy </value>
   </data>

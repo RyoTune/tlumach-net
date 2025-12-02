@@ -303,13 +303,13 @@ namespace Tlumach
         /// <param name="culture">An optional reference to the locale, whose translation is to be loaded. Makes sense for CSV and TSV formats that may contain multiple translations in one file.</param>
         /// <returns>A <seealso cref="Translation"/> instance or <see langword="null"/> if the parser could not be selected or if the parser failed to load the translation.</returns>
         /// <exception cref="GenericParserException"> and its descendants are thrown if parsing fails due to errors in format of the input.</exception>
-        public static Translation? LoadTranslation(string translationText, string fileExtension, CultureInfo? culture)
+        public static Translation? LoadTranslation(string translationText, string fileExtension, CultureInfo? culture, TextFormat? textProcessingMode)
         {
             BaseParser? parser = FileFormats.GetParser(fileExtension);
             if (parser is null)
                 return null;
 
-            return parser.LoadTranslation(translationText, culture);
+            return parser.LoadTranslation(translationText, culture, textProcessingMode);
         }
 
         /// <summary>
@@ -320,12 +320,12 @@ namespace Tlumach
         /// <param name="culture">An optional reference to the locale, whose translation is to be loaded. Makes sense for CSV and TSV formats that may contain multiple translations in one file.</param>
         /// <returns>A <seealso cref="Translation"/> instance or <see langword="null"/> if the parser failed to load the translation.</returns>
         /// <exception cref="GenericParserException"> and its descendants are thrown if parsing fails due to errors in format of the input.</exception>
-        public static Translation? LoadTranslation(string translationText, BaseParser parser, CultureInfo? culture)
+        public static Translation? LoadTranslation(string translationText, BaseParser parser, CultureInfo? culture, TextFormat? textProcessingMode)
         {
             if (parser is null)
                 throw new ArgumentNullException(nameof(parser));
 
-            return parser.LoadTranslation(translationText, culture);
+            return parser.LoadTranslation(translationText, culture, textProcessingMode);
         }
 
         /// <summary>
@@ -383,14 +383,15 @@ namespace Tlumach
             List<string> result = [];
             if (_defaultConfig is null)
                 return result;
-
-            foreach (var item in _defaultConfig.Translations.Keys)
+            lock (_defaultConfig.Translations)
             {
-                // We do not include "other" because we return only locale names, explicitly listed in the configuration.
-                if (!TranslationConfiguration.KEY_TRANSLATION_OTHER.Equals(item, StringComparison.Ordinal))
-                    result.Add(item);
+                foreach (var item in _defaultConfig.Translations.Keys)
+                {
+                    // We do not include "other" because we return only locale names, explicitly listed in the configuration.
+                    if (!TranslationConfiguration.KEY_TRANSLATION_OTHER.Equals(item, StringComparison.Ordinal))
+                        result.Add(item);
+                }
             }
-
             return result;
         }
 
@@ -421,7 +422,6 @@ namespace Tlumach
             return GetValue(_defaultConfig, key, culture);
         }
 
-#pragma warning disable MA0051 // Method is too long
         /// <summary>
         /// Retrieves the value based on the default configuration and culture.
         /// </summary>
@@ -430,6 +430,20 @@ namespace Tlumach
         /// <param name="culture">The culture, for which the entry is needed.</param>
         /// <returns>The translation entry or an empty entry if nothing was found.</returns>
         public TranslationEntry GetValue(TranslationConfiguration config, string key, CultureInfo culture)
+        {
+            return GetValue(config, key, culture, out _);
+        }
+
+#pragma warning disable MA0051 // Method is too long
+        /// <summary>
+        /// Retrieves the value based on the default configuration and culture.
+        /// </summary>
+        /// <param name="config">The configuration that specifies from where to load translations.</param>
+        /// <param name="key">The key of the translation entry to retrieve.</param>
+        /// <param name="culture">The culture, for which the entry is needed.</param>
+        /// <param name="foundForCulture">Upon return, indicates if the requested entry was found for the speciifed culture or its base culture. <see langword="false" /> will be returned if a value from the default translation was used.</param>
+        /// <returns>The translation entry or an empty entry if nothing was found.</returns>
+        public TranslationEntry GetValue(TranslationConfiguration config, string key, CultureInfo culture, out bool foundForCulture)
 #pragma warning restore MA0051 // Method is too long
         {
             if (config is null)
@@ -445,6 +459,8 @@ namespace Tlumach
 
             if (key is null)
                 throw new ArgumentNullException(nameof(key));
+
+            foundForCulture = false;
 
             TextFormat textProcessingMode = config.TextProcessingMode ?? TextFormat.None;
 
@@ -464,7 +480,10 @@ namespace Tlumach
                     return args.Entry;
 
                 if (args.Text is not null || args.EscapedText is not null)
+                {
+                    foundForCulture = true;
                     return EntryFromEventArgs(args, textProcessingMode);
+                }
             }
 
             // If requesting text for a non-default culture, deal with the culture-specific translation
@@ -503,6 +522,7 @@ namespace Tlumach
 
                 if (result is not null)
                 {
+                    foundForCulture = true;
                     return FireTranslationValueFound(culture, key, result, translation?.OriginalAssembly, translation?.OriginalFile, textProcessingMode);
                 }
             }
@@ -532,18 +552,35 @@ namespace Tlumach
             }
 
             // Try loading from the default translation
-            if (_defaultTranslation is not null
-                && _defaultTranslation.TryGetValue(keyUpper, out result)
-                && result is not null
-                && TranslationEntryAcceptable(result, _defaultTranslation.OriginalAssembly, _defaultTranslation.OriginalFile, config.DirectoryHint))
+            if (_defaultTranslation is not null)
             {
-                // if a locale-specific translation exists, cache the value from the default translation in the culture-local one so that in the future, no attempt to load or go to the default translation is needed
-                cultureLocalTranslation?.Add(keyUpper, result);
+                lock (_defaultTranslation)
+                {
+                    _defaultTranslation.TryGetValue(keyUpper, out result);
+                }
 
-                // if a basic-locale translation exists, cache the value from the default translation in the basic-culture one so that in the future, no attempt to load or go to the default translation is needed
-                basicCultureLocalTranslation?.Add(keyUpper, result);
+                if (result is not null && TranslationEntryAcceptable(result, _defaultTranslation.OriginalAssembly, _defaultTranslation.OriginalFile, config.DirectoryHint))
+            {
+                    if (cultureLocalTranslation is not null)
+                    {
+                        lock (cultureLocalTranslation)
+                        {
+                            // if a locale-specific translation exists, cache the value from the default translation in the culture-local one so that in the future, no attempt to load or go to the default translation is needed
+                            cultureLocalTranslation.Add(keyUpper, result);
+                        }
+                    }
 
-                return FireTranslationValueFound(culture, key, result, _defaultTranslation.OriginalAssembly, _defaultTranslation.OriginalFile, textProcessingMode);
+                    if (basicCultureLocalTranslation is not null)
+                    {
+                        lock (basicCultureLocalTranslation)
+                        {
+                            // if a basic-locale translation exists, cache the value from the default translation in the basic-culture one so that in the future, no attempt to load or go to the default translation is needed
+                            basicCultureLocalTranslation.Add(keyUpper, result);
+                        }
+                    }
+
+                    return FireTranslationValueFound(culture, key, result, _defaultTranslation.OriginalAssembly, _defaultTranslation.OriginalFile, textProcessingMode);
+                }
             }
 
             return FireTranslationValueNotFound(culture, key, textProcessingMode);
@@ -592,12 +629,15 @@ namespace Tlumach
             if (isBasicCulture)
                 translation.IsBasicCulture = true;
 
-            // If the translation contains what we need, try using it
-            if (translation.TryGetValue(keyUpper, out result)
-                && result is not null
-                && TranslationEntryAcceptable(result, translation.OriginalAssembly, translation.OriginalFile, config.DirectoryHint))
+            lock (translation)
             {
-                return FireTranslationValueFound(culture, key, result, translation.OriginalAssembly, translation.OriginalFile, config.TextProcessingMode ?? TextFormat.None);
+                // If the translation contains what we need, try using it
+                if (translation.TryGetValue(keyUpper, out result)
+                    && result is not null
+                    && TranslationEntryAcceptable(result, translation.OriginalAssembly, translation.OriginalFile, config.DirectoryHint))
+                {
+                    return FireTranslationValueFound(culture, key, result, translation.OriginalAssembly, translation.OriginalFile, config.TextProcessingMode ?? TextFormat.None);
+                }
             }
 
             return null;
@@ -779,24 +819,27 @@ namespace Tlumach
 
             string? configRef = null;
 
-            if (!tryLoadDefault && cultureNamePresent)
+            lock (config.Translations)
             {
-                if (string.IsNullOrEmpty(translationContent) && config.Translations.TryGetValue(culture.Name.ToUpperInvariant(), out configRef) && !string.IsNullOrEmpty(configRef))
+                if (!tryLoadDefault && cultureNamePresent)
+                {
+                    if (string.IsNullOrEmpty(translationContent) && config.Translations.TryGetValue(culture.Name.ToUpperInvariant(), out configRef) && !string.IsNullOrEmpty(configRef))
+                    {
+                        translationContent = InternalLoadFileContent(config.Assembly, configRef, config.DirectoryHint, ref usedFileName);
+                    }
+
+                    // Try the language name
+                    if (string.IsNullOrEmpty(translationContent) && config.Translations.TryGetValue(culture.TwoLetterISOLanguageName.ToUpperInvariant(), out configRef) && !string.IsNullOrEmpty(configRef))
+                    {
+                        translationContent = InternalLoadFileContent(config.Assembly, configRef, config.DirectoryHint, ref usedFileName);
+                    }
+                }
+
+                // See maybe the default value is defined
+                if (string.IsNullOrEmpty(translationContent) && config.Translations.TryGetValue(TranslationConfiguration.KEY_TRANSLATION_OTHER, out configRef) && !string.IsNullOrEmpty(configRef))
                 {
                     translationContent = InternalLoadFileContent(config.Assembly, configRef, config.DirectoryHint, ref usedFileName);
                 }
-
-                // Try the language name
-                if (string.IsNullOrEmpty(translationContent) && config.Translations.TryGetValue(culture.TwoLetterISOLanguageName.ToUpperInvariant(), out configRef) && !string.IsNullOrEmpty(configRef))
-                {
-                    translationContent = InternalLoadFileContent(config.Assembly, configRef, config.DirectoryHint, ref usedFileName);
-                }
-            }
-
-            // See maybe the default value is defined
-            if (string.IsNullOrEmpty(translationContent) && config.Translations.TryGetValue(TranslationConfiguration.KEY_TRANSLATION_OTHER, out configRef) && !string.IsNullOrEmpty(configRef))
-            {
-                translationContent = InternalLoadFileContent(config.Assembly, configRef, config.DirectoryHint, ref usedFileName);
             }
 
             Translation? result = null;
@@ -942,7 +985,7 @@ namespace Tlumach
             // File extension is used to create an appropriate parser
             try
             {
-                return LoadTranslation(translationContent!, parser, culture)?.SetOrigin(config.Assembly, usedFileName);
+                return LoadTranslation(translationContent!, parser, culture, config.TextProcessingMode)?.SetOrigin(config.Assembly, usedFileName);
             }
             catch (TextParseException ex)
             {

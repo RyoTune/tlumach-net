@@ -75,22 +75,22 @@ namespace Tlumach.Base
         }
 
 #pragma warning disable CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
-        protected override Translation InternalLoadTranslationEntriesFromJSON(JsonElement jsonObj, Translation? translation, string groupName)
+        protected override Translation InternalLoadTranslationEntriesFromJSON(JsonElement jsonObj, Translation? translation, string groupName, TextFormat? textProcessingMode)
         {
             // When processing the top level, pick the metadata (locale, context, author, last modified) values if they are present
             translation ??= new Translation(locale: null);
 
             // Enumerate string properties
-            InternalEnumerateStringPropertiesOfJSONObject(jsonObj, translation, groupName);
+            InternalEnumerateStringPropertiesOfJSONObject(jsonObj, translation, groupName, textProcessingMode);
 
             // Enumerate JSON properties that are objects - they either contain extra information about entries or they are child groups
-            InternalEnumerateObjectPropertiesOfJSONObject(jsonObj, translation, groupName);
+            InternalEnumerateObjectPropertiesOfJSONObject(jsonObj, translation, groupName, textProcessingMode);
 
             return translation;
         }
 #pragma warning restore CA1062 // In externally visible method, validate parameter is non-null before using it. If appropriate, throw an 'ArgumentNullException' when the argument is 'null'.
 
-        private void InternalEnumerateStringPropertiesOfJSONObject(JsonElement jsonObj, Translation translation, string groupName)
+        private void InternalEnumerateStringPropertiesOfJSONObject(JsonElement jsonObj, Translation translation, string groupName, TextFormat? textProcessingMode)
         {
             foreach (var prop in jsonObj.EnumerateObject().Where(static p => p.Value.ValueKind == JsonValueKind.String))
             {
@@ -125,7 +125,7 @@ namespace Tlumach.Base
 
                 if (value is not null)
                 {
-                    isTemplated = IsTemplatedText(value);
+                    isTemplated = IsTemplatedText(value, textProcessingMode);
                     if (TextProcessingMode == TextFormat.BackslashEscaping || TextProcessingMode == TextFormat.DotNet)
                     {
                         escapedValue = value;
@@ -141,7 +141,7 @@ namespace Tlumach.Base
             }
         }
 
-        private void InternalEnumerateObjectPropertiesOfJSONObject(JsonElement jsonObj, Translation translation, string groupName)
+        private void InternalEnumerateObjectPropertiesOfJSONObject(JsonElement jsonObj, Translation translation, string groupName, TextFormat? textProcessingMode)
         {
             foreach (var prop in jsonObj.EnumerateObject().Where(static p => p.Value.ValueKind == JsonValueKind.Object))
             {
@@ -150,13 +150,8 @@ namespace Tlumach.Base
                 var jsonChild = prop.Value;
 
                 // We have a group - use recursive handling
-                InternalLoadTranslationEntriesFromJSON(jsonChild, translation, (!string.IsNullOrEmpty(groupName)) ? groupName + "." + name : name);
+                InternalLoadTranslationEntriesFromJSON(jsonChild, translation, (!string.IsNullOrEmpty(groupName)) ? groupName + "." + name : name, textProcessingMode);
             }
-        }
-
-        internal override bool IsTemplatedText(string text)
-        {
-            return StringHasParameters(text, TextProcessingMode);
         }
     }
 }

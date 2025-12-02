@@ -1,5 +1,6 @@
 key	uk
 
 Hello	Привіт
+HelloName	Привіт, {name}
 Welcome	Вітаємо
 CultureInfo	Поточна культура інтерфейсу - '{currentCulture}', системна культура - '{systemCulture}'

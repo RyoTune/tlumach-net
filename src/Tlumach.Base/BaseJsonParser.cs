@@ -122,14 +122,14 @@ namespace Tlumach.Base
             }
         }
 
-        public override Translation? LoadTranslation(string translationText, CultureInfo? culture)
+        public override Translation? LoadTranslation(string translationText, CultureInfo? culture, TextFormat? textProcessingMode)
         {
             try
             {
                 var doc = JsonDocument.Parse(translationText);
                 JsonElement jsonObj = doc.RootElement;
 
-                return InternalLoadTranslationEntriesFromJSON(jsonObj, null, string.Empty);
+                return InternalLoadTranslationEntriesFromJSON(jsonObj, null, string.Empty, textProcessingMode);
             }
             catch (JsonException ex)
             {
@@ -142,7 +142,7 @@ namespace Tlumach.Base
             }
         }
 
-        protected abstract Translation InternalLoadTranslationEntriesFromJSON(JsonElement jsonObj, Translation? translation, string groupName);
+        protected abstract Translation InternalLoadTranslationEntriesFromJSON(JsonElement jsonObj, Translation? translation, string groupName, TextFormat? textProcessingMode);
 
         protected override TranslationTree? InternalLoadTranslationStructure(string content, TextFormat? textProcessingMode)
         {
@@ -153,7 +153,7 @@ namespace Tlumach.Base
 
                 TranslationTree result = new();
 
-                InternalLoadTreeNodeFromJSON(jsonObj, result, result.RootNode);
+                InternalLoadTreeNodeFromJSON(jsonObj, result, result.RootNode, textProcessingMode);
 
                 return result;
             }
@@ -168,7 +168,7 @@ namespace Tlumach.Base
             }
         }
 
-        private void InternalLoadTreeNodeFromJSON(JsonElement jsonObj, TranslationTree tree, TranslationTreeNode parentNode)
+        private void InternalLoadTreeNodeFromJSON(JsonElement jsonObj, TranslationTree tree, TranslationTreeNode parentNode, TextFormat? textProcessingMode)
         {
             // Enumerate string properties, which will be keys
             foreach (var prop in jsonObj.EnumerateObject().Where(static p => p.Value.ValueKind == JsonValueKind.String))
@@ -189,7 +189,7 @@ namespace Tlumach.Base
                 if (value is null)
                     throw new GenericParserException($"The value of the key '{key}' is not a string");
 
-                parentNode.Keys.Add(key, new TranslationTreeLeaf(key, !IsReference(value) && IsTemplatedText(value)));
+                parentNode.Keys.Add(key, new TranslationTreeLeaf(key, !IsReference(value) && IsTemplatedText(value, textProcessingMode)));
             }
 
             // Enumerate object properties, which will be groups
@@ -217,7 +217,7 @@ namespace Tlumach.Base
                 if (childNode is null)
                     throw new GenericParserException($"Group '{name}' could not be used to build a tree of translation entries");
 
-                InternalLoadTreeNodeFromJSON(jsonChild, tree, childNode);
+                InternalLoadTreeNodeFromJSON(jsonChild, tree, childNode, textProcessingMode);
             }
         }
 

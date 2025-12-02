@@ -1,5 +1,6 @@
 # This is a simple translation file.
 
 Hello="Hallo"
+HelloName="Hallo, {name}"
 Welcome="Willkommen"
 CultureInfo="Die aktuelle UI-Kultur ist '{currentCulture}', die Systemkultur ist '{systemCulture}'"

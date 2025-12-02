@@ -57,7 +57,7 @@ namespace Tlumach.Base
             return LocaleSeparatorChar;
         }
 
-        public override Translation? LoadTranslation(string translationText, CultureInfo? culture)
+        public override Translation? LoadTranslation(string translationText, CultureInfo? culture, TextFormat? textProcessingMode)
         {
             string currentGroup = string.Empty;
             string key;
@@ -102,10 +102,10 @@ namespace Tlumach.Base
                     if (reference is null)
                     {
                         if (escapedValue is not null)
-                            entry.ContainsPlaceholders = IsTemplatedText(escapedValue); // an 'escaped' value is present only when it was explicitly returned by the TOML parser to indicate that the text is escaped and must be handled as such
+                            entry.ContainsPlaceholders = IsTemplatedText(escapedValue, textProcessingMode); // an 'escaped' value is present only when it was explicitly returned by the TOML parser to indicate that the text is escaped and must be handled as such
                         else
                         if (value is not null)
-                            entry.ContainsPlaceholders = IsTemplatedText(value);
+                            entry.ContainsPlaceholders = IsTemplatedText(value, textProcessingMode);
                     }
 
                     result.Add(key.ToUpperInvariant(), entry);
@@ -645,17 +645,12 @@ namespace Tlumach.Base
                         value = line.Value.Value.unescaped;
                     }
 
-                    leaf = new TranslationTreeLeaf(key, !IsReference(value) && IsTemplatedText(value));
+                    leaf = new TranslationTreeLeaf(key, !IsReference(value) && IsTemplatedText(value, textProcessingMode));
                     node!.Keys.Add(key, leaf);
                 }
             }
 
             return result;
-        }
-
-        internal override bool IsTemplatedText(string text)
-        {
-            return StringHasParameters(text, GetTextProcessingMode());
         }
     }
 }

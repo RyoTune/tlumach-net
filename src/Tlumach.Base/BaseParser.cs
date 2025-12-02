@@ -368,14 +368,15 @@ namespace Tlumach.Base
         /// </summary>
         /// <param name="translationText">The text of the file to load.</param>
         /// <param name="culture">An optional reference to the locale, whose translation is to be loaded. Makes sense for CSV and TSV formats that may contain multiple translations in one file.</param>
+        /// <param name="textProcessingMode">The mode of processing of the text of the translation file.</param>
         /// <returns>The loaded translation or <see langword="null"/> if loading failed.</returns>
-        public abstract Translation? LoadTranslation(string translationText, CultureInfo? culture);
+        public abstract Translation? LoadTranslation(string translationText, CultureInfo? culture, TextFormat? textProcessingMode);
 
         /// <summary>
         /// Loads the keys from the default translation file and builds a tree of keys.
         /// </summary>
         /// <param name="content">The content to parse.</param>
-        /// <param name="textProcessingMode">The mode of processing the text of the default file.</param>
+        /// <param name="textProcessingMode">The mode of processing of the text of the default file.</param>
         /// <returns>The constructed <seealso cref="TranslationTree"/> upon success or <see langword="null"/> otherwise. </returns>
         /// <exception cref="TextParseException">Gets thrown when parsing of a default translation file fails.</exception>
         protected abstract TranslationTree? InternalLoadTranslationStructure(string content, TextFormat? textProcessingMode);
@@ -412,12 +413,15 @@ namespace Tlumach.Base
                 throw new GenericParserException($"The provided class name '{configuration.ClassName}' is not a valid identifier suitable for a class name.");
         }
 
+        //internal virtual bool IsTemplatedText(string text) => false;
+
         /// <summary>
         /// Checks whether the text is templated, i.e. contains placeholders.
         /// </summary>
         /// <param name="text">The text to check.</param>
+        /// <param name="textProcessingMode">Current text processing mode.</param>
         /// <returns><see langword="true"/> if the text contains placeholders and <see langword="false"/> otherwise.</returns>
-        internal virtual bool IsTemplatedText(string text) => false;
+        internal virtual bool IsTemplatedText(string text, TextFormat? textProcessingMode) => StringHasParameters(text, textProcessingMode ?? GetTextProcessingMode());
 
         /// <summary>
         /// Checks whether the text is a reference.

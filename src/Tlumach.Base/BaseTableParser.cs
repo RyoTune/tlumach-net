@@ -65,7 +65,7 @@ namespace Tlumach.Base
             return LocaleSeparatorChar;
         }
 
-        public override Translation? LoadTranslation(string translationText, CultureInfo? culture)
+        public override Translation? LoadTranslation(string translationText, CultureInfo? culture, TextFormat? textProcessingMode)
         {
             string key;
             string? value, escapedValue, reference;
@@ -123,7 +123,7 @@ namespace Tlumach.Base
                 }
 
                 if (reference is null && value is not null)
-                    entry.ContainsPlaceholders = IsTemplatedText((escapedValue is not null) ? escapedValue : value);
+                    entry.ContainsPlaceholders = IsTemplatedText((escapedValue is not null) ? escapedValue : value, textProcessingMode);
 
                 if (descriptionColumn != -1)
                     entry.Description = columns[descriptionColumn].Values[i];
@@ -177,7 +177,7 @@ namespace Tlumach.Base
                 if (valuesPresent)
                 {
                     value = columns[1].Values[i];
-                    leaf = new TranslationTreeLeaf(key, !IsReference(value) && IsTemplatedText(value));
+                    leaf = new TranslationTreeLeaf(key, !IsReference(value) && IsTemplatedText(value, textProcessingMode));
                 }
                 else
                 {

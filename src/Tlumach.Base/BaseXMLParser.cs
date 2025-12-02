@@ -32,7 +32,7 @@ namespace Tlumach.Base
         // "xml" namespace is special: must be explicitly referenced
         protected static readonly XNamespace CXmlNamespace = "http://www.w3.org/XML/1998/namespace";
 
-        public override Translation? LoadTranslation(string translationText, CultureInfo? culture)
+        public override Translation? LoadTranslation(string translationText, CultureInfo? culture, TextFormat? textProcessingMode)
         {
             try
             {
@@ -43,7 +43,7 @@ namespace Tlumach.Base
                 if (root is null)
                     throw new GenericParserException("The translation file has no XML root node.");
 
-                return InternalLoadTranslationEntriesFromXML(root, null, string.Empty);
+                return InternalLoadTranslationEntriesFromXML(root, null, string.Empty, textProcessingMode);
             }
             catch (XmlException ex)
             {
@@ -56,7 +56,7 @@ namespace Tlumach.Base
             }
         }
 
-        protected abstract Translation InternalLoadTranslationEntriesFromXML(XElement parentNode, Translation? translation, string groupName);
+        protected abstract Translation InternalLoadTranslationEntriesFromXML(XElement parentNode, Translation? translation, string groupName, TextFormat? textProcessingMode);
 
         public override TranslationConfiguration? ParseConfiguration(string fileContent, Assembly? assembly)
         {
