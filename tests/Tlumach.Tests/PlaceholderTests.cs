@@ -53,7 +53,7 @@ namespace Tlumach.Tests
         {
             var parser = new ArbParser();
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Hello\" : \"Hello {name}\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Hello\" : \"Hello {name}\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Hello"];
             Assert.NotNull(entry);
@@ -80,7 +80,7 @@ namespace Tlumach.Tests
         {
             var parser = new ArbParser();
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\r\n    \"Hello\": \"Hello {name}\",\r\n    \"@Hello\" : {\r\n        \"placeholders\": {\r\n            \"userName\": {\r\n              \"type\": \"String\",\r\n              \"example\": \"Bob\"\r\n            }\r\n        }\r\n    }\r\n", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\r\n    \"Hello\": \"Hello {name}\",\r\n    \"@Hello\" : {\r\n        \"placeholders\": {\r\n            \"userName\": {\r\n              \"type\": \"String\",\r\n              \"example\": \"Bob\"\r\n            }\r\n        }\r\n    }\r\n", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Hello"];
             Assert.NotNull(entry);
@@ -107,7 +107,7 @@ namespace Tlumach.Tests
         {
             var parser = new ArbParser();
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Hello\" : \"Hello {name}\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Hello\" : \"Hello {name}\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Hello"];
             Assert.NotNull(entry);
@@ -133,7 +133,7 @@ namespace Tlumach.Tests
         {
             var parser = new ArbParser();
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Hello\" : \"Hello {name}\"}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Hello\" : \"Hello {name}\"}"), CultureInfo.InvariantCulture, TextFormat.DotNet);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Hello"];
             Assert.NotNull(entry);
@@ -157,7 +157,7 @@ namespace Tlumach.Tests
         {
             var parser = new ArbParser();
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Hello\" : \"Hello {0}\"}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Hello\" : \"Hello {0}\"}"), CultureInfo.InvariantCulture, TextFormat.DotNet);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Hello"];
             Assert.NotNull(entry);
@@ -182,7 +182,7 @@ namespace Tlumach.Tests
         {
             var parser = new ArbParser();
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{count, number, integer} files processed.\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{count, number, integer} files processed.\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -209,7 +209,7 @@ namespace Tlumach.Tests
         {
             var parser = new ArbParser();
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Progress: {progress, number, percent}\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Progress: {progress, number, percent}\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -236,7 +236,7 @@ namespace Tlumach.Tests
         {
             var parser = new ArbParser();
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Total: {total, number, currency}\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Total: {total, number, currency}\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -262,9 +262,8 @@ namespace Tlumach.Tests
         public void ShouldHandlePluralPlaceholderArb(int mode)
         {
             var parser = new ArbParser();
-            ArbParser.TextProcessingMode = TextFormat.Arb;
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{total}: {count, plural, =0{no items} =1{# item} other{# items}}\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{total}: {count, plural, =0{no items} =1{# item} other{# items}}\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -290,9 +289,8 @@ namespace Tlumach.Tests
         public void ShouldHandlePluralWithEmbeddedPlaceholderArb(int mode)
         {
             var parser = new ArbParser();
-            ArbParser.TextProcessingMode = TextFormat.Arb;
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{count, plural, one{{name} has 1 message} other{{name} has # messages}}\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{count, plural, one{{name} has 1 message} other{{name} has # messages}}\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -320,7 +318,7 @@ namespace Tlumach.Tests
             var parser = new ArbParser();
             ArbParser.TextProcessingMode = TextFormat.Arb;
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{gender, select, male{He} female{She} other{They}} uploaded {count, number, integer} file(s).\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{gender, select, male{He} female{She} other{They}} uploaded {count, number, integer} file(s).\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -346,9 +344,8 @@ namespace Tlumach.Tests
         public void ShouldHandleSelectNestedPluralPlaceholdersArb(int mode)
         {
             var parser = new ArbParser();
-            ArbParser.TextProcessingMode = TextFormat.Arb;
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{gender, select, male{He} female{She} other{They}} {count, plural, one{uploaded 1 file} other{uploaded # files}}.\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{gender, select, male{He} female{She} other{They}} {count, plural, one{uploaded 1 file} other{uploaded # files}}.\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -376,7 +373,7 @@ namespace Tlumach.Tests
             var parser = new ArbParser();
             ArbParser.TextProcessingMode = TextFormat.Arb;
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{count, plural, offset:1 =0{Nobody tagged you} =1{{first} tagged you} one{{first} and one other tagged you} other{{first} and # others tagged you}}\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{count, plural, offset:1 =0{Nobody tagged you} =1{{first} tagged you} one{{first} and one other tagged you} other{{first} and # others tagged you}}\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -402,9 +399,8 @@ namespace Tlumach.Tests
         public void ShouldHandleSelectOrdinalPlaceholderArb(int mode)
         {
             var parser = new ArbParser();
-            ArbParser.TextProcessingMode = TextFormat.Arb;
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{place, selectordinal, one{#st} two{#nd} few{#rd} other{#th}} place\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{place, selectordinal, one{#st} two{#nd} few{#rd} other{#th}} place\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -430,9 +426,8 @@ namespace Tlumach.Tests
         public void ShouldHandleSelectWithEmbeddedNumberFormattingPlaceholderArb(int mode)
         {
             var parser = new ArbParser();
-            ArbParser.TextProcessingMode = TextFormat.Arb;
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{tier, select, free{Free plan} pro{Pro plan — {storage, number, integer} GB} other{Custom}}\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{tier, select, free{Free plan} pro{Pro plan — {storage, number, integer} GB} other{Custom}}\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -460,7 +455,7 @@ namespace Tlumach.Tests
             var parser = new ArbParser();
             ArbParser.TextProcessingMode = TextFormat.Arb;
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{count, plural, one{Subscription costs {price, number, currency} per user} other{Subscriptions cost {price, number, currency} per {count} users}}\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{count, plural, one{Subscription costs {price, number, currency} per user} other{Subscriptions cost {price, number, currency} per {count} users}}\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -486,9 +481,8 @@ namespace Tlumach.Tests
         public void ShouldHandleTwoPluralsPlaceholderArb(int mode)
         {
             var parser = new ArbParser();
-            ArbParser.TextProcessingMode = TextFormat.Arb;
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{apples, plural, one{# apple} other{# apples}} and {oranges, plural, one{# orange} other{# oranges}} in the basket.\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{apples, plural, one{# apple} other{# apples}} and {oranges, plural, one{# orange} other{# oranges}} in the basket.\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -514,9 +508,7 @@ namespace Tlumach.Tests
         public void ShouldHandlePluralAndPercentPlaceholderArb(int mode)
         {
             var parser = new ArbParser();
-            ArbParser.TextProcessingMode = TextFormat.Arb;
-
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{count, plural, one{Completion: {pct, number, percent} on 1 task} other{Completion: {pct, number, percent} on # tasks}}\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{count, plural, one{Completion: {pct, number, percent} on 1 task} other{Completion: {pct, number, percent} on # tasks}}\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -544,7 +536,7 @@ namespace Tlumach.Tests
             var parser = new ArbParser();
             ArbParser.TextProcessingMode = TextFormat.Arb;
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{count, plural, one{{who} is online} other{{who} are online}}\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{count, plural, one{{who} is online} other{{who} are online}}\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -570,9 +562,8 @@ namespace Tlumach.Tests
         public void ShouldHandleNestedSelectInsidePluralPlaceholderArb(int mode)
         {
             var parser = new ArbParser();
-            ArbParser.TextProcessingMode = TextFormat.Arb;
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{count, plural, one{{gender, select, male{He has} female{She has} other{They have}} 1 message} other{{gender, select, male{He has} female{She has} other{They have}} # messages}}\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{count, plural, one{{gender, select, male{He has} female{She has} other{They have}} 1 message} other{{gender, select, male{He has} female{She has} other{They have}} # messages}}\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -598,9 +589,8 @@ namespace Tlumach.Tests
         public void ShouldHandleMultilinePlusSelectDotNet(int mode)
         {
             var parser = new ArbParser();
-            ArbParser.TextProcessingMode = TextFormat.DotNet;
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Report:\\n- Name: {name}\\n- Files: {count, number}\\n- Done: {done, select, true{yes} other{no}}\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Report:\\n- Name: {name}\\n- Files: {count, number}\\n- Done: {done, select, true{yes} other{no}}\"", "}"), CultureInfo.InvariantCulture, TextFormat.DotNet);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -626,9 +616,8 @@ namespace Tlumach.Tests
         public void ShouldHandleEscapesApostrophesPlaceholderArb(int mode)
         {
             var parser = new ArbParser();
-            ArbParser.TextProcessingMode = TextFormat.Arb;
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Don''t remove {count, plural, one{this item} other{these items}}.\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Don''t remove {count, plural, one{this item} other{these items}}.\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -656,7 +645,7 @@ namespace Tlumach.Tests
             var parser = new ArbParser();
             ArbParser.TextProcessingMode = TextFormat.Arb;
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Braces: '{'example'}' → {value}\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Braces: '{'example'}' → {value}\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -684,7 +673,7 @@ namespace Tlumach.Tests
             var parser = new ArbParser();
             ArbParser.TextProcessingMode = TextFormat.Arb;
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{mode, select, summary{{items, plural, =0{No results} one{# result (took {ms, number, integer} ms)} other{# results (took {ms, number, integer} ms)}}} detailed{{items, plural, one{Found 1 result: {first}} other{Found # results. First: {first}}}} other{Unknown mode}}\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"{mode, select, summary{{items, plural, =0{No results} one{# result (took {ms, number, integer} ms)} other{# results (took {ms, number, integer} ms)}}} detailed{{items, plural, one{Found 1 result: {first}} other{Found # results. First: {first}}}} other{Unknown mode}}\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -711,7 +700,7 @@ namespace Tlumach.Tests
         {
             var parser = new ArbParser();
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Today is {today, date}.\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Today is {today, date}.\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -739,7 +728,7 @@ namespace Tlumach.Tests
         {
             var parser = new ArbParser();
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Today is {today, date, short}.\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Today is {today, date, short}.\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -767,7 +756,7 @@ namespace Tlumach.Tests
         {
             var parser = new ArbParser();
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Meeting starts at {start, time, medium} and ends at {end, time, long}.\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Meeting starts at {start, time, medium} and ends at {end, time, long}.\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -795,7 +784,7 @@ namespace Tlumach.Tests
         {
             var parser = new ArbParser();
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Report generated: {stamp, datetime, short}.\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Report generated: {stamp, datetime, short}.\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -823,7 +812,7 @@ namespace Tlumach.Tests
         {
             var parser = new ArbParser();
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Generated on {stamp, date, yyyy-MM-dd 'at' HH:mm:ss}.\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Generated on {stamp, date, yyyy-MM-dd 'at' HH:mm:ss}.\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -851,7 +840,7 @@ namespace Tlumach.Tests
         {
             var parser = new ArbParser();
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Generated on {stamp, date, 'yyyy-MM-dd ''at'' HH:mm:ss'}.\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Generated on {stamp, date, 'yyyy-MM-dd ''at'' HH:mm:ss'}.\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
@@ -880,7 +869,7 @@ namespace Tlumach.Tests
             ArbParser parser = new ArbParser();
             ArbParser.TextProcessingMode = TextFormat.DotNet;
 
-            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Generated on {stamp, date, 'yyyy-MM-dd ''at'' HH:mm:ss'}.\"", "}"), CultureInfo.InvariantCulture);
+            Translation? translation = parser.LoadTranslation(string.Concat("{", "\"Result\" : \"Generated on {stamp, date, 'yyyy-MM-dd ''at'' HH:mm:ss'}.\"", "}"), CultureInfo.InvariantCulture, TextFormat.Arb);
             Assert.NotNull(translation);
             TranslationEntry? entry = translation["Result"];
             Assert.NotNull(entry);
