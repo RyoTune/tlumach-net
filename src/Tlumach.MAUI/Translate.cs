@@ -54,8 +54,13 @@ namespace Tlumach.MAUI
             ext._core.Unit = (TranslationUnit?)newValue;
         }
 
+        /*public BindingBase ProvideValue(IServiceProvider serviceProvider)
+            => new Binding(nameof(XamlTranslateCore.Value), source: _core, mode: BindingMode.OneWay);*/
         public BindingBase ProvideValue(IServiceProvider serviceProvider)
-            => new Binding(nameof(XamlTranslateCore.Value), source: _core, mode: BindingMode.OneWay);
+            => BindingBase.Create<XamlTranslateCore, string>(
+                   static core => core.Value,
+                   mode: BindingMode.OneWay,
+                   source: _core);
 
         object IMarkupExtension.ProvideValue(IServiceProvider serviceProvider)
             => ProvideValue(serviceProvider);

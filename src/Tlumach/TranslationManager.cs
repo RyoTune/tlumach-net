@@ -693,7 +693,7 @@ namespace Tlumach
             {
                 string? filePath;
                 if (string.IsNullOrEmpty(TranslationsDirectory))
-                    filePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                    filePath = Path.GetDirectoryName(/*Assembly.GetExecutingAssembly().Location*/System.AppContext.BaseDirectory);
                 else
                     filePath = TranslationsDirectory;
 
@@ -1091,7 +1091,7 @@ namespace Tlumach
                 }
 
                 // Try the directory of the main EXE file
-                baseDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                baseDir = Path.GetDirectoryName(System.AppContext.BaseDirectory);
                 if (!string.IsNullOrEmpty(baseDir))
                 {
                     tryFileName = Path.Combine(baseDir, filename);

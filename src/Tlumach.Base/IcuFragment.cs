@@ -34,7 +34,7 @@ namespace Tlumach.Base
     /// </summary>
     internal static class IcuFragment
     {
-        enum DateTimeStyleOption
+        private enum DateTimeStyleOption
         {
             Short,
             Medium,
