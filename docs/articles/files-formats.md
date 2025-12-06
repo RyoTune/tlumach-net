@@ -81,11 +81,15 @@ Tlumach loads only string values and will report an error if the value is not a 
 
 JSON parser does not support comments because JSON format does not include them, and .NET built-in parser doesn't support comments (Newtonsoft.Json package does, but we don't use it in Tlumach).
 
+JSON parser supports nested JSON objects that let you create groups of translation units. 
+
 Tlumach loads only string properties.
 
 ### Arb
 
 Arb format does not support comments (same as JSON above).
+
+Arb parser supports nested JSON objects that let you create groups of translation units, **however** this is not standard for the Arb format itself, which does not support nested JSON objects. 
 
 Tlumach loads only string properties.
 
@@ -95,9 +99,11 @@ Files in these formats may contain multiple languages. I.e., a [default file](gl
 
 The first column of a CSV or TSV file must be the column with keys (in both default and locale-specific files). The first line must contain column headers, i.e., the names/captions of columns (the name of the first column is ignored). The columns after the first one may contain locale-specific translation units in any order. The locale of a column is recognized by its header; additionally, <xref:Tlumach.Base.BaseTableParser> has <xref:Tlumach.Base.BaseTableParser.OnCultureNameMatchCheck> event that you can use to translate a column caption into a locate name (useful when translating say "German" to "de-DE").
 
-In addition to translation units, a Description column is supported. It is recognized by matching the column caption with the <xref:Tlumach.Base.BaseTableParser.DescriptionColumnCaption> property, which is set to "Description" by default. A description is stored in the <xref:Tlumach.Base.TranslationEntry.Description> property (you can get a <xref:Tlumach.Base.TranslationEntry> instance from <xref:Tlumach.TranslationManager> by calling its GetEntry() method).
+In addition to translation units, a Description and Comments columns are supported. They is recognized by matching the column caption with the <xref:Tlumach.Base.BaseTableParser.DescriptionColumnCaption> property and <xref:Tlumach.Base.BaseTableParser.CommentsColumnCaption> properties, which are set to "Description" and "Comments" respectively by default. A description and comment are stored in the <xref:Tlumach.Base.TranslationEntry.Description> and <xref:Tlumach.Base.TranslationEntry.Comments> properties respectively (you can get a <xref:Tlumach.Base.TranslationEntry> instance from <xref:Tlumach.TranslationManager> by calling its GetEntry() method).
 
 ### ResX
+
+In addition to translation units, a Comments tag is supported. A comment is stored in the <xref:Tlumach.Base.TranslationEntry.Comment> property respectively (you can get a <xref:Tlumach.Base.TranslationEntry> instance from <xref:Tlumach.TranslationManager> by calling its GetEntry() method).
 
 ResX files are a bit hard to include to resources in their text form. As soon as .NET toolchain detects a dot in the name of the file which is marked as Embedded Resource, it considers the file to be a localized resource, and includes it to a satellite assembly instead of the main one. I.e., "strings.pl.resx", even when you specify that it is not a compilable resource, will be included into "YourAssembly.pl.dll" and not "YourAssembly.dll"; additionally, the extension will be removed. The only solution is to include it with a duplicate extension, for example as follows:
 
@@ -116,7 +122,7 @@ will give you the "sample.pl.resx" file in the resources of your main assembly.
 
 If you use [Generator](generator.md), you don't need to do anything as the generator puts initialization to the generated code _for formats that it detects from the configuration file and referenced files_. If you stick to one or two formats for your configuration file and translation files, you are fine. If you expect files in other formats to be present on the disk, from where your application and the translation manager will pick them, read below.
 
-If you initialize and use <xref:Tlumach.TranslationManager> directly, you also need instructions below.
+If you initialize and use <xref:Tlumach.TranslationManager> directly or via [Dependency Injection](di.md), you also need instructions below.
 
 Parsers are not initialized by default. To initialize the required parser classes, call the Use() static method of the corresponding parser class, namely:
 

@@ -25,6 +25,7 @@ The features of Tlumach include:
 * Each translation set can have a hierarchy of groups of translation entries, enabling easy management of translations (depending on the source format).
 * Automatic recognition and support for templated strings in Arb and .NET formats. This includes support for .NET- and Arb-style placeholders and support of main Unicode and ICU features ("number", "select", "plural", "selectordinal", "date", "time", "datetime" placeholder kinds) in Arb-style placeholders. (Note: placeholder style is independent of the file format, i.e., you can use Arb-style placeholders in a ResX or TOML translation file.)
 * The possibility to control the found translation entries or provide entries for missing keys via events (it may be necessary if an application should use some phrases configured by a user rather than from translations).
+* Compatibility with AOT compilation.
 
 ## Supported platforms and frameworks
 

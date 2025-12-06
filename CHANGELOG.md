@@ -2,10 +2,16 @@
 
 This document provides information about the changes and new features in Tlumach.
 
+---
+Version: 1.2.0  
+Date: December 6, 2025
+
 - [NEW] Added Dependency Injection support.
 - [NEW] Generator now emits key names as string constants.
 - [NEW] It is possible to skip generation of `TranslationUnit` instances (and just use key name constants).
 - [NEW] Added optional caching of values to the `TranslationUnit` class.
+- [NEW] Added AOT compatibility flag to the main assemblies.
+- [NEW] Added the `Comment` property to the `TranslationEntry` class. CSV/TSV and ResX parsers now pick comments from the translation files.
 
 ---
 Version: 1.1.0  
