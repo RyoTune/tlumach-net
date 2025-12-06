@@ -14,6 +14,8 @@
   href: language-management.md
 - name: Integration with XAML
   href: xaml.md
+- name: Dependency Injection
+  href: di.md
 - name: Change log
   href: changelog.md
 - name: Glossary

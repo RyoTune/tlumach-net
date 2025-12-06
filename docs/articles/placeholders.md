@@ -24,6 +24,8 @@ Tlumach makes an attempt to find a value in the set of provided values regardles
 
 Since version 1.1, you can bind XAML controls to units with placeholders, but you need to take extra steps to provide actual data for the placeholders in such units. Read the details in the [corresponding section of this documentation](strings.md#TemplatesInXAML).
 
+Dependency Injection classes fully support placeholders, however, you can pass only the list of objects to the .NET interfaces, which limits the ability to process named placeholders.
+
 ### TextFormat and text processing modes
 
 When determining whether something in curly braces is a placeholder, Tlumach makes use of the static `TextProcessingMode` property of the parser class.
@@ -44,9 +46,7 @@ The use of .NET format specifiers requires that `TextProcessingMode` is set to `
 
 ### Supported placeholder formats
 
-In both `DotNet` and `Arb` and `ArbNoEscaping` modes, Tlumach will try to walk through the templated text and replace every placeholder, be it a numeric or a literal one. It will then process each placeholder with respect to ICU directives, if they are present in the placeholder.
-
-At the moment, .NET format specifiers are not detected (this is planned). If your translation uses templated strings with .NET format specifiers in the placeholders, you can take the template values as described in [this topic](strings.md#StringTypes) and format them in your code.
+In both `DotNet` and `Arb` modes, Tlumach will try to walk through the templated text and replace every placeholder, be it a numeric or a literal one. It will then process each placeholder with respect to ICU directives, if they are present in the placeholder.
 
 When handling translation units coming from Arb files, Tlumach recognizes string, numeric, and date-time placeholders and supports most of Arb format specifiers.
 

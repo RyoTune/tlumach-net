@@ -50,6 +50,13 @@
         ]
       }
     ],
+    "overwrite": [
+      {
+        "files": [
+          "api/**.md"
+        ]
+      }
+    ],
     "dest": "_site",
     "globalMetadata": {
       "_appName":"Tlumach",
@@ -67,10 +74,9 @@
     "globalMetadataFiles": [],
     "fileMetadataFiles": [],
     "template": [
-      "default",
+      "default",      
       "modern",
-      "./statictoc",
-      "./tlumach"
+      "tlumach"
     ],
     "postProcessors": [ "ExtractSearchIndex" ],
     "noLangKeyword": false,
