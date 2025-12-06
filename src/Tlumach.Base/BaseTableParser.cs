@@ -36,9 +36,12 @@ namespace Tlumach.Base
         /// </summary>
         public static string DescriptionColumnCaption { get; set; } = "Description";
 
-        /*
+        /// <summary>
+        /// Use this property to override the caption by which the Comments column was detected.
+        /// </summary>
         public static string CommentsColumnCaption { get; set; } = "Comments";
 
+        /*
         public static string ExampleColumnCaption { get; set; } = "Example";
         */
 
@@ -77,11 +80,10 @@ namespace Tlumach.Base
                 return null;
 
             /*
-            int commentsColumn = -1;
             int exampleColumn = -1;
             */
 
-            List<(string Locale, List<string> Values)> columns = LoadAsListOfLists(translationText, false, culture, out int specificLocaleColumn, out int descriptionColumn);
+            List<(string Locale, List<string> Values)> columns = LoadAsListOfLists(translationText, false, culture, out int specificLocaleColumn, out int descriptionColumn, out int commentsColumn);
 
             // We can't accept the files with no columns or with just keys
             if (columns.Count < 2)
@@ -128,10 +130,9 @@ namespace Tlumach.Base
                 if (descriptionColumn != -1)
                     entry.Description = columns[descriptionColumn].Values[i];
 
-                /*
                 if (commentsColumn != -1)
                     entry.Comment = columns[commentsColumn].Values[i];
-
+                /*
                 if (exampleColumn != -1)
                     entry.Example = columns[exampleColumn].Values[i];
                 */
@@ -156,7 +157,7 @@ namespace Tlumach.Base
             if (string.IsNullOrEmpty(content))
                 return null;
 
-            List<(string Locale, List<string> Values)> columns = LoadAsListOfLists(content, true, null, out _, out _);
+            List<(string Locale, List<string> Values)> columns = LoadAsListOfLists(content, true, null, out _, out _, out _);
 
             // We can't accept the text with no columns
             if (columns.Count == 0)
@@ -199,8 +200,9 @@ namespace Tlumach.Base
         /// <param name="specificCulture">When set, should contain the reference to the locale to load from the file. If not set, all locales are loaded.</param>
         /// <param name="specificLocaleColumn">If a column for a specific culture was requested, this parameter will contain the index of the column in the result.</param>
         /// <param name="descriptionColumn">This parameter will contain the index of the description column in the result if such a column is present in the translation file.</param>
+        /// <param name="commentsColumn">This parameter will contain the index of the comments column in the result if such a column is present in the translation file.</param>
         /// <returns>The list of key-value pairs.</returns>
-        internal List<(string Locale, List<string> Values)> LoadAsListOfLists(string content, bool onlyStructure, CultureInfo? specificCulture, out int specificLocaleColumn, out int descriptionColumn)
+        internal List<(string Locale, List<string> Values)> LoadAsListOfLists(string content, bool onlyStructure, CultureInfo? specificCulture, out int specificLocaleColumn, out int descriptionColumn, out int commentsColumn)
         {
             List<string> cells = [];
             List<(string locale, List<string> values)> result = new List<(string locale, List<string> values)>();
@@ -213,12 +215,13 @@ namespace Tlumach.Base
             int defaultLocaleColumn = -1;
             specificLocaleColumn = -1;
             descriptionColumn = -1;
+            commentsColumn = -1;
 
             int specificLocaleColumnInput = -1;
             int descriptionColumnInput = -1;
+            int commentsColumnInput = -1;
 
             /*
-            int commentsColumn = -1;
             int exampleColumn = -1;
             */
 
@@ -292,7 +295,6 @@ namespace Tlumach.Base
                             addValue = !onlyStructure;
                         }
                         else
-                        /*
                         if (cellValue.Equals(CommentsColumnCaption, StringComparison.OrdinalIgnoreCase))
                         {
                             commentsColumnInput = i;
@@ -301,6 +303,7 @@ namespace Tlumach.Base
                             addValue = !onlyStructure;
                         }
                         else
+                        /*
                         if (cellValue.Equals(ExampleColumnCaption, StringComparison.OrdinalIgnoreCase))
                         {
                             exampleColumnInput = i;
@@ -367,6 +370,8 @@ namespace Tlumach.Base
                         {
                             specificLocaleColumn = 1;
                             if (descriptionColumnInput >= 0 && specificLocaleColumnInput > descriptionColumnInput)
+                                specificLocaleColumn++;
+                            if (commentsColumnInput >= 0 && specificLocaleColumnInput > commentsColumnInput)
                                 specificLocaleColumn++;
                             result.Insert(specificLocaleColumn, (cells[specificLocaleColumnInput], new List<string>()));
                         }

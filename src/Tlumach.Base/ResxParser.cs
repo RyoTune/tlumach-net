@@ -98,7 +98,7 @@ namespace Tlumach.Base
 
                     if (key?.Length > 0)
                     {
-                        value = data.Value;
+                        value = data.Element("value")?.Value;
 
                         if (value is null)
                             continue;
@@ -144,6 +144,7 @@ namespace Tlumach.Base
 
                 string? key;
                 string? value;
+                string? comment;
                 string? reference = null;
 
                 // Skip non-string typed entries (e.g., images) if a type is specified
@@ -169,12 +170,16 @@ namespace Tlumach.Base
                         value = null;
                     }
 
+                    comment = data.Element("comment")?.Value;
+
                     // Add an entry
                     if (translation.TryGetValue(key, out entry))
                         throw new GenericParserException($"Duplicate key '{key}' specified in the translation file");
 
                     entry = new(key, value, escapedText: null, reference);
                     translation.Add(key.ToUpperInvariant(), entry);
+
+                    entry.Comment = comment;
 
                     if (value is not null)
                         entry.ContainsPlaceholders = IsTemplatedText(value, textProcessingMode);

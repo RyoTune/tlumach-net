@@ -129,6 +129,11 @@ namespace Tlumach.Base
         public string? Description { get; set; }
 
         /// <summary>
+        /// Gets or sets an optional comment of the entry.
+        /// </summary>
+        public string? Comment { get; set; }
+
+        /// <summary>
         /// Gets or sets an optional reference to a screenshot of the entry.
         /// </summary>
         public string? Screen { get; set; }
