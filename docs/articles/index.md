@@ -36,4 +36,5 @@ Choose the desired way of using Tlumach to read specific Getting Started instruc
 - [Getting Started for integration with MAUI](getting-started-maui.md)
 - [Getting Started for integration with Avalonia](getting-started-avalonia.md)
 - [Getting Started for work with generated translation units](getting-started-manual.md) (recommended for web, server, and console applications, as well as WinForms applications)
+- [Getting Started for work via Dependency Injection](getting-started-di.md)
 - [Getting Started for work via TranslationManager](getting-started-tm.md) (for fine control over the process and for creating translation tools)
