@@ -1,20 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;net9.0;net10.0</TargetFrameworks>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<LangVersion>latest</LangVersion>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFrameworks>netstandard2.0;net9.0;net10.0</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
     <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">
         <IsAotCompatible>true</IsAotCompatible>
     </PropertyGroup>
-	<ItemGroup>
-	  <AdditionalFiles Include="../Shared/stylecop.json" />
-	</ItemGroup>
+    <ItemGroup>
+      <AdditionalFiles Include="../Shared/stylecop.json" />
+    </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\Tlumach.Base\Tlumach.Base.csproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Tlumach.Base\Tlumach.Base.csproj" />
+    </ItemGroup>
 
 </Project>

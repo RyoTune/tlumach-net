@@ -66,6 +66,29 @@ namespace Tlumach.Base
             if (options is null)
                 throw new ArgumentNullException(nameof(options));
 
+            string relativeDir = string.Empty;
+            string? baseConfigFileDir = Path.GetDirectoryName(configFile);
+            if (!string.IsNullOrEmpty(baseConfigFileDir))
+            {
+                baseConfigFileDir = Path.GetFullPath(baseConfigFileDir);
+                char lastChar = baseConfigFileDir.Length > 0 ? baseConfigFileDir[baseConfigFileDir.Length - 1] : '\0';
+                if (!((lastChar == Path.DirectorySeparatorChar) || (Path.AltDirectorySeparatorChar != '0' && lastChar == Path.AltDirectorySeparatorChar)))
+                {
+                    baseConfigFileDir = baseConfigFileDir + Path.DirectorySeparatorChar;
+                }
+
+                lastChar = projectDir.Length > 0 ? projectDir[projectDir.Length - 1] : '\0';
+                if (!((lastChar == Path.DirectorySeparatorChar) || (Path.AltDirectorySeparatorChar != '0' && lastChar == Path.AltDirectorySeparatorChar)))
+                {
+                    projectDir = projectDir + Path.DirectorySeparatorChar;
+                }
+
+                if (baseConfigFileDir.Length > 0 && baseConfigFileDir.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar).StartsWith(projectDir.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar), StringComparison.InvariantCultureIgnoreCase))
+                {
+                    relativeDir = Path.GetDirectoryName(baseConfigFileDir.Substring(projectDir.Length));
+                }
+            }
+
             TranslationConfiguration? configuration;
 
             // The config parser will parse configuration and will find the correct parser for the files referenced by the configuration
@@ -90,12 +113,12 @@ namespace Tlumach.Base
 
             StringBuilder builder = new();
 
-            EmitMainBody(builder, configuration, translationTree, options);
+            EmitMainBody(builder, configuration, translationTree, relativeDir, options);
 
             return builder.ToString();
         }
 
-        private static void EmitMainBody(StringBuilder builder, TranslationConfiguration configuration, TranslationTree translationTree, Dictionary<string, string> options)
+        private static void EmitMainBody(StringBuilder builder, TranslationConfiguration configuration, TranslationTree translationTree, string relativeDir, Dictionary<string, string> options)
         {
             bool addLine;
             string? usingNamespace = null;
@@ -149,7 +172,11 @@ namespace Tlumach.Base
             else
                 builder.AppendLine("        private static string? _defaultFileLocale = null;");
             builder.AppendLine();
-            builder.Append("        private static TranslationConfiguration _translationConfiguration = new TranslationConfiguration(typeof(").Append(configuration.ClassName).Append(").Assembly, \"").Append(configuration.DefaultFile).Append("\", _defaultFileLocale, ").Append(configuration.GetEscapeModeFullName()).AppendLine(");\n");
+            builder.Append("        private static TranslationConfiguration _translationConfiguration = new TranslationConfiguration(typeof(").Append(configuration.ClassName).Append(").Assembly, @\"").Append(configuration.DefaultFile).Append("\", _defaultFileLocale, ").Append(configuration.GetEscapeModeFullName()).Append(')');
+            if (!string.IsNullOrEmpty(relativeDir))
+                builder.Append(" { DirectoryHint = @\"").Append(relativeDir).Append("\", }");
+            builder.AppendLine(";\n");
+
             builder.AppendLine("        public static TranslationConfiguration Configuration => _translationConfiguration;");
             builder.AppendLine();
             builder.AppendLine("        ///<summary>");

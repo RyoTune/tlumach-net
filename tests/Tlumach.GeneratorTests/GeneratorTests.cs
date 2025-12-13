@@ -96,6 +96,26 @@ namespace Tlumach.Tests
         }
 
         [Fact]
+        public void ShouldGenerateClassInSubdirectoryOfProject()
+        {
+            IniParser.Use();
+            TomlParser.Use();
+            string? result = TestGenerator.GenerateClass("..\\..\\..\\Translations\\Strings.cfg", Path.GetFullPath("..\\..\\.."), "Tlumach");
+            Assert.NotNull(result);
+
+            var (ok, diags) = RoslynCompileHelper.CompileToAssembly(result);
+
+            if (!ok)
+            {
+                var msg = string.Join(
+                    Environment.NewLine,
+                    diags.Where(d => d.Severity >= Microsoft.CodeAnalysis.DiagnosticSeverity.Info)
+                         .Select(d => d.ToString()));
+                Assert.True(ok, "Compilation failed:" + Environment.NewLine + msg);
+            }
+        }
+
+        [Fact]
         public void ShouldNotGenerateClassWithTemplatedUnits()
         {
             IniParser.Use();

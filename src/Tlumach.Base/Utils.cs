@@ -60,9 +60,7 @@ namespace Tlumach.Base
             var type = obj.GetType();
 
             // Case-insensitive property lookup
-            var prop = type.GetProperty(
-                propertyName,
-                BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+            PropertyInfo? prop = type.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
 
             if (prop is null)
                 return false;
@@ -87,6 +85,7 @@ namespace Tlumach.Base
 
             try
             {
+                //var allResources = assembly.GetManifestResourceNames();
 #pragma warning disable CA1307 // Specify StringComparison for clarity
                 string sourceResourceName = filename.Replace('/', '.').Replace('\\', '.');
 #pragma warning restore CA1307 // Specify StringComparison for clarity
@@ -143,6 +142,11 @@ namespace Tlumach.Base
             if (filename is null)
                 throw new ArgumentNullException(nameof(filename));
 
+#if !GENERATOR
+            if (!File.Exists(filename))
+                return null;
+#endif
+
             try
             {
                 string attemptName = filename;
@@ -175,18 +179,29 @@ namespace Tlumach.Base
             {
                 string attemptName = filename;
 #pragma warning disable CA2000
-                FileStream? stream = TryOpenStreamForReading(attemptName);
+                FileStream? stream = null;
+
+#if !GENERATOR
+                if (File.Exists(attemptName))
+#endif
+                    stream = TryOpenStreamForReading(attemptName);
 
                 if (stream is null && !string.IsNullOrEmpty(baseDirectory))
                 {
                     attemptName = Path.Combine(baseDirectory, filename);
-                    stream = TryOpenStreamForReading(attemptName);
+#if !GENERATOR
+                    if (File.Exists(attemptName))
+#endif
+                        stream = TryOpenStreamForReading(attemptName);
                 }
 
                 if (stream is null && !string.IsNullOrEmpty(baseDirectory2))
                 {
                     attemptName = Path.Combine(baseDirectory2, filename);
-                    stream = TryOpenStreamForReading(attemptName);
+#if !GENERATOR
+                    if (File.Exists(attemptName))
+#endif
+                        stream = TryOpenStreamForReading(attemptName);
                 }
 #pragma warning restore CA2000
                 if (stream is not null)

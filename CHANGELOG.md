@@ -2,6 +2,8 @@
 
 This document provides information about the changes and new features in Tlumach.
 
+- [NEW] Minor improvements in the Generator in its handling of configuration files and translation files that reside in a subdirectory of a project and get included into the assembly as resources.
+
 ---
 Version: 1.2.1  
 Date: December 13, 2025
