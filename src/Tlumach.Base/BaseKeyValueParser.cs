@@ -410,6 +410,13 @@ namespace Tlumach.Base
                             currentColumnNumber--;
                             state = TextParserState.CapturingValue;
                         }
+                        else
+                        if (content[offset] == '\n')
+                        {
+                            currentLineNumber++;
+                            currentColumnNumber = 0; // it will be incremented after the switch and be set to the starting position 1
+                            lineStartPos = offset + 1;
+                        }
 
                         break;
 
@@ -435,11 +442,20 @@ namespace Tlumach.Base
                         else
                         if (valueEndCheck == false)
                         {
+                            if (content[offset] == '\n')
+                            {
+                                currentLineNumber++;
+                                currentColumnNumber = 0; // it will be incremented after the switch and be set to the starting position 1
+                                lineStartPos = offset + 1;
+                            }
+                            else
                             // we skip CR (\r) unless it is not followed by LF (\n)
                             if (content[offset] != '\r' ||
                                 (content[offset] == '\r' &&
                                  (offset == content.Length - 1 || content[offset + 1] != '\n')))
+                            {
                                 valueBuilder.Append(content[offset]);
+                            }
                         }
                         else
                         if (valueEndCheck == true)
@@ -519,12 +535,6 @@ namespace Tlumach.Base
                             // Add a null value to the resulting dictionary
                             if (!string.IsNullOrEmpty(capturedKey))
                             {
-                                /*
-                                // We use '^' (caret) to distinguish between section names and keys - neither of them may start with a caret anyway
-                                if (result.ContainsKey('^' + capturedKey))
-                                    throw new TextParseException($"Duplicate section name `{capturedKey}`", keyStartPos, offset, currentLineNumber, keyStartPos - lineStartPos + 1);
-                                result['^' + capturedKey] = null;
-                                */
                                 if (result.ContainsKey(capturedKey))
                                     throw new TextParseException($"Duplicate section name `{capturedKey}`", keyStartPos, offset, currentLineNumber, keyStartPos - lineStartPos + 1);
                                 result[capturedKey] = null;

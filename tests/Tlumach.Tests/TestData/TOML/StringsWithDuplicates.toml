@@ -1,0 +1,8 @@
+# ACos
+description_acos = """Returns the arccosine of the argument -  the angle whose cosine is the specified number.
+The value is returned in radians or degrees depending on the Deg/Rad switch
+"""
+
+# some comment
+parameter_today_result = "Today date."
+some_other_param = ""

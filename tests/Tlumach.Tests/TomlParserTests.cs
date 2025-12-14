@@ -166,5 +166,26 @@ namespace Tlumach.Tests
             Assert.NotNull(entry.Text);
             Assert.Equal(0, entry.Text.Length);
         }
+
+        [Fact]
+        public void ShouldCountLinesRight()
+        {
+            try
+            {
+                var manager = new TranslationManager(Path.Combine(TestFilesPath, "ValidConfigWithDuplicates.tomlcfg"));
+                manager.LoadFromDisk = true;
+                manager.TranslationsDirectory = TestFilesPath;
+                TranslationEntry entry = manager.GetValue("fake");
+
+                Assert.Fail("The loading of the translation should have ended with an exception, but it has not.");
+            }
+            catch (TextFileParseException ex)
+            {
+                var pex = ex.InnerException as Tlumach.Base.TextParseException;
+                Assert.NotNull(pex);
+
+                Assert.Equal(7, pex.LineNumber);
+            }
+        }
     }
 }
