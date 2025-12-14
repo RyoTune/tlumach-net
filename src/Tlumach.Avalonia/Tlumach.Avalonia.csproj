@@ -19,4 +19,10 @@
       <AdditionalFiles Include="../Shared/stylecop.json" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Update="Roslynator.Analyzers" Version="4.15.0" />
+      <PackageReference Update="Roslynator.CodeAnalysis.Analyzers" Version="4.15.0" />
+      <PackageReference Update="Roslynator.Formatting.Analyzers" Version="4.15.0" />
+    </ItemGroup>
+
 </Project>

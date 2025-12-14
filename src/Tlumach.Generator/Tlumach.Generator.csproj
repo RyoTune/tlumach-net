@@ -27,7 +27,7 @@
 
     <ItemGroup Condition="$(TargetFramework.Contains('netstandard2.0'))">
         <PackageReference Include="System.Memory" Version="4.6.3" />
-        <PackageReference Include="System.Text.Json" Version="10.0.0" />
+        <PackageReference Include="System.Text.Json" Version="10.0.1" />
     </ItemGroup>
 
     <ItemGroup>
@@ -60,6 +60,12 @@
       <Compile Include="..\Tlumach.Base\TranslationTreeNode.cs" Link="TranslationTreeNode.cs" />
       <Compile Include="..\Tlumach.Base\TsvParser.cs" Link="TsvParser.cs" />
       <Compile Include="..\Tlumach.Base\Utils.cs" Link="Utils.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Update="Roslynator.Analyzers" Version="4.15.0" />
+      <PackageReference Update="Roslynator.CodeAnalysis.Analyzers" Version="4.15.0" />
+      <PackageReference Update="Roslynator.Formatting.Analyzers" Version="4.15.0" />
     </ItemGroup>
 
 </Project>
