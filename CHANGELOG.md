@@ -3,6 +3,12 @@
 This document provides information about the changes and new features in Tlumach.
 
 ---
+Version: 1.2.2.1 2
+Date: December 25, 2025
+
+- [FIX] `UntranslatedUnit` in the Avalonia package returned null in `CurrentValue`.
+
+---
 Version: 1.2.2.1  
 Date: December 24, 2025
 

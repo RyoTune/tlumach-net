@@ -24,7 +24,7 @@ namespace Tlumach.Avalonia
 {
     public class TranslationUnit : BaseTranslationUnit, IDisposable
     {
-        private readonly BehaviorSubject<string> _value;
+        protected readonly BehaviorSubject<string> _value;
 
         public IObservable<string> Value => _value;
 
@@ -37,11 +37,10 @@ namespace Tlumach.Avalonia
         /// <param name="translationManager">The translation manager to which the unit is bound.</param>
         /// <param name="translationConfiguration">The translation configuration used to create the unit.</param>
         /// <param name="containsPlaceholders">An indicator of whether the unit contains placeholders.</param>
-        protected TranslationUnit(TranslationManager translationManager, TranslationConfiguration translationConfiguration, bool containsPlaceholders)
+        protected TranslationUnit(string sourceValue, TranslationManager translationManager, TranslationConfiguration translationConfiguration, bool containsPlaceholders)
             : base(translationManager, translationConfiguration, containsPlaceholders)
         {
-            string value = GetValue(TranslationManager.CurrentCulture);
-            _value = new BehaviorSubject<string>(value);
+            _value = new BehaviorSubject<string>(sourceValue);
 
             if (TranslationManager != TranslationManager.Empty)
                 TranslationManager.OnCultureChanged += TranslationManager_OnCultureChanged;

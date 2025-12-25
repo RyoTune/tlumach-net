@@ -17,6 +17,7 @@
 // </copyright>
 
 using System.Globalization;
+using System.Reactive.Subjects;
 
 using Tlumach.Base;
 
@@ -55,9 +56,10 @@ public class UntranslatedUnit : Tlumach.Avalonia.TranslationUnit
     /// <param name="translationConfiguration">A reference to an instance of <seealso cref="TranslationConfiguration"/>. If <paramref name="containsPlaceholders"/> is <see langword="true"/>, this configuration's TextProcessingMode is used to process the <paramref name="sourceValue"/>.</param>
     /// <param name="containsPlaceholders">Specifies whether <paramref name="sourceValue"/> contains placeholders and should be processed accordingly.</param>
     public UntranslatedUnit(string sourceValue, TranslationManager translationManager, TranslationConfiguration translationConfiguration, bool containsPlaceholders)
-        : base(translationManager, translationConfiguration, containsPlaceholders)
+        : base(sourceValue, translationManager, translationConfiguration, containsPlaceholders)
     {
         _sourceValue = sourceValue;
+
     }
 
     protected override string InternalGetValueAsText(CultureInfo culture) => _sourceValue!;
