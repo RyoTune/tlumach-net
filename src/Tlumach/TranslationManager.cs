@@ -569,24 +569,6 @@ namespace Tlumach
                 Monitor.Enter(this);
                 _defaultTranslation = translation;
                 Monitor.Exit(this);
-
-                if (translation is not null)
-                {
-                    string cultureNameUpper;
-                    if (!string.IsNullOrEmpty(translation.Locale))
-                    {
-                        cultureNameUpper = translation.Locale!.ToUpperInvariant();
-                    }
-                    else
-                    {
-                        cultureNameUpper = _culture.Name.ToUpperInvariant();
-                    }
-
-                    lock (_translations)
-                    {
-                        _translations[cultureNameUpper] = translation;
-                    }
-                }
             }
             else
             {
